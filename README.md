@@ -19,6 +19,9 @@ To build this code use the included scripts that are taken from the [OBS Plugin 
 1. Run `cmake --preset macos` to compile the plugin first.
 2. Then run `cmake --build --preset macos` to then build the plugin into the `build-macos/RelWithDebInfo` folder.
 
+## Automated Local Build Script
+The `macos-build-and-run-locally.sh` script is a convenience script that will build the plugin for macOS and copy it to the OBS plugins location for easy testing.
+
 ### GitHub Actions & CI
 The scripts contained in github/scripts can be used to build and package the plugin and take care of setting up obs-studio as well as its own dependencies. A default workflow for GitHub Actions is also provided and will use these scripts.
 
