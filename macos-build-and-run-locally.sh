@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 BUILD_FILE_LOCATION=./build_macos/RelWithDebInfo/ashmanix-moveface-obs-plugin.plugin
 BUILD_DESTINATION_FOLDER="$HOME/Library/Application Support/obs-studio/plugins/"

@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+#include <QMainWindow>
+#include <main-widget-dock.hpp>
 #include <obs-module.h>
 #include <plugin-support.h>
 
@@ -23,8 +25,17 @@ OBS_DECLARE_MODULE()
 OBS_MODULE_AUTHOR("Ashmanix")
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-GB")
 
+MainWidgetDock *mainWidgetDock = nullptr;
+
 bool obs_module_load(void)
 {
+	const auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
+	obs_frontend_push_ui_translation(obs_module_get_string);
+	mainWidgetDock = new MainWidgetDock(main_window);
+
+	obs_frontend_add_dock_by_id("ashmanixMoveFaceWidget", obs_module_text("MoveFace"), mainWidgetDock);
+	obs_frontend_pop_ui_translation();
+
 	obs_log(LOG_INFO, "plugin loaded successfully (version %s)", PLUGIN_VERSION);
 	return true;
 }
@@ -32,4 +43,19 @@ bool obs_module_load(void)
 void obs_module_unload(void)
 {
 	obs_log(LOG_INFO, "plugin unloaded");
+}
+
+void obs_module_post_load(void)
+{
+	mainWidgetDock->ConfigureWebSocketConnection();
+}
+
+const char *obs_module_name(void)
+{
+	return obs_module_text("MoveFace");
+}
+
+const char *obs_module_description(void)
+{
+	return obs_module_text("Description");
 }
