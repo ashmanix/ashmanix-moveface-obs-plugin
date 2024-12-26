@@ -39,24 +39,25 @@ echo "Starting build and run script..."
 
 
 # Run the build macos script
-echo -ne "${CLEAR_LINE}Running cmake compile script..."
+echo -ne "${CLEAR_LINE}• Running cmake compile script..."
 
 # Temporary file to store output
 temp_build_output=$(mktemp)
 
-cmake --preset macos >"$temp_build_output" 2>&1
+cmake --preset $BUILD_PRESET >$temp_build_output 2>&1
 
 if [ $? -ne 0 ]; then
     echo "${CLEAR_LINE}${RED}X${NC} CMake compile failed! Ending script. Output:"
-    cat "$temp_build_output"
+    cat $temp_build_output
     exit 1
 else
     echo "${CLEAR_LINE}${GREEN}✓${NC} CMake compile completed successfully!"
 fi
 
 # Run the cmake build script
-echo -ne "Running cmake compile script..."
-cmake --build --preset macos >"$temp_build_output" 2>&1
+echo -ne "• Running cmake compile script..."
+cmake --build --preset $BUILD_PRESET --target clean >"$temp_build_output" 2>&1
+cmake --build --preset $BUILD_PRESET >"$temp_build_output" 2>&1
 
 if [ $? -ne 0 ]; then
     echo "${CLEAR_LINE}${RED}X${NC} CMake build failed! Ending script. Output:"
@@ -68,7 +69,7 @@ fi
 
 
 # Copy the plugin to the correct destination folder
-echo -ne "Copying build folder to application folder${CLEAR_LINE}"
+echo -ne "• Copying build folder to application folder${CLEAR_LINE}"
 cp -r "$BUILD_FILE_LOCATION" "$BUILD_DESTINATION_FOLDER"
 if [ $? -ne 0 ]; then
     echo "${CLEAR_LINE}${RED}X${NC} Copying plugin to application folder failed! Ending script."
@@ -80,7 +81,7 @@ fi
 
 # If OBS is open then close it
 if pgrep $APP_NAME >/dev/null; then
-    echo -ne "$APP_NAME is currently open. Now closing...."
+    echo -ne "• $APP_NAME is currently open. Now closing...."
     # Temporary file to store output
     temp_close_output=$(mktemp)
     SCRIPT="
@@ -106,7 +107,7 @@ fi
 
 
 # Open OBS
-echo -ne "Opening $APP_NAME app"
+echo -ne "• Opening $APP_NAME app"
 open -a $APP_NAME
 if [ $? -ne 0 ]; then
     echo "${CLEAR_LINE}${RED}X${NC} Error opening $APP_NAME app! Ending script."

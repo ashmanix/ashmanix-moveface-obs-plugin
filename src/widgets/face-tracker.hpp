@@ -6,6 +6,9 @@
 #include <QVBoxLayout>
 #include <QMetaType>
 #include <QString>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 #include <obs.h>
 #include <obs.hpp>
@@ -16,6 +19,7 @@
 #include "plugin-support.h"
 #include "../ui/ui_FaceTracker.h"
 #include "../utils/tracker-utils.hpp"
+#include "../utils/network-connection.hpp"
 #include "../main-widget-dock.hpp"
 
 // Forward declarations
@@ -27,29 +31,45 @@ class FaceTracker : public QWidget {
 public:
 	explicit FaceTracker(QWidget *parent = nullptr, obs_data_t *savedData = nullptr,
 			     MainWidgetDock *mDockWidget = nullptr);
-	;
 	~FaceTracker();
 	QString GetTrackerID();
+	void SetTrackerID(const QString &newId = QString());
+	TrackerDataStruct *GetTrackerData();
+
+	void SaveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
+	void LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
 
 private:
-	Ui::FaceTracker *ui;
-    SettingsDialog *settingsDialogUi = nullptr;
+	Ui::FaceTracker *ui = nullptr;
+	SettingsDialog *settingsDialogUi = nullptr;
 
 	QString title;
 	TrackerDataStruct trackerData;
-	MainWidgetDock *mainDockWidget;
+	MainWidgetDock *mainDockWidget = nullptr;
+
+	NetworkConnection *networkConnection = nullptr;
+	QTimer *connectionTimerTimeout = nullptr;
+
+	QJsonObject initiateTrackingObject = {
+		{"messageType", "iOSTrackingDataRequest"},
+		{"time", 1},
+		{"sentBy", "vTuberApp"},
+	};
 
 	void SetupWidgetUI();
 	void ConnectUISignalHandlers();
 	void SetTrackerData();
-	void LoadTimerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
+	void SetConnectionLabel(bool isConnected);
+	void UpdateTrackerDataFromDialog(TrackerDataStruct *newData);
+	void InitiateNetworkConnection(bool shouldSendRequest = false);
 
 signals:
 	void RequestDelete(QString id);
 
 private slots:
-	void SettingsButtonClicked();
-	void DeleteButtonClicked();
+	void SettingsActionSelected();
+	void DeleteActionSelected();
+	void HandleTrackingData(QString data);
 };
 
 #endif // FACETRACKER_H

@@ -7,6 +7,7 @@
 #include <QMetaType>
 #include <QPushButton>
 
+#include <util/platform.h>
 #include <obs.h>
 #include <obs.hpp>
 #include <obs-frontend-api.h>
@@ -14,12 +15,12 @@
 #include <obs-websocket-api.h>
 
 #include "plugin-support.h"
+#include "./utils/obs-utils.hpp"
+#include "./utils/tracker-utils.hpp"
 #include "widgets/obs-dock-wrapper.hpp"
 #include "ui/ui_MainWidget.h"
 
 #define CONFIG "config.json"
-
-Q_DECLARE_OPAQUE_POINTER(obs_data_t *)
 
 // Forward declerations
 class FaceTracker;
@@ -31,11 +32,14 @@ public:
 	~MainWidgetDock();
 	void ConfigureWebSocketConnection();
 
+	Result ValidateNewTrackerID(QString id);
+	Result UpdateTrackerList(QString oldId, QString newId);
+
 	// struct WebsocketCallbackData {
 	// 	MainWidgetDock *instance;
 	// 	WebsocketRequestType requestType;
 	// 	const char *requestDataKey;
-	// 	const char *requestTimerIdKey;
+	// 	const char *requestTrackerIdKey;
 	// };
 
 private:
@@ -54,11 +58,15 @@ private:
 	void SetupCountdownWidgetUI();
 	void ConnectUISignalHandlers();
 	void ConnectTrackerSignalHandlers(FaceTracker *faceTracker);
+	void SaveSettings();
+	int GetNumberOfTimers();
+	void RegisterAllHotkeys(obs_data_t *savedData);
+	void UnregisterAllHotkeys();
+	void AddTracker(obs_data_t *savedData = nullptr);
 
 	static void OBSFrontendEventHandler(enum obs_frontend_event event, void *private_data);
 	static void UpdateWidgetStyles(MainWidgetDock *mainWidgetDock);
-
-	void AddTracker(obs_data_t *savedData = nullptr);
+	static void LoadSavedSettings(MainWidgetDock *trackerWidgetDock);
 
 signals:
 

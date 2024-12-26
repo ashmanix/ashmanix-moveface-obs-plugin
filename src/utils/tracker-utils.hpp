@@ -8,6 +8,9 @@
 
 struct TrackerDataStruct {
 	QString trackerId;
+	QString destIpAddress = "255.255.255.255";
+	int destPort = 21412;
+	int port = 21412;
 };
 
 struct Result {

@@ -22,16 +22,16 @@ if(ENABLE_FRONTEND_API)
 endif()
 
 if(ENABLE_QT)
-  find_package(Qt6 COMPONENTS Widgets Core)
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Core Qt6::Widgets)
+  find_package(Qt6 COMPONENTS Widgets Core Network)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network)
   target_compile_options(
     ${CMAKE_PROJECT_NAME}
     PRIVATE $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header -Wno-comma>
-  )
+)
   set_target_properties(
     ${CMAKE_PROJECT_NAME}
     PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON
-  )
+)
 endif()
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
@@ -46,6 +46,11 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   src/widgets/settings-dialog.hpp
   src/widgets/obs-dock-wrapper.hpp
   src/utils/tracker-utils.cpp
-  src/utils/tracker-utils.hpp)
+  src/utils/tracker-utils.hpp
+  src/utils/obs-utils.cpp
+  src/utils/obs-utils.hpp
+  src/utils/network-connection.cpp
+  src/utils/network-connection.hpp
+)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
