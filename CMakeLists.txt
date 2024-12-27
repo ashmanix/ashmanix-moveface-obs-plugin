@@ -27,30 +27,32 @@ if(ENABLE_QT)
   target_compile_options(
     ${CMAKE_PROJECT_NAME}
     PRIVATE $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header -Wno-comma>
-)
+  )
   set_target_properties(
     ${CMAKE_PROJECT_NAME}
     PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON
-)
+  )
 endif()
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-  src/plugin-main.cpp
-  src/main-widget-dock.hpp
-  src/main-widget-dock.cpp
-  src/widgets/face-tracker.cpp
-  src/widgets/face-tracker.hpp
-  src/widgets/settings-dialog.cpp
-  src/widgets/settings-dialog.hpp
-  src/widgets/obs-dock-wrapper.hpp
-  src/utils/tracker-utils.cpp
-  src/utils/tracker-utils.hpp
-  src/utils/obs-utils.cpp
-  src/utils/obs-utils.hpp
-  src/utils/network-tracking.cpp
-  src/utils/network-tracking.hpp
+target_sources(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE
+    src/plugin-main.cpp
+    src/main-widget-dock.hpp
+    src/main-widget-dock.cpp
+    src/widgets/face-tracker.cpp
+    src/widgets/face-tracker.hpp
+    src/widgets/settings-dialog.cpp
+    src/widgets/settings-dialog.hpp
+    src/widgets/obs-dock-wrapper.hpp
+    src/utils/tracker-utils.cpp
+    src/utils/tracker-utils.hpp
+    src/utils/obs-utils.cpp
+    src/utils/obs-utils.hpp
+    src/utils/network-tracking.cpp
+    src/utils/network-tracking.hpp
 )
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
