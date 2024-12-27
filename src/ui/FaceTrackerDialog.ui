@@ -116,13 +116,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="portLineEdit">
-                 <property name="inputMethodHints">
-                  <set>Qt::ImhDigitsOnly</set>
-                 </property>
-                </widget>
-               </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="destIpAddressLabel">
                  <property name="text">
@@ -140,13 +133,23 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="1">
-                <widget class="QLineEdit" name="destPortLineEdit">
-                 <property name="inputMethodHints">
-                  <set>Qt::ImhDigitsOnly</set>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="portSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
-                 <property name="inputMask">
-                  <string notr="true"/>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QSpinBox" name="destPortSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
                 </widget>
                </item>

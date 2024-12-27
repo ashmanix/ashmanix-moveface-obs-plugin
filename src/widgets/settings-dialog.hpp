@@ -11,7 +11,7 @@
 
 #include "../main-widget-dock.hpp"
 #include "../utils/tracker-utils.hpp"
-#include "../utils/network-connection.hpp"
+#include "../utils/network-tracking.hpp"
 #include "../ui/ui_FaceTrackerDialog.h"
 
 class SettingsDialog : public QDialog {
@@ -32,8 +32,10 @@ private:
 	void SetTitle();
 	void SetupDialogUI(TrackerDataStruct *settingsDialogData);
 	void ApplyFormChanges();
-    Result ValidateTrackerID();
-    Result ValidateDestIPAddress();
+	Result ValidateTrackerID();
+	Result ValidateDestIPAddress();
+
+	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
 protected:
 	void showEvent(QShowEvent *event) override;

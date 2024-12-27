@@ -45,7 +45,6 @@ Result MainWidgetDock::ValidateNewTrackerID(QString id)
 	return {true, ""};
 }
 
-
 Result MainWidgetDock::UpdateTrackerList(QString oldId, QString newId)
 {
 	FaceTracker *foundTracker = trackerWidgetMap.take(oldId);

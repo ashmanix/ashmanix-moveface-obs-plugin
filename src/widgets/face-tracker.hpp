@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QTimer>
 
 #include <obs.h>
 #include <obs.hpp>
@@ -19,7 +20,7 @@
 #include "plugin-support.h"
 #include "../ui/ui_FaceTracker.h"
 #include "../utils/tracker-utils.hpp"
-#include "../utils/network-connection.hpp"
+#include "../utils/network-tracking.hpp"
 #include "../main-widget-dock.hpp"
 
 // Forward declarations
@@ -44,24 +45,32 @@ private:
 	SettingsDialog *settingsDialogUi = nullptr;
 
 	QString title;
+	bool isConnected;
 	TrackerDataStruct trackerData;
 	MainWidgetDock *mainDockWidget = nullptr;
 
-	NetworkConnection *networkConnection = nullptr;
-	QTimer *connectionTimerTimeout = nullptr;
+	NetworkTracking *networkTracking = nullptr;
+	const int MAXERRORCOUNT = 3;
+	int networkErrorCount = 0;
+	QTimer *networkTrackingDataRequestTimer = nullptr;
+	QTimer *connectionTimer = nullptr;
+	const int trackingDataPeriodInSecs = 5;
 
 	QJsonObject initiateTrackingObject = {
 		{"messageType", "iOSTrackingDataRequest"},
-		{"time", 1},
+		{"time", trackingDataPeriodInSecs},
 		{"sentBy", "vTuberApp"},
 	};
 
 	void SetupWidgetUI();
 	void ConnectUISignalHandlers();
 	void SetTrackerData();
-	void SetConnectionLabel(bool isConnected);
+	void SetConnected(bool isConnectedInput);
 	void UpdateTrackerDataFromDialog(TrackerDataStruct *newData);
-	void InitiateNetworkConnection(bool shouldSendRequest = false);
+	void InitiateNetworkTracking(bool shouldSendRequest = false);
+	void ResetConnectionTimer();
+	void EnableTimer();
+	void DisableTimer();
 
 signals:
 	void RequestDelete(QString id);
@@ -70,6 +79,8 @@ private slots:
 	void SettingsActionSelected();
 	void DeleteActionSelected();
 	void HandleTrackingData(QString data);
+	void RequestTrackingData();
+	void ToggleEnabled(int checkState);
 };
 
 #endif // FACETRACKER_H

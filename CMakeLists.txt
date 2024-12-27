@@ -49,8 +49,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   src/utils/tracker-utils.hpp
   src/utils/obs-utils.cpp
   src/utils/obs-utils.hpp
-  src/utils/network-connection.cpp
-  src/utils/network-connection.hpp
+  src/utils/network-tracking.cpp
+  src/utils/network-tracking.hpp
 )
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

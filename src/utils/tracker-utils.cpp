@@ -1,6 +1,5 @@
 #include "tracker-utils.hpp"
 
-
 QString GenerateUniqueID()
 {
 	QUuid uuid = QUuid::createUuid();

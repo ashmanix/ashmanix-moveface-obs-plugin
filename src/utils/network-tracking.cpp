@@ -1,25 +1,26 @@
-#include "network-connection.hpp"
+#include "network-tracking.hpp"
 
-NetworkConnection::NetworkConnection(QWidget *parent, quint16 in_port) : QWidget(parent)
+NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port) : QWidget(parent)
 {
 	udpSocket = new QUdpSocket(this);
 	port = in_port;
 	StartConnection();
 }
 
-NetworkConnection::~NetworkConnection()
+NetworkTracking::~NetworkTracking()
 {
 	if (udpSocket)
 		udpSocket->close();
+	obs_log(LOG_INFO, "Closing network connection");
 }
 
-bool NetworkConnection::UpdateConnection(quint16 newPort)
+bool NetworkTracking::UpdateConnection(quint16 newPort)
 {
 	port = newPort;
 	return StartConnection();
 }
 
-void NetworkConnection::SendUDPData(QString destIpAddress, quint16 destPort, QByteArray data)
+bool NetworkTracking::SendUDPData(QString destIpAddress, quint16 destPort, QByteArray data)
 {
 	if (udpSocket) {
 		QHostAddress destAddress = QHostAddress(destIpAddress);
@@ -28,20 +29,23 @@ void NetworkConnection::SendUDPData(QString destIpAddress, quint16 destPort, QBy
 			// An error occurred while sending
 			QUdpSocket::SocketError socketError = udpSocket->error();
 			QString errorString = udpSocket->errorString();
-
-			obs_log(LOG_WARNING, "Failed to send UDP datagram: %s (Error Code: %d)",
+			obs_log(LOG_ERROR, "Failed to send UDP datagram: %s (Error Code: %d)",
 				errorString.toStdString().c_str(), static_cast<int>(socketError));
-		} else {
-			// Data sent successfully
-			obs_log(LOG_INFO, "Sent %lld bytes to %s:%d", bytesSent, destIpAddress.toStdString().c_str(),
-				destPort);
+			return false;
 		}
+		// else {
+		// 	// Data sent successfully
+		// 	obs_log(LOG_INFO, "Sent %lld bytes to %s:%d", bytesSent, destIpAddress.toStdString().c_str(),
+		// 		destPort);
+		// }
 	} else {
 		obs_log(LOG_WARNING, "Cannot send data as no UDP socket set!");
+		return false;
 	}
+	return true;
 }
 
-QString NetworkConnection::GetIpAddress()
+QString NetworkTracking::GetIpAddress()
 {
 	// Get all network interfaces
 	QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
@@ -59,7 +63,7 @@ QString NetworkConnection::GetIpAddress()
 	return ipAddresses;
 }
 
-void NetworkConnection::ProcessPendingDatagrams()
+void NetworkTracking::ProcessPendingDatagrams()
 {
 	while (udpSocket->hasPendingDatagrams()) {
 		QByteArray datagram;
@@ -80,7 +84,7 @@ void NetworkConnection::ProcessPendingDatagrams()
 	}
 }
 
-bool NetworkConnection::StartConnection()
+bool NetworkTracking::StartConnection()
 {
 	if (udpSocket)
 		udpSocket->close();
@@ -90,29 +94,7 @@ bool NetworkConnection::StartConnection()
 		return false;
 	}
 
-	connect(udpSocket, &QUdpSocket::readyRead, this, &NetworkConnection::ProcessPendingDatagrams);
+	connect(udpSocket, &QUdpSocket::readyRead, this, &NetworkTracking::ProcessPendingDatagrams);
 	obs_log(LOG_INFO, "Server listening on port: %d", port);
 	return true;
 }
-
-// QString NetworkConnection::GetCleanAddress(const QHostAddress &address)
-// {
-// 	if (address.protocol() == QAbstractSocket::IPv4Protocol) {
-// 		// It's a pure IPv4 address
-// 		return address.toString();
-// 	} else if (address.protocol() == QAbstractSocket::IPv6Protocol) {
-// 		bool isv4ConvertedTov6 = false;
-// 		address.toIPv4Address(&isv4ConvertedTov6);
-// 		if (isv4ConvertedTov6) {
-// 			// Extract the IPv4 part
-// 			quint32 ipv4 = address.toIPv4Address();
-// 			QHostAddress ipv4Address(ipv4);
-// 			return ipv4Address.toString();
-// 		} else {
-// 			return address.toString();
-// 		}
-// 	} else {
-// 		// Unknown protocol
-// 		return address.toString();
-// 	}
-// }

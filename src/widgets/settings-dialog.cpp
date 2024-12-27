@@ -21,14 +21,14 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::SetFormDetails(TrackerDataStruct *settingsDialogData)
 {
-	ui->ipAddressViewLabel->setText(NetworkConnection::GetIpAddress());
+	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddress());
 
 	if (settingsDialogData != nullptr) {
 		ui->trackerIdLineEdit->setText(settingsDialogData->trackerId);
 
-		ui->portLineEdit->setText(QString::number(settingsDialogData->port));
+		ui->portSpinBox->setValue(settingsDialogData->port);
 		ui->destIpAddressLineEdit->setText(settingsDialogData->destIpAddress);
-		ui->destPortLineEdit->setText(QString::number(settingsDialogData->destPort));
+		ui->destPortSpinBox->setValue(settingsDialogData->destPort);
 
 		ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 	} else {
@@ -42,9 +42,9 @@ void SettingsDialog::ConnectUISignalHandlers()
 
 	QObject::connect(ui->destIpAddressLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::FormChangeDetected);
 
-	QObject::connect(ui->destPortLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::FormChangeDetected);
+	QObject::connect(ui->destPortSpinBox, &QSpinBox::valueChanged, this, &SettingsDialog::FormChangeDetected);
 
-	QObject::connect(ui->portLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::FormChangeDetected);
+	QObject::connect(ui->portSpinBox, &QSpinBox::valueChanged, this, &SettingsDialog::FormChangeDetected);
 
 	QObject::connect(ui->dialogButtonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::OkButtonClicked);
 
@@ -73,14 +73,13 @@ void SettingsDialog::SetupDialogUI(TrackerDataStruct *settingsDialogData)
 		QRegularExpression(R"(^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$)"), this));
 
 	ui->portLabel->setText(obs_module_text("DialogPortAddress"));
-	ui->portLineEdit->setText("21412");
-	ui->portLineEdit->setValidator(new QIntValidator(0, 65535, this));
+	ui->portSpinBox->setRange(0, 65535);
 
 	ui->ipAddressLabel->setText(obs_module_text("DialogIpAddressLabel"));
-	ui->ipAddressViewLabel->setText(NetworkConnection::GetIpAddress());
+	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddress());
 
 	ui->destPortLabel->setText(obs_module_text("DialogDestPortAddress"));
-	ui->destPortLineEdit->setValidator(new QIntValidator(0, 65535, this));
+	ui->destPortSpinBox->setRange(0, 65535);
 
 	ui->generalGroupBox->setTitle(obs_module_text("DialogGeneralGroupBoxTitle"));
 	ui->connectionGroupBox->setTitle(obs_module_text("DialogConnectionGroupBoxTitle"));
@@ -125,9 +124,9 @@ void SettingsDialog::ApplyFormChanges()
 		TrackerDataStruct *newData = new TrackerDataStruct;
 
 		newData->trackerId = ui->trackerIdLineEdit->text();
-		newData->port = ui->portLineEdit->text().toInt();
+		newData->port = ui->portSpinBox->text().toInt();
 		newData->destIpAddress = ui->destIpAddressLineEdit->text();
-		newData->destPort = ui->destPortLineEdit->text().toInt();
+		newData->destPort = ui->destPortSpinBox->text().toInt();
 
 		ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 		emit SettingsUpdated(newData);
@@ -147,7 +146,7 @@ Result SettingsDialog::ValidateTrackerID()
 			idLineEdit->setStyleSheet("");
 			SetTitle();
 		} else {
-			idLineEdit->setStyleSheet("border: 1px solid rgb(192, 0, 0);");
+			idLineEdit->setStyleSheet(formErrorStyling);
 			obs_log(LOG_WARNING, updateIdResult.errorMessage.toStdString().c_str());
 		}
 	}
@@ -167,13 +166,17 @@ Result SettingsDialog::ValidateDestIPAddress()
 	}
 
 	QString text = lineEdit->text();
+	if (text.isEmpty()) {
+		return {true, ""};
+	}
+
 	int pos = 0;
 	QValidator::State state = validator->validate(text, pos);
 
 	if (state == QValidator::Acceptable) {
 		lineEdit->setStyleSheet("");
 	} else {
-		lineEdit->setStyleSheet("border: 1px solid rgb(192, 0, 0);");
+		lineEdit->setStyleSheet(formErrorStyling);
 		destinationIdValidation = {false, obs_module_text("DialogTrackerDestIpValidationError")};
 		obs_log(LOG_WARNING, destinationIdValidation.errorMessage.toStdString().c_str());
 	}
@@ -191,7 +194,7 @@ void SettingsDialog::showEvent(QShowEvent *event)
 	ui->trackerIdLineEdit->setStyleSheet("");
 	ui->destIpAddressLineEdit->setStyleSheet("");
 
-	ui->ipAddressViewLabel->setText(NetworkConnection::GetIpAddress());
+	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddress());
 }
 
 // --------------------------------- Private Slots ----------------------------------
