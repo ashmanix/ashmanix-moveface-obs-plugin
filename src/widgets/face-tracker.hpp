@@ -50,25 +50,13 @@ private:
 	MainWidgetDock *mainDockWidget = nullptr;
 
 	NetworkTracking *networkTracking = nullptr;
-	const int MAXERRORCOUNT = 3;
-	int networkErrorCount = 0;
-	QTimer *networkTrackingDataRequestTimer = nullptr;
-	QTimer *connectionTimer = nullptr;
-	const int trackingDataPeriodInSecs = 5;
-
-	QJsonObject initiateTrackingObject = {
-		{"messageType", "iOSTrackingDataRequest"},
-		{"time", trackingDataPeriodInSecs},
-		{"sentBy", "vTuberApp"},
-	};
 
 	void SetupWidgetUI();
 	void ConnectUISignalHandlers();
 	void SetTrackerData();
 	void SetConnected(bool isConnectedInput);
 	void UpdateTrackerDataFromDialog(TrackerDataStruct *newData);
-	void InitiateNetworkTracking(bool shouldSendRequest = false);
-	void ResetConnectionTimer();
+	void InitiateNetworkTracking();
 	void EnableTimer();
 	void DisableTimer();
 
@@ -78,9 +66,9 @@ signals:
 private slots:
 	void SettingsActionSelected();
 	void DeleteActionSelected();
-	void HandleTrackingData(QString data);
-	void RequestTrackingData();
+	void HandleTrackingData(VTubeStudioTrackingData data);
 	void ToggleEnabled(int checkState);
+	void ToggleConnectionError(bool isError);
 };
 
 #endif // FACETRACKER_H

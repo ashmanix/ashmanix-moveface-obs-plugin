@@ -98,15 +98,16 @@ void FaceTracker::SetupWidgetUI()
 					  "}");
 	ui->errorLabel->setVisible(false);
 	ui->errorLabel->setStyleSheet("QLabel { "
-				      "  background-color:  rgb(192, 0, 0); "
+				      "  color:  rgb(192, 0, 0); "
 				      "  border-radius: 6px; "
 				      "}");
 
-	ui->connectionLabel->setFixedSize(12, 12);
-	//Tool button only used as an icon so we permanantly set it to disabled
-	SetConnected(false);
-
 	ui->mainWidgetFrame->setProperty("class", "bg-base");
+
+	ui->isEnabledCheckBox->setToolTip(obs_module_text("ToggleEnabledTickBoxTip"));
+	
+	ui->connectionLabel->setFixedSize(12, 12);
+	SetConnected(false);
 }
 
 void FaceTracker::ConnectUISignalHandlers()
@@ -151,71 +152,43 @@ void FaceTracker::UpdateTrackerDataFromDialog(TrackerDataStruct *newData)
 		trackerData.port = newData->port;
 
 		// Renew connection
-		InitiateNetworkTracking(true);
+		InitiateNetworkTracking();
 	}
 
 	mainDockWidget->UpdateTrackerList(trackerData.trackerId, newData->trackerId);
 }
 
-void FaceTracker::InitiateNetworkTracking(bool shouldSendRequest)
+void FaceTracker::InitiateNetworkTracking()
 {
 	if (!trackerData.isEnabled)
 		return;
 
 	ui->errorLabel->setVisible(false);
 	if (!networkTracking) {
-		networkTracking = new NetworkTracking(this, trackerData.port);
+		networkTracking = new NetworkTracking(this, trackerData.port, trackerData.destIpAddress, trackerData.destPort);
 		QObject::connect(networkTracking, &NetworkTracking::ReceivedData, this,
 				 &FaceTracker::HandleTrackingData);
+
+		QObject::connect(networkTracking, &NetworkTracking::ConnectionToggle, this, &FaceTracker::SetConnected);
+
+		QObject::connect(networkTracking, &NetworkTracking::ConnectionErrorToggle, this,
+				 &FaceTracker::ToggleConnectionError);
 	} else {
-		networkTracking->UpdateConnection(trackerData.port);
+		networkTracking->UpdateConnection(trackerData.port, trackerData.destIpAddress, trackerData.destPort);
 	}
-
-	if (shouldSendRequest) {
-		// We send out the signal periodically as required by vTubeStudio to continue
-		// receiving tracking data
-		if (!networkTrackingDataRequestTimer) {
-			networkTrackingDataRequestTimer = new QTimer();
-			QObject::connect(networkTrackingDataRequestTimer, &QTimer::timeout, this,
-					 &FaceTracker::RequestTrackingData);
-		}
-		//Reset timer
-		networkTrackingDataRequestTimer->stop();
-		int timePeriod = trackingDataPeriodInSecs - 1 >= 0 ? (trackingDataPeriodInSecs - 1) * 1000 : 1000;
-		networkTrackingDataRequestTimer->start(timePeriod);
-	}
-}
-
-void FaceTracker::ResetConnectionTimer()
-{
-	if (!isConnected)
-		SetConnected(true);
-
-	// We send out the signal periodically as required by vTubeStudio
-	if (!connectionTimer) {
-		connectionTimer = new QTimer();
-		QObject::connect(connectionTimer, &QTimer::timeout, [this]() { SetConnected(false); });
-	}
-	//Reset timer
-	connectionTimer->stop();
-	int timePeriod = trackingDataPeriodInSecs - 1 >= 0 ? (trackingDataPeriodInSecs - 1) * 1000 : 1000;
-	connectionTimer->start(timePeriod);
 }
 
 void FaceTracker::EnableTimer()
 {
 	trackerData.isEnabled = true;
 	ui->trackerNameLabel->setEnabled(true);
-	InitiateNetworkTracking(true);
+	InitiateNetworkTracking();
 }
 
 void FaceTracker::DisableTimer()
 {
 	trackerData.isEnabled = false;
 	ui->trackerNameLabel->setEnabled(false);
-	if (networkTrackingDataRequestTimer) {
-		networkTrackingDataRequestTimer->stop();
-	}
 	if (networkTracking) {
 		networkTracking->deleteLater();
 		networkTracking = nullptr;
@@ -245,34 +218,13 @@ void FaceTracker::DeleteActionSelected()
 	emit RequestDelete(trackerData.trackerId);
 }
 
-void FaceTracker::HandleTrackingData(QString data)
+void FaceTracker::HandleTrackingData(VTubeStudioTrackingData data)
 {
 	UNUSED_PARAMETER(data);
 
-	ResetConnectionTimer();
+	// ResetConnectionTimer();
 
-	obs_log(LOG_INFO, data.toStdString().c_str());
-}
-
-void FaceTracker::RequestTrackingData()
-{
-	if (trackerData.isEnabled && !trackerData.destIpAddress.isEmpty()) {
-		QJsonArray ports;
-		ports.append(trackerData.port);
-		initiateTrackingObject["ports"] = ports;
-
-		QJsonDocument jsonDoc(initiateTrackingObject);
-		QByteArray jsonString = jsonDoc.toJson(QJsonDocument::Indented);
-		bool result = networkTracking->SendUDPData(trackerData.destIpAddress, trackerData.destPort, jsonString);
-		if (!result) {
-			networkErrorCount++;
-		}
-		if (networkErrorCount >= MAXERRORCOUNT) {
-			ui->errorLabel->setVisible(true);
-			obs_log(LOG_WARNING, "Send connection max errors reached, cancelling send messages");
-			networkTrackingDataRequestTimer->stop();
-		}
-	}
+	obs_log(LOG_INFO, "data received!");
 }
 
 void FaceTracker::ToggleEnabled(int checkState)
@@ -287,4 +239,9 @@ void FaceTracker::ToggleEnabled(int checkState)
 		DisableTimer();
 		break;
 	}
+}
+
+void FaceTracker::ToggleConnectionError(bool isError)
+{
+	ui->errorLabel->setVisible(isError);
 }

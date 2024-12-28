@@ -21,7 +21,7 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::SetFormDetails(TrackerDataStruct *settingsDialogData)
 {
-	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddress());
+	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddresses());
 
 	if (settingsDialogData != nullptr) {
 		ui->trackerIdLineEdit->setText(settingsDialogData->trackerId);
@@ -76,7 +76,7 @@ void SettingsDialog::SetupDialogUI(TrackerDataStruct *settingsDialogData)
 	ui->portSpinBox->setRange(0, 65535);
 
 	ui->ipAddressLabel->setText(obs_module_text("DialogIpAddressLabel"));
-	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddress());
+	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddresses());
 
 	ui->destPortLabel->setText(obs_module_text("DialogDestPortAddress"));
 	ui->destPortSpinBox->setRange(0, 65535);
@@ -194,7 +194,7 @@ void SettingsDialog::showEvent(QShowEvent *event)
 	ui->trackerIdLineEdit->setStyleSheet("");
 	ui->destIpAddressLineEdit->setStyleSheet("");
 
-	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddress());
+	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddresses());
 }
 
 // --------------------------------- Private Slots ----------------------------------
