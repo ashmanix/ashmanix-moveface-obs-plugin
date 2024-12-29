@@ -8,6 +8,9 @@
 #include <QValidator>
 #include <QMenu>
 #include <QVector>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsPixmapItem>
 
 #include "../main-widget-dock.hpp"
 #include "../utils/tracker-utils.hpp"
@@ -27,15 +30,24 @@ private:
 	MainWidgetDock *mainWidget;
 	TrackerDataStruct *trackerData;
 	bool isError = false;
+	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
 	void ConnectUISignalHandlers();
+	void ConnectObsSignalHandlers();
 	void SetTitle();
 	void SetupDialogUI(TrackerDataStruct *settingsDialogData);
 	void ApplyFormChanges();
 	Result ValidateTrackerID();
 	Result ValidateDestIPAddress();
 
-	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
+	void GetOBSSourceList();
+	static bool GetImageSources(void *list_property, obs_source_t *source);
+	static void OBSSourceCreated(void *param, calldata_t *calldata);
+	static void OBSSourceDeleted(void *param, calldata_t *calldata);
+	static void OBSSourceRenamed(void *param, calldata_t *calldata);
+	static int CheckIfImageSourceType(obs_source_t *source);
+
+	void AddImageToQGraphics();
 
 protected:
 	void showEvent(QShowEvent *event) override;
@@ -49,6 +61,7 @@ private slots:
 	void ApplyButtonClicked();
 	void CancelButtonClicked();
 	void OkButtonClicked();
+	void AddNewPose();
 };
 
 #endif // SETTINGSDIALOG_H

@@ -157,6 +157,12 @@
           <property name="arrowType">
            <enum>Qt::NoArrow</enum>
           </property>
+          <property name="class" stdset="0">
+           <string>icon-dots-vert</string>
+          </property>
+          <property name="themeID" stdset="0">
+           <string>menuIconSmall</string>
+          </property>
          </widget>
         </item>
        </layout>

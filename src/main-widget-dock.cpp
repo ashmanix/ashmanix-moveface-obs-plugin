@@ -63,10 +63,8 @@ Result MainWidgetDock::UpdateTrackerList(QString oldId, QString newId)
 
 void MainWidgetDock::SetupCountdownWidgetUI()
 {
-	ui->addTrackerButton->setProperty("themeID", "addIconSmall");
-	ui->addTrackerButton->setProperty("class", "icon-plus");
 	ui->addTrackerButton->setEnabled(true);
-	ui->addTrackerButton->setToolTip(obs_module_text("AddTrackerButtonTip"));
+	ui->addTrackerButton->setToolTip(obs_module_text("AddTrackerButtonToolTip"));
 
 	this->setStyleSheet("#dialogMainWidget QDialogButtonBox QPushButton {"
 			    "   width: auto;"

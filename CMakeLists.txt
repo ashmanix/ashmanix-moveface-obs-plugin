@@ -47,6 +47,8 @@ target_sources(
     src/widgets/settings-dialog.cpp
     src/widgets/settings-dialog.hpp
     src/widgets/obs-dock-wrapper.hpp
+    src/widgets/avatar-graphics-view.cpp
+    src/widgets/avatar-graphics-view.hpp
     src/utils/tracker-utils.cpp
     src/utils/tracker-utils.hpp
     src/utils/obs-utils.cpp

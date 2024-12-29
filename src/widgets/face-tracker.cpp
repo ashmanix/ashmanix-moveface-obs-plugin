@@ -50,22 +50,30 @@ TrackerDataStruct *FaceTracker::GetTrackerData()
 void FaceTracker::SaveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject)
 {
 	obs_data_set_string(dataObject, "trackerId", trackerData.trackerId.toStdString().c_str());
+	obs_data_set_string(dataObject, "selectedImageSource", trackerData.selectedImageSource.toStdString().c_str());
 
 	obs_data_set_string(dataObject, "destIpAddress", trackerData.destIpAddress.toStdString().c_str());
 	obs_data_set_int(dataObject, "destPort", trackerData.destPort);
 	obs_data_set_int(dataObject, "port", trackerData.port);
 	obs_data_set_bool(dataObject, "isEnabled", trackerData.isEnabled);
+
+	QString poseListJson = trackerData.poseListToJsonString();
+	obs_data_set_string(dataObject, "poseList", poseListJson.toStdString().c_str());
 }
 
 void FaceTracker::LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
 {
 
 	trackerData.trackerId = (char *)obs_data_get_string(dataObject, "trackerId");
+	trackerData.selectedImageSource = (char *)obs_data_get_string(dataObject, "selectedImageSource");
 
 	trackerData.destIpAddress = (char *)obs_data_get_string(dataObject, "destIpAddress");
 	trackerData.destPort = obs_data_get_int(dataObject, "destPort");
 	trackerData.port = obs_data_get_int(dataObject, "port");
 	trackerData.isEnabled = obs_data_get_bool(dataObject, "isEnabled");
+
+	QString poseListString = (char *)obs_data_get_string(dataObject, "poseList");
+	trackerData.jsonStringToPoseList(poseListString);
 
 	SetTrackerData();
 
@@ -78,8 +86,6 @@ void FaceTracker::SetupWidgetUI()
 {
 	SetTrackerID();
 
-	ui->menuToolButton->setProperty("themeID", "menuIconSmall");
-	ui->menuToolButton->setProperty("class", "icon-dots-vert");
 	QMenu *toolButtonMenu = new QMenu(this);
 	toolButtonMenu->addAction("Settings", this, SLOT(SettingsActionSelected()));
 	toolButtonMenu->addSeparator();
@@ -104,9 +110,10 @@ void FaceTracker::SetupWidgetUI()
 
 	ui->mainWidgetFrame->setProperty("class", "bg-base");
 
-	ui->isEnabledCheckBox->setToolTip(obs_module_text("ToggleEnabledTickBoxTip"));
-	
+	ui->isEnabledCheckBox->setToolTip(obs_module_text("ToggleEnabledTickBoxToolTip"));
+
 	ui->connectionLabel->setFixedSize(12, 12);
+
 	SetConnected(false);
 }
 
@@ -155,6 +162,8 @@ void FaceTracker::UpdateTrackerDataFromDialog(TrackerDataStruct *newData)
 		InitiateNetworkTracking();
 	}
 
+	trackerData.selectedImageSource = newData->selectedImageSource;
+
 	mainDockWidget->UpdateTrackerList(trackerData.trackerId, newData->trackerId);
 }
 
@@ -165,7 +174,8 @@ void FaceTracker::InitiateNetworkTracking()
 
 	ui->errorLabel->setVisible(false);
 	if (!networkTracking) {
-		networkTracking = new NetworkTracking(this, trackerData.port, trackerData.destIpAddress, trackerData.destPort);
+		networkTracking =
+			new NetworkTracking(this, trackerData.port, trackerData.destIpAddress, trackerData.destPort);
 		QObject::connect(networkTracking, &NetworkTracking::ReceivedData, this,
 				 &FaceTracker::HandleTrackingData);
 
@@ -204,6 +214,13 @@ void FaceTracker::SettingsActionSelected()
 		settingsDialogUi = new SettingsDialog(this, &trackerData, mainDockWidget);
 		QObject::connect(settingsDialogUi, &SettingsDialog::SettingsUpdated, this,
 				 &FaceTracker::UpdateTrackerDataFromDialog);
+
+		settingsDialogUi->setStyleSheet("QPushButton {"
+						"   width: auto;"
+						"   height: auto;"
+						"   padding: 4px 8px;"
+						"   margin: 0;"
+						"}");
 	}
 	if (settingsDialogUi->isVisible()) {
 		settingsDialogUi->raise();

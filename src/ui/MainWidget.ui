@@ -212,6 +212,12 @@
                   <height>16</height>
                  </size>
                 </property>
+                <property name="class" stdset="0">
+                 <string>icon-plus</string>
+                </property>
+                <property name="themeID" stdset="0">
+                 <string>addIconSmall</string>
+                </property>
                </widget>
               </item>
              </layout>
