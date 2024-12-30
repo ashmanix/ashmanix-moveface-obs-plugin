@@ -44,6 +44,8 @@ void SettingsDialog::SetFormDetails(TrackerDataStruct *settingsDialogData)
 		ui->destPortSpinBox->setValue(settingsDialogData->destPort);
 
 		ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
+
+		SyncPoseListToModel();
 	} else {
 		obs_log(LOG_WARNING, "No tracker data found!");
 	}
@@ -62,11 +64,35 @@ void SettingsDialog::ConnectUISignalHandlers()
 
 	QObject::connect(ui->portSpinBox, &QSpinBox::valueChanged, this, &SettingsDialog::FormChangeDetected);
 
-	QObject::connect(ui->addPoseToolButton, &QToolButton::clicked, this, &SettingsDialog::AddNewPose);
+	QObject::connect(ui->addPoseToolButton, &QToolButton::clicked, this, &SettingsDialog::AddPose);
+	QObject::connect(ui->deletePoseToolButton, &QToolButton::clicked, this, &SettingsDialog::DeletePose);
 
 	QObject::connect(ui->dialogButtonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::OkButtonClicked);
 
 	QObject::connect(ui->dialogButtonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::CancelButtonClicked);
+
+	QObject::connect(ui->bodyUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::BODY); });
+	QObject::connect(ui->eyesOpenUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::EYESOPEN); });
+	QObject::connect(ui->eyesHalfOpenUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::EYESHALFOPEN); });
+	QObject::connect(ui->eyesClosedUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::EYESCLOSED); });
+	QObject::connect(ui->mouthClosedUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::MOUTHCLOSED); });
+	QObject::connect(ui->mouthOpenUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::MOUTHOPEN); });
+	QObject::connect(ui->mouthSmileUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::MOUTHSMILE); });
+	QObject::connect(ui->tongueOutUrlPushButton, &QPushButton::clicked, this,
+			 [this]() { HandleImageUrlButtonClicked(PoseImage::TONGUEOUT); });
+
+	QObject::connect(ui->poseListView, &QListView::clicked, this, &SettingsDialog::HandlePoseListClick);
+
+	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::OnPoseRowsInserted);
+	QObject::connect(poseListModel, &QAbstractItemModel::rowsRemoved, this, &SettingsDialog::OnPoseRowsRemoved);
+	QObject::connect(poseListModel, &QAbstractItemModel::dataChanged, this, &SettingsDialog::OnPoseDataChanged);
 
 	QPushButton *applyButton = ui->dialogButtonBox->button(QDialogButtonBox::Apply);
 	if (applyButton) {
@@ -134,27 +160,32 @@ void SettingsDialog::SetupDialogUI(TrackerDataStruct *settingsDialogData)
 	ui->imageGroupBox->setTitle(obs_module_text("DialogAvatarGroupBoxTitle"));
 
 	ui->addPoseToolButton->setToolTip(obs_module_text("DialogAddPoseToolTip"));
+	ui->deletePoseToolButton->setToolTip(obs_module_text("DialogDeletePoseToolTip"));
 
 	ui->poseListLabel->setText(obs_module_text("DialogPostListLabel"));
 	ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
+	poseListModel = new QStandardItemModel(this);
+	ui->poseListView->setModel(poseListModel);
 
 	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyUrlLabel"));
-	ui->eyeOpenUrlLabel->setText(obs_module_text("DialogEyesOpenUrlLabel"));
-	ui->eyeHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenUrlLabel"));
-	ui->eyeClosedUrlLabel->setText(obs_module_text("DialogEyesClosedUrlLabel"));
+	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenUrlLabel"));
+	ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenUrlLabel"));
+	ui->eyesClosedUrlLabel->setText(obs_module_text("DialogEyesClosedUrlLabel"));
 	ui->mouthClosedUrlLabel->setText(obs_module_text("DialogMouthClosedUrlLabel"));
 	ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenUrlLabel"));
 	ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileUrlLabel"));
 	ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutUrlLabel"));
-	
+
 	ui->bodyUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
-	ui->eyeOpenUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
-	ui->eyeHalfOpenUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
-	ui->eyeClosedUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
+	ui->eyesOpenUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
+	ui->eyesHalfOpenUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
+	ui->eyesClosedUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
 	ui->mouthClosedUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
 	ui->mouthOpenUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
 	ui->mouthSmileUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
 	ui->tongueOutUrlPushButton->setText(obs_module_text("DialogImageUrlBrowseButtonText"));
+
+	ui->imageConfigWidget->setVisible(false);
 
 	GetOBSSourceList();
 
@@ -194,6 +225,7 @@ void SettingsDialog::ApplyFormChanges()
 		newData->port = ui->portSpinBox->text().toInt();
 		newData->destIpAddress = ui->destIpAddressLineEdit->text();
 		newData->destPort = ui->destPortSpinBox->text().toInt();
+		newData->poseList = settingsPoseList;
 
 		ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 		emit SettingsUpdated(newData);
@@ -407,6 +439,127 @@ void SettingsDialog::OkButtonClicked()
 		this->reject();
 }
 
-void SettingsDialog::AddNewPose() {
+void SettingsDialog::SyncPoseListToModel()
+{
+	// Clear the model
+	poseListModel->clear();
+	settingsPoseList = trackerData->poseList;
 
+	// Refill from the poseList
+	for (int i = 0; i < trackerData->poseList.size(); ++i) {
+		const Pose &p = trackerData->poseList[i];
+
+		// For a single-column model, store display text as Pose ID
+		QStandardItem *item = new QStandardItem(p.poseId);
+		// If you need more data, you can store it in user roles
+		item->setData(p.bodyImageUrl, Qt::UserRole + 1);
+		// ... etc.
+
+		poseListModel->appendRow(item);
+	}
+}
+
+void SettingsDialog::AddPose()
+{
+	if (!poseListModel)
+		return obs_log(LOG_ERROR, "No list model found!");
+
+	int count = poseListModel->rowCount();
+	QStandardItem *poseItem = new QStandardItem(QString("New Pose %1").arg(count));
+	poseListModel->appendRow(poseItem);
+}
+
+void SettingsDialog::DeletePose()
+{
+	QModelIndex modelIndex = ui->poseListView->currentIndex();
+	int rowIndex = modelIndex.row();
+
+	obs_log(LOG_INFO, "Row To Delete: %d", rowIndex);
+
+	if (rowIndex != -1) {
+		poseListModel->takeRow(rowIndex);
+	}
+}
+
+void SettingsDialog::HandleImageUrlButtonClicked(PoseImage image)
+{
+	// if (selectedPoseIndex < 0 || selectedPoseIndex >= trackerData->poseList.size())
+	// 	return obs_log(LOG_ERROR, "Error finding selected Post at index: %d", selectedPoseIndex);
+
+	// Pose selectedPost = trackerData->poseList[selectedPoseIndex];
+
+	QString fileName = QFileDialog::getOpenFileName(this, obs_module_text("ImageUrlFileDialogWindowTitle"),
+							QString(), tr("Images (*.png *.jpg *.bmp *.jpeg)"));
+	obs_log(LOG_INFO, "File: %s", fileName.toStdString().c_str());
+
+	this->raise();
+	this->activateWindow();
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	FormChangeDetected();
+
+	switch (image) {
+	case PoseImage::BODY:
+
+		break;
+
+	default:
+		break;
+	}
+}
+
+void SettingsDialog::HandlePoseListClick(QModelIndex modelIndex)
+{
+	obs_log(LOG_INFO, "Row: %d", modelIndex.row());
+	ui->imageConfigWidget->setVisible(true);
+}
+
+void SettingsDialog::OnPoseRowsInserted(const QModelIndex &parent, int first, int last)
+{
+	Q_UNUSED(parent);
+
+	// For each newly inserted row, create a default Pose or read from the model
+	// and insert into settingsPoseList at the correct position.
+	for (int row = first; row <= last; ++row) {
+		// E.g. read the poseId from the model
+		QModelIndex idx = poseListModel->index(row, 0);
+		QString poseId = idx.data(Qt::DisplayRole).toString();
+
+		Pose newPose;
+		newPose.poseId = poseId;
+
+		settingsPoseList.insert(row, newPose);
+	}
+	FormChangeDetected();
+}
+
+void SettingsDialog::OnPoseRowsRemoved(const QModelIndex &parent, int first, int last)
+{
+	Q_UNUSED(parent);
+
+	// Remove the corresponding poses from settingsPoseList
+	for (int row = last; row >= first; --row) {
+		if (row >= 0 && row < settingsPoseList.size()) {
+			settingsPoseList.removeAt(row);
+		}
+	}
+	FormChangeDetected();
+}
+
+void SettingsDialog::OnPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+				       const QList<int> &roles)
+{
+	Q_UNUSED(&roles);
+	for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+		// Read changed data from the model and update the Pose
+		QModelIndex idx = poseListModel->index(row, 0);
+		QString newPoseId = idx.data(Qt::DisplayRole).toString();
+		if (row >= 0 && row < settingsPoseList.size()) {
+			settingsPoseList[row].poseId = newPoseId;
+		}
+	}
+	FormChangeDetected();
 }

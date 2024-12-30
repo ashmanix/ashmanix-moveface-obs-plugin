@@ -43,6 +43,17 @@ struct Vector3 {
 	}
 };
 
+enum class PoseImage {
+	BODY,
+	EYESOPEN,
+	EYESHALFOPEN,
+	EYESCLOSED,
+	MOUTHCLOSED,
+	MOUTHOPEN,
+	MOUTHSMILE,
+	TONGUEOUT,
+};
+
 enum class BlendShapeKey {
 	BROWOUTERUP_L,
 	BROWINNERUP_L,
@@ -432,16 +443,20 @@ struct BlendShapeRule {
 // Mouth type
 struct Pose {
 	QString poseId;
-	QString bodyImageUrl;
+	QString bodyImageUrl = "";
 
-	QString eyeOpenImageUrl;
-	QString eyeHalfOpenImageUrl;
-	QString eyeClosedImageUrl;
+	QString eyeOpenImageUrl = "";
+	QString eyeHalfOpenImageUrl = "";
+	QString eyeClosedImageUrl = "";
 
-	QString mouthClosedUrl;
-	QString mouthOpenUrl;
-	QString mouthSmileUrl;
-	QString mouthTongueOutUrl;
+	QString mouthClosedUrl = "";
+	QString mouthOpenUrl = "";
+	QString mouthSmileUrl = "";
+	QString mouthTongueOutUrl = "";
+
+	Vector3 bodyPosition = {0, 0, 0};
+	Vector3 eyePosition = {0, 0, 0};
+	Vector3 mouthPosition = {0, 0, 0};
 
 	std::vector<BlendShapeRule> blendShapesRuleList;
 
@@ -473,6 +488,10 @@ struct Pose {
 		obj["mouthSmileUrl"] = mouthSmileUrl;
 		obj["mouthTongueOutUrl"] = mouthTongueOutUrl;
 
+		obj["bodyPosition"] = bodyPosition.toJson();
+		obj["eyePosition"] = eyePosition.toJson();
+		obj["mouthPosition"] = mouthPosition.toJson();
+
 		// Convert blendShapesRuleList to a QJsonArray
 		QJsonArray rulesArray;
 		for (const auto &rule : blendShapesRuleList) {
@@ -502,6 +521,15 @@ struct Pose {
 		pose.mouthSmileUrl = obj["mouthSmileUrl"].toString();
 		pose.mouthTongueOutUrl = obj["mouthTongueOutUrl"].toString();
 
+		QJsonObject bodyPosObj = obj["bodyPosition"].toObject();
+		pose.bodyPosition = Vector3::fromJson(bodyPosObj);
+
+		QJsonObject eyePosObj = obj["eyePosition"].toObject();
+		pose.eyePosition = Vector3::fromJson(eyePosObj);
+
+		QJsonObject mouthPosObj = obj["mouthPosition"].toObject();
+		pose.mouthPosition = Vector3::fromJson(mouthPosObj);
+
 		QJsonArray rulesArray = obj["blendShapesRuleList"].toArray();
 		for (auto ruleValue : rulesArray) {
 			if (ruleValue.isObject()) {
@@ -523,7 +551,7 @@ struct TrackerDataStruct {
 	QString destIpAddress = "192.0.0.0";
 	int destPort = 21412;
 	int port = 21412;
-	QVector<Pose> poseList;
+	QList<Pose> poseList;
 	bool isEnabled = false;
 
 	QString poseListToJsonString()

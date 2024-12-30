@@ -163,6 +163,7 @@ void FaceTracker::UpdateTrackerDataFromDialog(TrackerDataStruct *newData)
 	}
 
 	trackerData.selectedImageSource = newData->selectedImageSource;
+	trackerData.poseList = newData->poseList;
 
 	mainDockWidget->UpdateTrackerList(trackerData.trackerId, newData->trackerId);
 }

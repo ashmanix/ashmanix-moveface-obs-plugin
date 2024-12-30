@@ -11,6 +11,10 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
+#include <QFileDialog>
+#include <QStandardItemModel>
+#include <QModelIndex>
+#include <QList>
 
 #include "../main-widget-dock.hpp"
 #include "../utils/tracker-utils.hpp"
@@ -31,6 +35,9 @@ private:
 	TrackerDataStruct *trackerData;
 	bool isError = false;
 	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
+
+	QStandardItemModel *poseListModel = nullptr;
+	QList<Pose> settingsPoseList;
 
 	void ConnectUISignalHandlers();
 	void ConnectObsSignalHandlers();
@@ -61,7 +68,16 @@ private slots:
 	void ApplyButtonClicked();
 	void CancelButtonClicked();
 	void OkButtonClicked();
-	void AddNewPose();
+
+	void SyncPoseListToModel();
+	void AddPose();
+	void DeletePose();
+	void HandleImageUrlButtonClicked(PoseImage image);
+	void HandlePoseListClick(QModelIndex modelIndex);
+	void OnPoseRowsInserted(const QModelIndex &parent, int first, int last);
+	void OnPoseRowsRemoved(const QModelIndex &parent, int first, int last);
+	void OnPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+				const QList<int> &roles = QList<int>());
 };
 
 #endif // SETTINGSDIALOG_H
