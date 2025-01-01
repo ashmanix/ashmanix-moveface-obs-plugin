@@ -159,12 +159,12 @@ void MainWidgetDock::UpdateWidgetStyles(MainWidgetDock *trackerWidgetDock)
 {
 	int trackerWidgetCount = trackerWidgetDock->ui->trackerListLayout->count();
 	for (int i = 0; i < trackerWidgetCount; i++) {
-		// FaceTracker *trackerWidget = static_cast<FaceTracker *>(
-		// 	trackerWidgetDock->ui->trackerListLayout->itemAt(i)
-		// 		->widget());
-		// if (trackerWidget) {
-		// 	trackerWidget->UpdateStyles();
-		// }
+		FaceTracker *trackerWidget = static_cast<FaceTracker *>(
+			trackerWidgetDock->ui->trackerListLayout->itemAt(i)
+				->widget());
+		if (trackerWidget) {
+			trackerWidget->UpdateWidgetStyles();
+		}
 	}
 }
 

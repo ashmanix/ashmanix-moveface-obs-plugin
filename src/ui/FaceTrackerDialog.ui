@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
-    <height>783</height>
+    <width>910</width>
+    <height>942</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>false</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -43,8 +46,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>685</width>
-            <height>688</height>
+            <width>870</width>
+            <height>815</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -280,7 +283,7 @@
         <number>5</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="imageViewHorizontalLayout" stretch="2,5">
+        <layout class="QHBoxLayout" name="imageViewHorizontalLayout" stretch="0,5">
          <property name="bottomMargin">
           <number>0</number>
          </property>
@@ -299,10 +302,16 @@
            <item>
             <widget class="QListView" name="poseListView">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
              </property>
              <property name="autoFillBackground">
               <bool>true</bool>
@@ -391,7 +400,7 @@
             <widget class="AvatarGraphicsView" name="avatarGraphicsView">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>1</horstretch>
+               <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
@@ -413,16 +422,28 @@
              <property name="frameShadow">
               <enum>QFrame::Plain</enum>
              </property>
+             <property name="verticalScrollBarPolicy">
+              <enum>Qt::ScrollBarAsNeeded</enum>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarAsNeeded</enum>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QAbstractScrollArea::AdjustToContents</enum>
+             </property>
              <property name="sceneRect">
               <rectf>
                <x>0.000000000000000</x>
                <y>0.000000000000000</y>
-               <width>100.000000000000000</width>
-               <height>200.000000000000000</height>
+               <width>20000.000000000000000</width>
+               <height>20000.000000000000000</height>
               </rectf>
              </property>
+             <property name="dragMode">
+              <enum>QGraphicsView::ScrollHandDrag</enum>
+             </property>
              <property name="resizeAnchor">
-              <enum>QGraphicsView::NoAnchor</enum>
+              <enum>QGraphicsView::AnchorViewCenter</enum>
              </property>
              <property name="class" stdset="0">
               <string>bg-base</string>
@@ -445,9 +466,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-2</y>
-            <width>633</width>
-            <height>405</height>
+            <y>0</y>
+            <width>870</width>
+            <height>402</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -492,21 +513,25 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_6">
                    <item>
                     <widget class="QLineEdit" name="bodyUrlLineEdit">
-                     <property name="clearButtonEnabled">
+                     <property name="readOnly">
                       <bool>true</bool>
+                     </property>
+                     <property name="clearButtonEnabled">
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="bodyUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="bodyUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="bodyUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -522,22 +547,26 @@
                  <item row="1" column="1">
                   <layout class="QHBoxLayout" name="horizontalLayout_4">
                    <item>
-                    <widget class="QLineEdit" name="eyesOpenUrlEdit">
-                     <property name="clearButtonEnabled">
+                    <widget class="QLineEdit" name="eyesOpenUrlLineEdit">
+                     <property name="readOnly">
                       <bool>true</bool>
+                     </property>
+                     <property name="clearButtonEnabled">
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="eyesOpenUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="eyesOpenUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="eyesOpenUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -554,27 +583,25 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_5">
                    <item>
                     <widget class="QLineEdit" name="eyesHalfOpenUrlEdit">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
                      <property name="clearButtonEnabled">
                       <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="eyesHalfOpenUrlPushButton">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="eyesHalfOpenUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="eyesHalfOpenUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -591,21 +618,25 @@
                   <layout class="QHBoxLayout" name="horizontalLayout">
                    <item>
                     <widget class="QLineEdit" name="eyesClosedUrlLineEdit">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
                      <property name="clearButtonEnabled">
                       <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="eyesClosedUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="eyesClosedUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="eyesClosedUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -622,21 +653,25 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_7">
                    <item>
                     <widget class="QLineEdit" name="mouthClosedUrlLineEdit">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
                      <property name="clearButtonEnabled">
                       <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="mouthClosedUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="mouthClosedUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="mouthClosedUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -653,21 +688,25 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_8">
                    <item>
                     <widget class="QLineEdit" name="mouthOpenUrlLineEdit">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
                      <property name="clearButtonEnabled">
                       <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="mouthOpenUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="mouthOpenUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="mouthOpenUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -684,21 +723,25 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_9">
                    <item>
                     <widget class="QLineEdit" name="mouthSmileUrlLineEdit">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
                      <property name="clearButtonEnabled">
                       <bool>true</bool>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="mouthSmileUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="mouthSmileUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="mouthSmileUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -721,15 +764,16 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="tongueOutUrlPushButton">
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
+                    <widget class="QToolButton" name="tongueOutUrlDeleteToolButton">
                      <property name="text">
-                      <string>browse</string>
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="tongueOutUrlBrowseToolButton">
+                     <property name="text">
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -805,6 +849,8 @@
    <header>widgets/avatar-graphics-view.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="plugin.qrc"/>
+ </resources>
  <connections/>
 </ui>

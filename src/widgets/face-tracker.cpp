@@ -80,6 +80,12 @@ void FaceTracker::LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
 	ToggleEnabled(trackerData.isEnabled ? Qt::Checked : Qt::Unchecked);
 }
 
+void FaceTracker::UpdateWidgetStyles() {
+	if(settingsDialogUi) {
+		settingsDialogUi->UpdateStyledUIComponents();
+	}
+}
+
 // ---------------------------------- Private -------------------------------------
 
 void FaceTracker::SetupWidgetUI()

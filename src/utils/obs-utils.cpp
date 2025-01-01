@@ -37,3 +37,10 @@ void HotkeyCallback(void *incoming_data, obs_hotkey_id id, obs_hotkey_t *hotkey,
 		hotkey_callback_data->function();
 	}
 }
+
+QString GetDataFolderPath() {
+	char *file = obs_module_file(NULL);
+	QString filePath = QString::fromUtf8(file);
+	bfree(file);
+	return filePath;
+}

@@ -28,6 +28,7 @@ public:
 				MainWidgetDock *mWidget = nullptr);
 	~SettingsDialog();
 	void SetFormDetails(TrackerDataStruct *settingsDialogData);
+	void UpdateStyledUIComponents();
 
 private:
 	Ui::FaceTrackerDialog *ui;
@@ -38,6 +39,7 @@ private:
 
 	QStandardItemModel *poseListModel = nullptr;
 	QList<Pose> settingsPoseList;
+	QGraphicsScene *avatarPreviewScene = nullptr;
 
 	void ConnectUISignalHandlers();
 	void ConnectObsSignalHandlers();
@@ -54,7 +56,10 @@ private:
 	static void OBSSourceRenamed(void *param, calldata_t *calldata);
 	static int CheckIfImageSourceType(obs_source_t *source);
 
-	void AddImageToQGraphics();
+	void AddImageToQGraphics(QString fileUrl, bool clearScene = false);
+	void ClearCurrentPoseConfig();
+	void LoadSelectedPoseConfig();
+	int GetSelectedRow();
 
 protected:
 	void showEvent(QShowEvent *event) override;
@@ -73,6 +78,7 @@ private slots:
 	void AddPose();
 	void DeletePose();
 	void HandleImageUrlButtonClicked(PoseImage image);
+	void HandleClearImageUrl(PoseImage image);
 	void HandlePoseListClick(QModelIndex modelIndex);
 	void OnPoseRowsInserted(const QModelIndex &parent, int first, int last);
 	void OnPoseRowsRemoved(const QModelIndex &parent, int first, int last);

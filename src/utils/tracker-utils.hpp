@@ -10,9 +10,12 @@
 #include <QString>
 #include <QUuid>
 #include <QCryptographicHash>
+#include <QFileInfo>
 
 #include <obs.h>
 #include "plugin-support.h"
+
+#define CONFIG "config.json"
 
 struct Result {
 	bool success;
@@ -445,17 +448,17 @@ struct Pose {
 	QString poseId;
 	QString bodyImageUrl = "";
 
-	QString eyeOpenImageUrl = "";
-	QString eyeHalfOpenImageUrl = "";
-	QString eyeClosedImageUrl = "";
+	QString eyesOpenImageUrl = "";
+	QString eyesHalfOpenImageUrl = "";
+	QString eyesClosedImageUrl = "";
 
-	QString mouthClosedUrl = "";
-	QString mouthOpenUrl = "";
-	QString mouthSmileUrl = "";
-	QString mouthTongueOutUrl = "";
+	QString mouthClosedImageUrl = "";
+	QString mouthOpenImageUrl = "";
+	QString mouthSmileImageUrl = "";
+	QString mouthTongueOutImageUrl = "";
 
 	Vector3 bodyPosition = {0, 0, 0};
-	Vector3 eyePosition = {0, 0, 0};
+	Vector3 eyesPosition = {0, 0, 0};
 	Vector3 mouthPosition = {0, 0, 0};
 
 	std::vector<BlendShapeRule> blendShapesRuleList;
@@ -479,17 +482,17 @@ struct Pose {
 		QJsonObject obj;
 		obj["poseId"] = poseId;
 		obj["bodyImageUrl"] = bodyImageUrl;
-		obj["eyeOpenImageUrl"] = eyeOpenImageUrl;
-		obj["eyeHalfOpenImageUrl"] = eyeHalfOpenImageUrl;
-		obj["eyeClosedImageUrl"] = eyeClosedImageUrl;
+		obj["eyesOpenImageUrl"] = eyesOpenImageUrl;
+		obj["eyesHalfOpenImageUrl"] = eyesHalfOpenImageUrl;
+		obj["eyesClosedImageUrl"] = eyesClosedImageUrl;
 
-		obj["mouthClosedUrl"] = mouthClosedUrl;
-		obj["mouthOpenUrl"] = mouthOpenUrl;
-		obj["mouthSmileUrl"] = mouthSmileUrl;
-		obj["mouthTongueOutUrl"] = mouthTongueOutUrl;
+		obj["mouthClosedImageUrl"] = mouthClosedImageUrl;
+		obj["mouthOpenImageUrl"] = mouthOpenImageUrl;
+		obj["mouthSmileImageUrl"] = mouthSmileImageUrl;
+		obj["mouthTongueOutImageUrl"] = mouthTongueOutImageUrl;
 
 		obj["bodyPosition"] = bodyPosition.toJson();
-		obj["eyePosition"] = eyePosition.toJson();
+		obj["eyesPosition"] = eyesPosition.toJson();
 		obj["mouthPosition"] = mouthPosition.toJson();
 
 		// Convert blendShapesRuleList to a QJsonArray
@@ -512,20 +515,20 @@ struct Pose {
 		Pose pose;
 		pose.poseId = obj["poseId"].toString();
 		pose.bodyImageUrl = obj["bodyImageUrl"].toString();
-		pose.eyeOpenImageUrl = obj["eyeOpenImageUrl"].toString();
-		pose.eyeHalfOpenImageUrl = obj["eyeHalfOpenImageUrl"].toString();
-		pose.eyeClosedImageUrl = obj["eyeClosedImageUrl"].toString();
+		pose.eyesOpenImageUrl = obj["eyesOpenImageUrl"].toString();
+		pose.eyesHalfOpenImageUrl = obj["eyesHalfOpenImageUrl"].toString();
+		pose.eyesClosedImageUrl = obj["eyesClosedImageUrl"].toString();
 
-		pose.mouthClosedUrl = obj["mouthClosedUrl"].toString();
-		pose.mouthOpenUrl = obj["mouthOpenUrl"].toString();
-		pose.mouthSmileUrl = obj["mouthSmileUrl"].toString();
-		pose.mouthTongueOutUrl = obj["mouthTongueOutUrl"].toString();
+		pose.mouthClosedImageUrl = obj["mouthClosedImageUrl"].toString();
+		pose.mouthOpenImageUrl = obj["mouthOpenImageUrl"].toString();
+		pose.mouthSmileImageUrl = obj["mouthSmileImageUrl"].toString();
+		pose.mouthTongueOutImageUrl = obj["mouthTongueOutImageUrl"].toString();
 
 		QJsonObject bodyPosObj = obj["bodyPosition"].toObject();
 		pose.bodyPosition = Vector3::fromJson(bodyPosObj);
 
 		QJsonObject eyePosObj = obj["eyePosition"].toObject();
-		pose.eyePosition = Vector3::fromJson(eyePosObj);
+		pose.eyesPosition = Vector3::fromJson(eyePosObj);
 
 		QJsonObject mouthPosObj = obj["mouthPosition"].toObject();
 		pose.mouthPosition = Vector3::fromJson(mouthPosObj);
@@ -604,5 +607,6 @@ struct TrackerDataStruct {
 };
 
 QString GenerateUniqueID();
+bool FileExists(QString filePath);
 
 #endif // TRACKERUTILS_H

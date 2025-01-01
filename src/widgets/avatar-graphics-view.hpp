@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 
+#include <obs.h>
 #include "plugin-support.h"
 
 class AvatarGraphicsView : public QGraphicsView {

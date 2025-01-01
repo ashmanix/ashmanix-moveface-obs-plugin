@@ -39,6 +39,7 @@ public:
 
 	void SaveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
 	void LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
+	void UpdateWidgetStyles();
 
 private:
 	Ui::FaceTracker *ui = nullptr;
