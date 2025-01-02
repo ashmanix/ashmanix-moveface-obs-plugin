@@ -489,7 +489,7 @@
              <property name="title">
               <string>image</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
+             <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0">
               <property name="bottomMargin">
                <number>12</number>
               </property>
@@ -587,7 +587,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="clearButtonEnabled">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -622,7 +622,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="clearButtonEnabled">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -657,7 +657,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="clearButtonEnabled">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -692,7 +692,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="clearButtonEnabled">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -727,7 +727,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="clearButtonEnabled">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -758,8 +758,11 @@
                   <layout class="QHBoxLayout" name="horizontalLayout_10">
                    <item>
                     <widget class="QLineEdit" name="tongueOutUrlLineEdit">
-                     <property name="clearButtonEnabled">
+                     <property name="readOnly">
                       <bool>true</bool>
+                     </property>
+                     <property name="clearButtonEnabled">
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -780,6 +783,24 @@
                   </layout>
                  </item>
                 </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="noConfigLabel">
+                <property name="font">
+                 <font>
+                  <pointsize>20</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>no config</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
                </widget>
               </item>
              </layout>

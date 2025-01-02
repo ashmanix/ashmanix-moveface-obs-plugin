@@ -1,6 +1,6 @@
 #include "settings-dialog.hpp"
 
-SettingsDialog::SettingsDialog(QWidget *parent, TrackerDataStruct *tData, MainWidgetDock *mWidget)
+SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerDataStruct> tData, MainWidgetDock *mWidget)
 	: QDialog(parent),
 	  ui(new Ui::FaceTrackerDialog)
 {
@@ -21,6 +21,10 @@ SettingsDialog::~SettingsDialog()
 	signal_handler_disconnect(obs_get_signal_handler(), "source_create", OBSSourceCreated, ui);
 	signal_handler_disconnect(obs_get_signal_handler(), "source_destroy", OBSSourceDeleted, ui);
 	signal_handler_disconnect(obs_get_signal_handler(), "source_rename", OBSSourceRenamed, ui);
+
+	delete ui;
+	settingsPoseList.clear();
+
 	this->deleteLater();
 }
 
@@ -31,6 +35,7 @@ void SettingsDialog::UpdateStyledUIComponents()
 	QString searchIconPath = QDir::fromNativeSeparators(baseUrl + "search.svg");
 	if (QFileInfo::exists(searchIconPath)) {
 		QIcon searchIcon(searchIconPath);
+
 		ui->bodyUrlBrowseToolButton->setIcon(searchIcon);
 		ui->eyesOpenUrlBrowseToolButton->setIcon(searchIcon);
 		ui->eyesHalfOpenUrlBrowseToolButton->setIcon(searchIcon);
@@ -44,30 +49,36 @@ void SettingsDialog::UpdateStyledUIComponents()
 	QString plusIconPath = QDir::fromNativeSeparators(baseUrl + "plus.svg");
 	if (QFileInfo::exists(plusIconPath)) {
 		QIcon plusIcon(plusIconPath);
+
 		ui->addPoseToolButton->setIcon(plusIcon);
 	}
 
 	QString trashIconPath = QDir::fromNativeSeparators(baseUrl + "trash.svg");
 	if (QFileInfo::exists(trashIconPath)) {
 		QIcon trashIcon(trashIconPath);
-		ui->deletePoseToolButton->setIcon(trashIcon);
 
-		ui->bodyUrlDeleteToolButton->setIcon(trashIcon);
-		ui->eyesOpenUrlDeleteToolButton->setIcon(trashIcon);
-		ui->eyesHalfOpenUrlDeleteToolButton->setIcon(trashIcon);
-		ui->eyesClosedUrlDeleteToolButton->setIcon(trashIcon);
-		ui->mouthClosedUrlDeleteToolButton->setIcon(trashIcon);
-		ui->mouthOpenUrlDeleteToolButton->setIcon(trashIcon);
-		ui->mouthSmileUrlDeleteToolButton->setIcon(trashIcon);
-		ui->tongueOutUrlDeleteToolButton->setIcon(trashIcon);
+		ui->deletePoseToolButton->setIcon(trashIcon);
 	}
 
-	obs_log(LOG_INFO, "Is theme dark: %s", obs_frontend_is_theme_dark() ? "true" : "false");
-	obs_log(LOG_INFO, "file: %s", searchIconPath.toStdString().c_str());
-	obs_log(LOG_INFO, "Exists: %s", FileExists(searchIconPath) ? "true" : "false");
+	QString entryClearIconPath = QDir::fromNativeSeparators(baseUrl + "entry-clear.svg");
+	if (QFileInfo::exists(entryClearIconPath)) {
+		QIcon entryClearIcon(entryClearIconPath);
+
+		ui->bodyUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->eyesOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->eyesHalfOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->eyesClosedUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->mouthClosedUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->mouthOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->mouthSmileUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
+	}
+
+	ui->noConfigLabel->setStyleSheet("font-size: 20pt;");
+	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 }
 
-void SettingsDialog::SetFormDetails(TrackerDataStruct *settingsDialogData)
+void SettingsDialog::SetFormDetails(QSharedPointer<TrackerDataStruct> settingsDialogData)
 {
 	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddresses());
 
@@ -176,7 +187,7 @@ void SettingsDialog::SetTitle()
 	this->setWindowTitle(dialogTitle);
 }
 
-void SettingsDialog::SetupDialogUI(TrackerDataStruct *settingsDialogData)
+void SettingsDialog::SetupDialogUI(QSharedPointer<TrackerDataStruct> settingsDialogData)
 {
 	// ------------------------------------------------ General Tab ------------------------------------------------
 
@@ -254,7 +265,18 @@ void SettingsDialog::SetupDialogUI(TrackerDataStruct *settingsDialogData)
 	ui->mouthSmileUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
 	ui->tongueOutUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
 
+	// Initialize the mapping between PoseImage enums and QLineEdit pointers
+	poseImageLineEdits[PoseImage::BODY] = ui->bodyUrlLineEdit;
+	poseImageLineEdits[PoseImage::EYESOPEN] = ui->eyesOpenUrlLineEdit;
+	poseImageLineEdits[PoseImage::EYESHALFOPEN] = ui->eyesHalfOpenUrlEdit;
+	poseImageLineEdits[PoseImage::EYESCLOSED] = ui->eyesClosedUrlLineEdit;
+	poseImageLineEdits[PoseImage::MOUTHCLOSED] = ui->mouthClosedUrlLineEdit;
+	poseImageLineEdits[PoseImage::MOUTHOPEN] = ui->mouthOpenUrlLineEdit;
+	poseImageLineEdits[PoseImage::MOUTHSMILE] = ui->mouthSmileUrlLineEdit;
+	poseImageLineEdits[PoseImage::TONGUEOUT] = ui->tongueOutUrlLineEdit;
+
 	ui->imageConfigWidget->setVisible(false);
+	ui->noConfigLabel->setVisible(true);
 
 	UpdateStyledUIComponents();
 
@@ -287,14 +309,20 @@ void SettingsDialog::ApplyFormChanges()
 			return;
 		}
 
-		TrackerDataStruct *newData = new TrackerDataStruct;
+		QSharedPointer<TrackerDataStruct> newData = QSharedPointer<TrackerDataStruct>::create();
 
 		newData->trackerId = ui->trackerIdLineEdit->text();
 		newData->selectedImageSource = ui->imageSourceDropdownList->currentText();
 		newData->port = ui->portSpinBox->text().toInt();
 		newData->destIpAddress = ui->destIpAddressLineEdit->text();
 		newData->destPort = ui->destPortSpinBox->text().toInt();
-		newData->poseList = settingsPoseList;
+
+		newData->poseList.clear();
+		for (const QSharedPointer<Pose> &posePtr : settingsPoseList) {
+			if (posePtr) {
+				newData->poseList.append(posePtr->clone());
+			}
+		}
 
 		ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 		emit SettingsUpdated(newData);
@@ -445,41 +473,59 @@ int SettingsDialog::CheckIfImageSourceType(obs_source_t *source)
 	return false;
 }
 
-void SettingsDialog::AddImageToQGraphics(QString fileUrl, bool clearScene)
+void SettingsDialog::AddImageToScene(PoseImageData *imageData, bool clearScene)
 {
 	if (!avatarPreviewScene || clearScene) {
 		QGraphicsView *view = ui->avatarGraphicsView;
 		avatarPreviewScene = new QGraphicsScene(this);
 
 		avatarPreviewScene->setSceneRect(0, 0, 10000, 10000);
-		view->scale(0.5, 0.5);
+		view->scale(0.1, 0.1);
 
 		view->setScene(avatarPreviewScene);
 		view->setRenderHint(QPainter::Antialiasing);
 		// Create a QGraphicsView to visualize the scene
-		view->setDragMode(QGraphicsView::RubberBandDrag); // optional: for selecting items
-								  // view->setDragMode(QGraphicsView::NoDrag);
+		view->setDragMode(QGraphicsView::RubberBandDrag);
 	}
 
-	if (!FileExists(fileUrl))
-		return obs_log(LOG_ERROR, QString("File %1 not found!").arg(fileUrl).toStdString().c_str());
+	if (imageData->pixmapItem == nullptr)
+		return obs_log(
+			LOG_ERROR,
+			QString("Image data for file: %1 not found!").arg(imageData->imageUrl).toStdString().c_str());
 
-	// Example: Add one image item
-	QGraphicsPixmapItem *pixmapItem = new QGraphicsPixmapItem(QPixmap(fileUrl));
-	pixmapItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
-	avatarPreviewScene->addItem(pixmapItem);
+	obs_log(LOG_INFO, "YO!");
+
+	imageData->pixmapItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+	avatarPreviewScene->addItem(imageData->pixmapItem);
+}
+
+void SettingsDialog::ClearScene()
+{
+	if (avatarPreviewScene) {
+		QList<QGraphicsItem *> items = avatarPreviewScene->items();
+		for (QGraphicsItem *item : items) {
+			// Check if the item is a QGraphicsPixmapItem (commonly used for images)
+			if (dynamic_cast<QGraphicsPixmapItem *>(item)) {
+				avatarPreviewScene->removeItem(item);
+			}
+		}
+	}
 }
 
 void SettingsDialog::ClearCurrentPoseConfig()
 {
-	ui->bodyUrlLineEdit->setText("");
-	ui->eyesOpenUrlLineEdit->setText("");
-	ui->eyesHalfOpenUrlEdit->setText("");
-	ui->eyesClosedUrlLineEdit->setText("");
-	ui->mouthOpenUrlLineEdit->setText("");
-	ui->mouthClosedUrlLineEdit->setText("");
-	ui->mouthSmileUrlLineEdit->setText("");
-	ui->tongueOutUrlLineEdit->setText("");
+	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
+		PoseImage poseEnum = static_cast<PoseImage>(i);
+		auto it = poseImageLineEdits.find(poseEnum);
+		if (it != poseImageLineEdits.end()) {
+			QLineEdit *lineEdit = it.value(); // For QMap
+			// If using std::map, use it->second
+			if (lineEdit) {
+				lineEdit->clear();
+			}
+		}
+	}
+	ClearScene();
 }
 
 void SettingsDialog::LoadSelectedPoseConfig()
@@ -488,32 +534,63 @@ void SettingsDialog::LoadSelectedPoseConfig()
 	if (selectedRow == -1)
 		return;
 
-	Pose *selectedPose = &settingsPoseList[selectedRow];
+	if (selectedRow == previouslySelectedPoseIndex)
+		return;
+
+	previouslySelectedPoseIndex = selectedRow;
+
+	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
 	ClearCurrentPoseConfig();
+	ClearScene();
 
-	ui->bodyUrlLineEdit->setText(selectedPose->bodyImageUrl);
-	ui->eyesOpenUrlLineEdit->setText(selectedPose->eyesOpenImageUrl);
-	ui->eyesHalfOpenUrlEdit->setText(selectedPose->eyesHalfOpenImageUrl);
-	ui->eyesClosedUrlLineEdit->setText(selectedPose->eyesClosedImageUrl);
-	ui->mouthOpenUrlLineEdit->setText(selectedPose->mouthOpenImageUrl);
-	ui->mouthClosedUrlLineEdit->setText(selectedPose->mouthClosedImageUrl);
-	ui->mouthSmileUrlLineEdit->setText(selectedPose->mouthSmileImageUrl);
-	ui->tongueOutUrlLineEdit->setText(selectedPose->mouthTongueOutImageUrl);
+	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
+		PoseImage poseEnum = static_cast<PoseImage>(i);
+		auto it = poseImageLineEdits.find(poseEnum);
+		if (it != poseImageLineEdits.end()) {
+			QLineEdit *lineEdit = it.value();
+			QString fileName = selectedPose->getPoseImageData(poseEnum)->imageUrl;
 
-	if (!selectedPose->bodyImageUrl.isEmpty())
-		AddImageToQGraphics(selectedPose->bodyImageUrl, true);
+			if (lineEdit) {
+				lineEdit->setText(fileName);
+			}
 
-	if (!selectedPose->eyesOpenImageUrl.isEmpty())
-		AddImageToQGraphics(selectedPose->eyesOpenImageUrl);
+			if (fileName.isEmpty())
+				return;
 
-	if (!selectedPose->mouthClosedImageUrl.isEmpty())
-		AddImageToQGraphics(selectedPose->mouthClosedImageUrl);
+			if (!FileExists(fileName)) {
+				obs_log(LOG_WARNING, QString("Image file: %1 not found when loading pose!")
+							     .arg(fileName)
+							     .toStdString()
+							     .c_str());
+				break;
+			}
+
+			switch (poseEnum) {
+			case PoseImage::BODY:
+			case PoseImage::MOUTHCLOSED:
+			case PoseImage::EYESOPEN:
+				AddImageToScene(selectedPose->getPoseImageData(poseEnum));
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 }
 
 int SettingsDialog::GetSelectedRow()
 {
 	QModelIndex modelIndex = ui->poseListView->currentIndex();
 	return modelIndex.row();
+}
+
+void SettingsDialog::ResetPoseUITab()
+{
+	ui->poseListView->selectionModel()->clearSelection();
+	ClearCurrentPoseConfig();
+	ui->imageConfigWidget->setVisible(false);
+	ui->noConfigLabel->setVisible(true);
 }
 
 //  ------------------------------------------------ Protected ------------------------------------------------
@@ -527,7 +604,12 @@ void SettingsDialog::showEvent(QShowEvent *event)
 	ui->destIpAddressLineEdit->setStyleSheet("");
 
 	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddresses());
+
+	ClearCurrentPoseConfig();
+	LoadSelectedPoseConfig();
 }
+
+void SettingsDialog::closeEvent(QCloseEvent *) {}
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------
 
@@ -544,34 +626,46 @@ void SettingsDialog::ApplyButtonClicked()
 void SettingsDialog::CancelButtonClicked()
 {
 	SetFormDetails(trackerData);
+	ResetPoseUITab();
 	this->reject();
 }
 
 void SettingsDialog::OkButtonClicked()
 {
 	ApplyFormChanges();
+	ResetPoseUITab();
 	if (!isError)
 		this->reject();
 }
 
 void SettingsDialog::SyncPoseListToModel()
 {
-	// Clear the model
+	QObject::disconnect(poseListModel, &QAbstractItemModel::rowsInserted, this,
+			    &SettingsDialog::OnPoseRowsInserted);
+
 	poseListModel->clear();
-	settingsPoseList = trackerData->poseList;
 
-	// Refill from the poseList
+	settingsPoseList.clear();
+	previouslySelectedPoseIndex = -1;
+
 	for (int i = 0; i < trackerData->poseList.size(); ++i) {
-		const Pose &p = trackerData->poseList[i];
+		QSharedPointer<Pose> originalPosePtr = trackerData->poseList[i];
+		if (!originalPosePtr) {
+			obs_log(LOG_WARNING, QString("Pose pointer at index %1 is null.").arg(i).toStdString().c_str());
+			continue; // Skip null pointers
+		}
 
-		// For a single-column model, store display text as Pose ID
+		// Clone the Pose to ensure an independent copy
+		QSharedPointer<Pose> clonedPosePtr = originalPosePtr->clone();
+		settingsPoseList.append(clonedPosePtr);
+
+		const Pose &p = *clonedPosePtr;
 		QStandardItem *item = new QStandardItem(p.poseId);
-		// If you need more data, you can store it in user roles
-		item->setData(p.bodyImageUrl, Qt::UserRole + 1);
-		// ... etc.
 
 		poseListModel->appendRow(item);
 	}
+
+	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::OnPoseRowsInserted);
 }
 
 void SettingsDialog::AddPose()
@@ -596,16 +690,11 @@ void SettingsDialog::DeletePose()
 	}
 }
 
-void SettingsDialog::HandleImageUrlButtonClicked(PoseImage image)
+void SettingsDialog::HandleImageUrlButtonClicked(PoseImage poseEnum)
 {
-	// if (selectedPoseIndex < 0 || selectedPoseIndex >= trackerData->poseList.size())
-	// 	return obs_log(LOG_ERROR, "Error finding selected Post at index: %d", selectedPoseIndex);
-
-	// Pose selectedPost = trackerData->poseList[selectedPoseIndex];
-
 	QString fileName = QFileDialog::getOpenFileName(this, obs_module_text("ImageUrlFileDialogWindowTitle"),
-							QString(), tr("Images (*.png *.jpg *.bmp *.jpeg)"));
-	obs_log(LOG_INFO, "File: %s", fileName.toStdString().c_str());
+							QString("%HOME%/Images"),
+							tr("Images (*.png *.jpg *.bmp *.jpeg)"));
 
 	this->raise();
 	this->activateWindow();
@@ -614,49 +703,60 @@ void SettingsDialog::HandleImageUrlButtonClicked(PoseImage image)
 		return;
 	}
 
-	FormChangeDetected();
-
 	int selectedRow = GetSelectedRow();
 	if (selectedRow == -1)
 		return;
 
-	Pose *selectedPose = &settingsPoseList[selectedRow];
+	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
 
-	switch (image) {
+	size_t imageIndex = static_cast<size_t>(poseEnum);
+
+	if (!(imageIndex >= 0 && imageIndex < selectedPose->poseImages.size())) {
+		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
+		return;
+	}
+
+	FormChangeDetected();
+
+	if (!FileExists(fileName)) {
+		obs_log(LOG_WARNING, QString("Image file: %1 not found!").arg(fileName).toStdString().c_str());
+		return;
+	}
+
+	QLineEdit *lineEdit = poseImageLineEdits.value(poseEnum, nullptr);
+	if (lineEdit) {
+		lineEdit->setText(fileName);
+	} else {
+		obs_log(LOG_WARNING, QString("QLineEdit not found for PoseImage enum value: %1")
+					     .arg(static_cast<int>(poseEnum))
+					     .toStdString()
+					     .c_str());
+		return;
+	}
+
+	selectedPose->poseImages[imageIndex].imageUrl = fileName;
+
+	if (selectedPose->poseImages[imageIndex].pixmapItem) {
+		delete selectedPose->poseImages[imageIndex].pixmapItem;
+		selectedPose->poseImages[imageIndex].pixmapItem = nullptr;
+	}
+
+	QPixmap pixmap(fileName);
+	if (pixmap.isNull()) {
+		obs_log(LOG_WARNING,
+			QString("Failed to load pixmap from file: %1").arg(fileName).toStdString().c_str());
+		delete selectedPose->poseImages[imageIndex].pixmapItem;
+		selectedPose->poseImages[imageIndex].pixmapItem = nullptr;
+		return;
+	}
+
+	selectedPose->poseImages[imageIndex].pixmapItem = new QGraphicsPixmapItem(pixmap);
+
+	switch (poseEnum) {
 	case PoseImage::BODY:
-		selectedPose->bodyImageUrl = fileName;
-		AddImageToQGraphics(selectedPose->bodyImageUrl);
-		ui->bodyUrlLineEdit->setText(selectedPose->bodyImageUrl);
-		break;
-	case PoseImage::EYESOPEN:
-		selectedPose->eyesOpenImageUrl = fileName;
-		AddImageToQGraphics(selectedPose->eyesOpenImageUrl);
-		ui->eyesOpenUrlLineEdit->setText(selectedPose->eyesOpenImageUrl);
-		break;
 	case PoseImage::MOUTHCLOSED:
-		selectedPose->mouthClosedImageUrl = fileName;
-		AddImageToQGraphics(selectedPose->mouthClosedImageUrl);
-		ui->mouthClosedUrlLineEdit->setText(selectedPose->mouthClosedImageUrl);
-		break;
-	case PoseImage::EYESCLOSED:
-		selectedPose->eyesClosedImageUrl = fileName;
-		ui->eyesClosedUrlLineEdit->setText(selectedPose->eyesClosedImageUrl);
-		break;
-	case PoseImage::EYESHALFOPEN:
-		selectedPose->eyesHalfOpenImageUrl = fileName;
-		ui->eyesHalfOpenUrlEdit->setText(selectedPose->eyesHalfOpenImageUrl);
-		break;
-	case PoseImage::MOUTHOPEN:
-		selectedPose->mouthOpenImageUrl = fileName;
-		ui->mouthOpenUrlLineEdit->setText(selectedPose->mouthOpenImageUrl);
-		break;
-	case PoseImage::MOUTHSMILE:
-		selectedPose->mouthSmileImageUrl = fileName;
-		ui->mouthSmileUrlLineEdit->setText(selectedPose->mouthSmileImageUrl);
-		break;
-	case PoseImage::TONGUEOUT:
-		selectedPose->mouthTongueOutImageUrl = fileName;
-		ui->tongueOutUrlLineEdit->setText(selectedPose->mouthTongueOutImageUrl);
+	case PoseImage::EYESOPEN:
+		AddImageToScene(selectedPose->getPoseImageData(poseEnum));
 		break;
 
 	default:
@@ -664,7 +764,7 @@ void SettingsDialog::HandleImageUrlButtonClicked(PoseImage image)
 	}
 }
 
-void SettingsDialog::HandleClearImageUrl(PoseImage image)
+void SettingsDialog::HandleClearImageUrl(PoseImage poseEnum)
 {
 	int selectedRow = GetSelectedRow();
 	if (selectedRow == -1)
@@ -672,47 +772,20 @@ void SettingsDialog::HandleClearImageUrl(PoseImage image)
 
 	FormChangeDetected();
 
-	Pose *selectedPose = &settingsPoseList[selectedRow];
+	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
+	size_t imageIndex = static_cast<size_t>(poseEnum);
 
-	switch (image) {
-	case PoseImage::BODY:
-		selectedPose->bodyImageUrl = QString();
-		ui->bodyUrlLineEdit->setText(QString());
-		// Remove Image
-		break;
-	case PoseImage::EYESOPEN:
-		selectedPose->eyesOpenImageUrl = QString();
-		ui->eyesOpenUrlLineEdit->setText(QString());
-		// Remove Image
-		break;
-	case PoseImage::MOUTHCLOSED:
-		selectedPose->mouthClosedImageUrl = QString();
-		ui->mouthClosedUrlLineEdit->setText(QString());
-		// Remove Image
-		break;
-	case PoseImage::EYESCLOSED:
-		selectedPose->eyesClosedImageUrl = QString();
-		ui->eyesClosedUrlLineEdit->setText(QString());
-		break;
-	case PoseImage::EYESHALFOPEN:
-		selectedPose->eyesHalfOpenImageUrl = QString();
-		ui->eyesHalfOpenUrlEdit->setText(QString());
-		break;
-	case PoseImage::MOUTHOPEN:
-		selectedPose->mouthOpenImageUrl = QString();
-		ui->mouthOpenUrlLineEdit->setText(QString());
-		break;
-	case PoseImage::MOUTHSMILE:
-		selectedPose->mouthSmileImageUrl = QString();
-		ui->mouthSmileUrlLineEdit->setText(QString());
-		break;
-	case PoseImage::TONGUEOUT:
-		selectedPose->mouthTongueOutImageUrl = QString();
-		ui->tongueOutUrlLineEdit->setText(QString());
-		break;
+	if (imageIndex >= 0 && imageIndex < selectedPose->poseImages.size()) {
+		PoseImageData &poseData = selectedPose->poseImages[imageIndex];
+		poseImageLineEdits[poseEnum]->setText(QString());
 
-	default:
-		break;
+		poseData.imageUrl = QString();
+		if (poseData.pixmapItem) {
+			delete poseData.pixmapItem;
+			poseData.pixmapItem = nullptr;
+		}
+	} else {
+		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
 	}
 }
 
@@ -721,6 +794,7 @@ void SettingsDialog::HandlePoseListClick(QModelIndex modelIndex)
 	obs_log(LOG_INFO, "Row: %d", modelIndex.row());
 	LoadSelectedPoseConfig();
 	ui->imageConfigWidget->setVisible(true);
+	ui->noConfigLabel->setVisible(false);
 }
 
 void SettingsDialog::OnPoseRowsInserted(const QModelIndex &parent, int first, int last)
@@ -734,8 +808,8 @@ void SettingsDialog::OnPoseRowsInserted(const QModelIndex &parent, int first, in
 		QModelIndex idx = poseListModel->index(row, 0);
 		QString poseId = idx.data(Qt::DisplayRole).toString();
 
-		Pose newPose;
-		newPose.poseId = poseId;
+		QSharedPointer<Pose> newPose = QSharedPointer<Pose>::create();
+		newPose->poseId = poseId;
 
 		settingsPoseList.insert(row, newPose);
 	}
@@ -766,7 +840,7 @@ void SettingsDialog::OnPoseDataChanged(const QModelIndex &topLeft, const QModelI
 		QModelIndex idx = poseListModel->index(row, 0);
 		QString newPoseId = idx.data(Qt::DisplayRole).toString();
 		if (row >= 0 && row < settingsPoseList.size()) {
-			settingsPoseList[row].poseId = newPoseId;
+			settingsPoseList[row]->poseId = newPoseId;
 		}
 	}
 	FormChangeDetected();

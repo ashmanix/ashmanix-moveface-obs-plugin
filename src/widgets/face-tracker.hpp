@@ -35,7 +35,7 @@ public:
 	~FaceTracker();
 	QString GetTrackerID();
 	void SetTrackerID(const QString &newId = QString());
-	TrackerDataStruct *GetTrackerData();
+	TrackerDataStruct GetTrackerData();
 
 	void SaveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
 	void LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
@@ -47,7 +47,7 @@ private:
 
 	QString title;
 	bool isConnected;
-	TrackerDataStruct trackerData;
+	QSharedPointer<TrackerDataStruct> trackerData;
 	MainWidgetDock *mainDockWidget = nullptr;
 
 	NetworkTracking *networkTracking = nullptr;
@@ -55,8 +55,9 @@ private:
 	void SetupWidgetUI();
 	void ConnectUISignalHandlers();
 	void SetTrackerData();
+	void LoadPoseData();
 	void SetConnected(bool isConnectedInput);
-	void UpdateTrackerDataFromDialog(TrackerDataStruct *newData);
+	void UpdateTrackerDataFromDialog(QSharedPointer<TrackerDataStruct> newData);
 	void InitiateNetworkTracking();
 	void EnableTimer();
 	void DisableTimer();

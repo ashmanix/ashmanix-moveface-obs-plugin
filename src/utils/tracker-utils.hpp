@@ -11,9 +11,12 @@
 #include <QUuid>
 #include <QCryptographicHash>
 #include <QFileInfo>
+#include <QGraphicsPixmapItem>
 
 #include <obs.h>
 #include "plugin-support.h"
+
+#include <array>
 
 #define CONFIG "config.json"
 
@@ -55,6 +58,7 @@ enum class PoseImage {
 	MOUTHOPEN,
 	MOUTHSMILE,
 	TONGUEOUT,
+	COUNT,
 };
 
 enum class BlendShapeKey {
@@ -440,28 +444,64 @@ struct BlendShapeRule {
 	}
 };
 
+struct PoseImageData {
+	QString imageUrl;
+	QGraphicsPixmapItem *pixmapItem;
+
+	PoseImageData(const QString &url = "", QGraphicsPixmapItem *item = nullptr)
+		: imageUrl(url),
+		  pixmapItem(item) {};
+};
+
 // For poses we will concentrate first on
 // Head rotation (looking left or right)
 // Eye blink
 // Mouth type
 struct Pose {
 	QString poseId;
-	QString bodyImageUrl = "";
 
-	QString eyesOpenImageUrl = "";
-	QString eyesHalfOpenImageUrl = "";
-	QString eyesClosedImageUrl = "";
-
-	QString mouthClosedImageUrl = "";
-	QString mouthOpenImageUrl = "";
-	QString mouthSmileImageUrl = "";
-	QString mouthTongueOutImageUrl = "";
+	// Container mapping PoseImage enums to PoseImageData
+	std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> poseImages;
 
 	Vector3 bodyPosition = {0, 0, 0};
 	Vector3 eyesPosition = {0, 0, 0};
 	Vector3 mouthPosition = {0, 0, 0};
 
 	std::vector<BlendShapeRule> blendShapesRuleList;
+
+	// Constructor
+	Pose()
+	{
+		// Initialize the array with default PoseImageData
+		for (size_t i = 0; i < poseImages.size(); ++i) {
+			poseImages[i] = PoseImageData();
+		}
+	}
+
+	PoseImageData *getPoseImageData(PoseImage pose)
+	{
+		size_t index = static_cast<size_t>(pose);
+		if (index < poseImages.size()) {
+			return &poseImages[index];
+		}
+		// Return nullptr if the pose is out of range
+		return nullptr;
+	}
+
+	QSharedPointer<Pose> clone() const
+	{
+		return QSharedPointer<Pose>(new Pose(*this)); // Utilizes the copy constructor
+	}
+
+	Pose(const Pose &other)
+		: poseId(other.poseId),
+		  poseImages(other.poseImages),
+		  bodyPosition(other.bodyPosition),
+		  eyesPosition(other.eyesPosition),
+		  mouthPosition(other.mouthPosition),
+		  blendShapesRuleList(other.blendShapesRuleList)
+	{
+	}
 
 	bool shouldUsePose(QMap<BlendShapeKey, BlendShape> blendShapes)
 	{
@@ -481,15 +521,17 @@ struct Pose {
 	{
 		QJsonObject obj;
 		obj["poseId"] = poseId;
-		obj["bodyImageUrl"] = bodyImageUrl;
-		obj["eyesOpenImageUrl"] = eyesOpenImageUrl;
-		obj["eyesHalfOpenImageUrl"] = eyesHalfOpenImageUrl;
-		obj["eyesClosedImageUrl"] = eyesClosedImageUrl;
 
-		obj["mouthClosedImageUrl"] = mouthClosedImageUrl;
-		obj["mouthOpenImageUrl"] = mouthOpenImageUrl;
-		obj["mouthSmileImageUrl"] = mouthSmileImageUrl;
-		obj["mouthTongueOutImageUrl"] = mouthTongueOutImageUrl;
+		QJsonObject imagesObj;
+		for (size_t i = 0; i < poseImages.size(); ++i) {
+			const PoseImageData &data = poseImages[i];
+			QJsonObject imageData;
+			imageData["imageUrl"] = data.imageUrl;
+
+			QString key = QString::number(static_cast<int>(static_cast<PoseImage>(i)));
+			imagesObj[key] = imageData; // Assigning imageData to imagesObj
+		}
+		obj["poseImages"] = imagesObj;
 
 		obj["bodyPosition"] = bodyPosition.toJson();
 		obj["eyesPosition"] = eyesPosition.toJson();
@@ -514,20 +556,21 @@ struct Pose {
 	{
 		Pose pose;
 		pose.poseId = obj["poseId"].toString();
-		pose.bodyImageUrl = obj["bodyImageUrl"].toString();
-		pose.eyesOpenImageUrl = obj["eyesOpenImageUrl"].toString();
-		pose.eyesHalfOpenImageUrl = obj["eyesHalfOpenImageUrl"].toString();
-		pose.eyesClosedImageUrl = obj["eyesClosedImageUrl"].toString();
 
-		pose.mouthClosedImageUrl = obj["mouthClosedImageUrl"].toString();
-		pose.mouthOpenImageUrl = obj["mouthOpenImageUrl"].toString();
-		pose.mouthSmileImageUrl = obj["mouthSmileImageUrl"].toString();
-		pose.mouthTongueOutImageUrl = obj["mouthTongueOutImageUrl"].toString();
+		QJsonObject imagesObj = obj["poseImages"].toObject();
+		for (size_t i = 0; i < pose.poseImages.size(); ++i) {
+			PoseImage poseEnum = static_cast<PoseImage>(i);
+			QString key = QString::number(static_cast<int>(poseEnum));
+			if (imagesObj.contains(key)) {
+				QJsonObject imageData = imagesObj[key].toObject();
+				pose.poseImages[i].imageUrl = imageData["imageUrl"].toString();
+			}
+		}
 
 		QJsonObject bodyPosObj = obj["bodyPosition"].toObject();
 		pose.bodyPosition = Vector3::fromJson(bodyPosObj);
 
-		QJsonObject eyePosObj = obj["eyePosition"].toObject();
+		QJsonObject eyePosObj = obj["eyesPosition"].toObject();
 		pose.eyesPosition = Vector3::fromJson(eyePosObj);
 
 		QJsonObject mouthPosObj = obj["mouthPosition"].toObject();
@@ -554,7 +597,7 @@ struct TrackerDataStruct {
 	QString destIpAddress = "192.0.0.0";
 	int destPort = 21412;
 	int port = 21412;
-	QList<Pose> poseList;
+	QList<QSharedPointer<Pose>> poseList;
 	bool isEnabled = false;
 
 	QString poseListToJsonString()
@@ -563,9 +606,13 @@ struct TrackerDataStruct {
 
 		// Convert blendShapesRuleList to a QJsonArray
 		QJsonArray poseArray;
-		for (const auto &pose : poseList) {
-			QJsonObject poseObj = pose.toJson();
-			poseArray.append(poseObj);
+		for (const auto &posePtr : poseList) {
+			if (posePtr) {
+				QJsonObject poseObj = posePtr->toJson();
+				poseArray.append(poseObj);
+			} else {
+				obs_log(LOG_WARNING, "Encountered a null Pose pointer during JSON serialization.");
+			}
 		}
 
 		obj["poseArray"] = poseArray;
@@ -599,8 +646,12 @@ struct TrackerDataStruct {
 		for (auto value : poseArray) {
 			if (value.isObject()) {
 				QJsonObject poseObj = value.toObject();
+
 				Pose p = Pose::fromJson(poseObj);
-				poseList.push_back(p);
+				QSharedPointer<Pose> posePtr = QSharedPointer<Pose>::create();
+				*posePtr = p; // Assign the Pose data to the shared pointer
+
+				poseList.push_back(posePtr);
 			}
 		}
 	}

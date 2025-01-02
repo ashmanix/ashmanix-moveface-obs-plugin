@@ -100,14 +100,12 @@ void MainWidgetDock::SaveSettings()
 		if (item) {
 			FaceTracker *trackerWidget = qobject_cast<FaceTracker *>(item->widget());
 			if (trackerWidget) {
-				TrackerDataStruct *trackerData = trackerWidget->GetTrackerData();
-				if (trackerData) {
-					obs_data_t *dataObject = obs_data_create();
-					trackerWidget->SaveTrackerWidgetDataToOBSSaveData(dataObject);
-					obs_data_array_push_back(obsDataArray, dataObject);
+				TrackerDataStruct trackerData = trackerWidget->GetTrackerData();
+				obs_data_t *dataObject = obs_data_create();
+				trackerWidget->SaveTrackerWidgetDataToOBSSaveData(dataObject);
+				obs_data_array_push_back(obsDataArray, dataObject);
 
-					obs_data_release(dataObject);
-				}
+				obs_data_release(dataObject);
 			}
 		}
 	}
@@ -159,9 +157,8 @@ void MainWidgetDock::UpdateWidgetStyles(MainWidgetDock *trackerWidgetDock)
 {
 	int trackerWidgetCount = trackerWidgetDock->ui->trackerListLayout->count();
 	for (int i = 0; i < trackerWidgetCount; i++) {
-		FaceTracker *trackerWidget = static_cast<FaceTracker *>(
-			trackerWidgetDock->ui->trackerListLayout->itemAt(i)
-				->widget());
+		FaceTracker *trackerWidget =
+			static_cast<FaceTracker *>(trackerWidgetDock->ui->trackerListLayout->itemAt(i)->widget());
 		if (trackerWidget) {
 			trackerWidget->UpdateWidgetStyles();
 		}

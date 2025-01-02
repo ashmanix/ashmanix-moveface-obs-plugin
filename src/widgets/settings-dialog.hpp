@@ -24,27 +24,29 @@
 class SettingsDialog : public QDialog {
 	Q_OBJECT
 public:
-	explicit SettingsDialog(QWidget *parent = nullptr, TrackerDataStruct *tData = nullptr,
+	explicit SettingsDialog(QWidget *parent = nullptr, QSharedPointer<TrackerDataStruct> tData = nullptr,
 				MainWidgetDock *mWidget = nullptr);
 	~SettingsDialog();
-	void SetFormDetails(TrackerDataStruct *settingsDialogData);
+	void SetFormDetails(QSharedPointer<TrackerDataStruct> settingsDialogData);
 	void UpdateStyledUIComponents();
 
 private:
 	Ui::FaceTrackerDialog *ui;
 	MainWidgetDock *mainWidget;
-	TrackerDataStruct *trackerData;
+	QSharedPointer<TrackerDataStruct> trackerData;
 	bool isError = false;
 	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
 	QStandardItemModel *poseListModel = nullptr;
-	QList<Pose> settingsPoseList;
+	QList<QSharedPointer<Pose>> settingsPoseList;
+	QMap<PoseImage, QLineEdit*> poseImageLineEdits;
 	QGraphicsScene *avatarPreviewScene = nullptr;
+	int previouslySelectedPoseIndex = -1;
 
 	void ConnectUISignalHandlers();
 	void ConnectObsSignalHandlers();
 	void SetTitle();
-	void SetupDialogUI(TrackerDataStruct *settingsDialogData);
+	void SetupDialogUI(QSharedPointer<TrackerDataStruct> settingsDialogData);
 	void ApplyFormChanges();
 	Result ValidateTrackerID();
 	Result ValidateDestIPAddress();
@@ -56,16 +58,19 @@ private:
 	static void OBSSourceRenamed(void *param, calldata_t *calldata);
 	static int CheckIfImageSourceType(obs_source_t *source);
 
-	void AddImageToQGraphics(QString fileUrl, bool clearScene = false);
+	void AddImageToScene(PoseImageData *imageData, bool clearScene = false);
+	void ClearScene();
 	void ClearCurrentPoseConfig();
 	void LoadSelectedPoseConfig();
 	int GetSelectedRow();
+	void ResetPoseUITab();
 
 protected:
 	void showEvent(QShowEvent *event) override;
+  	void closeEvent(QCloseEvent *) override;
 
 signals:
-	void SettingsUpdated(TrackerDataStruct *newData);
+	void SettingsUpdated(QSharedPointer<TrackerDataStruct> newData);
 
 private slots:
 	void FormChangeDetected();

@@ -8,18 +8,18 @@ FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock 
 	ui->setupUi(this);
 
 	mainDockWidget = mDockWidget;
-	trackerData = TrackerDataStruct();
+	trackerData = QSharedPointer<TrackerDataStruct>::create();
 
 	if (savedData) {
 		LoadTrackerWidgetDataFromOBSSaveData(savedData);
 	}
 
-	if (trackerData.trackerId.size() == 0) {
+	if (trackerData->trackerId.size() == 0) {
 		// Get a unique ID for the tracker
-		trackerData.trackerId = GenerateUniqueID();
+		trackerData->trackerId = GenerateUniqueID();
 	}
 
-	this->setProperty("id", trackerData.trackerId);
+	this->setProperty("id", trackerData->trackerId);
 
 	SetupWidgetUI();
 
@@ -30,58 +30,62 @@ FaceTracker::~FaceTracker() {}
 
 QString FaceTracker::GetTrackerID()
 {
-	return trackerData.trackerId;
+	return trackerData->trackerId;
 }
 
 void FaceTracker::SetTrackerID(const QString &newId)
 {
 	if (!newId.isEmpty()) {
-		trackerData.trackerId = newId;
+		trackerData->trackerId = newId;
 	}
-	ui->trackerNameLabel->setText(trackerData.trackerId);
-	this->setProperty("id", trackerData.trackerId);
+	ui->trackerNameLabel->setText(trackerData->trackerId);
+	this->setProperty("id", trackerData->trackerId);
 }
 
-TrackerDataStruct *FaceTracker::GetTrackerData()
+TrackerDataStruct FaceTracker::GetTrackerData()
 {
-	return &trackerData;
+	if (trackerData) {           // Always check if the pointer is not null
+		return *trackerData; // Dereference to get a copy
+	}
+	return TrackerDataStruct();
 }
 
 void FaceTracker::SaveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject)
 {
-	obs_data_set_string(dataObject, "trackerId", trackerData.trackerId.toStdString().c_str());
-	obs_data_set_string(dataObject, "selectedImageSource", trackerData.selectedImageSource.toStdString().c_str());
+	obs_data_set_string(dataObject, "trackerId", trackerData->trackerId.toStdString().c_str());
+	obs_data_set_string(dataObject, "selectedImageSource", trackerData->selectedImageSource.toStdString().c_str());
 
-	obs_data_set_string(dataObject, "destIpAddress", trackerData.destIpAddress.toStdString().c_str());
-	obs_data_set_int(dataObject, "destPort", trackerData.destPort);
-	obs_data_set_int(dataObject, "port", trackerData.port);
-	obs_data_set_bool(dataObject, "isEnabled", trackerData.isEnabled);
+	obs_data_set_string(dataObject, "destIpAddress", trackerData->destIpAddress.toStdString().c_str());
+	obs_data_set_int(dataObject, "destPort", trackerData->destPort);
+	obs_data_set_int(dataObject, "port", trackerData->port);
+	obs_data_set_bool(dataObject, "isEnabled", trackerData->isEnabled);
 
-	QString poseListJson = trackerData.poseListToJsonString();
+	QString poseListJson = trackerData->poseListToJsonString();
 	obs_data_set_string(dataObject, "poseList", poseListJson.toStdString().c_str());
 }
 
 void FaceTracker::LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
 {
 
-	trackerData.trackerId = (char *)obs_data_get_string(dataObject, "trackerId");
-	trackerData.selectedImageSource = (char *)obs_data_get_string(dataObject, "selectedImageSource");
+	trackerData->trackerId = (char *)obs_data_get_string(dataObject, "trackerId");
+	trackerData->selectedImageSource = (char *)obs_data_get_string(dataObject, "selectedImageSource");
 
-	trackerData.destIpAddress = (char *)obs_data_get_string(dataObject, "destIpAddress");
-	trackerData.destPort = obs_data_get_int(dataObject, "destPort");
-	trackerData.port = obs_data_get_int(dataObject, "port");
-	trackerData.isEnabled = obs_data_get_bool(dataObject, "isEnabled");
+	trackerData->destIpAddress = (char *)obs_data_get_string(dataObject, "destIpAddress");
+	trackerData->destPort = obs_data_get_int(dataObject, "destPort");
+	trackerData->port = obs_data_get_int(dataObject, "port");
+	trackerData->isEnabled = obs_data_get_bool(dataObject, "isEnabled");
 
 	QString poseListString = (char *)obs_data_get_string(dataObject, "poseList");
-	trackerData.jsonStringToPoseList(poseListString);
+	trackerData->jsonStringToPoseList(poseListString);
 
 	SetTrackerData();
 
-	ToggleEnabled(trackerData.isEnabled ? Qt::Checked : Qt::Unchecked);
+	ToggleEnabled(trackerData->isEnabled ? Qt::Checked : Qt::Unchecked);
 }
 
-void FaceTracker::UpdateWidgetStyles() {
-	if(settingsDialogUi) {
+void FaceTracker::UpdateWidgetStyles()
+{
+	if (settingsDialogUi) {
 		settingsDialogUi->UpdateStyledUIComponents();
 	}
 }
@@ -134,8 +138,58 @@ void FaceTracker::ConnectUISignalHandlers()
 
 void FaceTracker::SetTrackerData()
 {
-	ui->trackerNameLabel->setText(trackerData.trackerId);
-	ui->isEnabledCheckBox->setChecked(trackerData.isEnabled);
+	ui->trackerNameLabel->setText(trackerData->trackerId);
+	ui->isEnabledCheckBox->setChecked(trackerData->isEnabled);
+	LoadPoseData();
+}
+
+void FaceTracker::LoadPoseData()
+{
+	for (size_t i = 0; i < static_cast<size_t>(trackerData->poseList.size()); i++) {
+		QSharedPointer<Pose> selectedPose = static_cast<QSharedPointer<Pose>>(trackerData->poseList[i]);
+
+		for (size_t i = 0; i < selectedPose->poseImages.size(); ++i) {
+			PoseImage poseEnum = static_cast<PoseImage>(i);
+			PoseImageData &data = selectedPose->poseImages[i];
+
+			if (!data.imageUrl.isEmpty()) {
+				data.pixmapItem = new QGraphicsPixmapItem();
+
+				QPixmap pixmap(data.imageUrl);
+				if (!pixmap.isNull()) {
+					data.pixmapItem->setPixmap(pixmap);
+				} else {
+					obs_log(LOG_ERROR, "Failed to load pixmap from URL: %s",
+						data.imageUrl.toStdString().c_str());
+					delete data.pixmapItem;
+					data.pixmapItem = nullptr;
+					continue;
+				}
+
+				switch (poseEnum) {
+				case PoseImage::BODY:
+					data.pixmapItem->setPos(selectedPose->bodyPosition.x,
+								selectedPose->bodyPosition.y);
+					break;
+				case PoseImage::EYESOPEN:
+				case PoseImage::EYESHALFOPEN:
+				case PoseImage::EYESCLOSED:
+					data.pixmapItem->setPos(selectedPose->eyesPosition.x,
+								selectedPose->eyesPosition.y);
+					break;
+				case PoseImage::MOUTHCLOSED:
+				case PoseImage::MOUTHOPEN:
+				case PoseImage::MOUTHSMILE:
+				case PoseImage::TONGUEOUT:
+					data.pixmapItem->setPos(selectedPose->mouthPosition.x,
+								selectedPose->mouthPosition.y);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
 }
 
 void FaceTracker::SetConnected(bool isConnectedInput)
@@ -155,34 +209,41 @@ void FaceTracker::SetConnected(bool isConnectedInput)
 	}
 }
 
-void FaceTracker::UpdateTrackerDataFromDialog(TrackerDataStruct *newData)
+void FaceTracker::UpdateTrackerDataFromDialog(QSharedPointer<TrackerDataStruct> newData)
 {
-	if (newData->destIpAddress != trackerData.destIpAddress || newData->destPort != trackerData.destPort ||
-	    newData->port != trackerData.port) {
+	if (newData->destIpAddress != trackerData->destIpAddress || newData->destPort != trackerData->destPort ||
+	    newData->port != trackerData->port) {
 
-		trackerData.destIpAddress = newData->destIpAddress;
-		trackerData.destPort = newData->destPort;
-		trackerData.port = newData->port;
+		trackerData->destIpAddress = newData->destIpAddress;
+		trackerData->destPort = newData->destPort;
+		trackerData->port = newData->port;
 
 		// Renew connection
 		InitiateNetworkTracking();
 	}
 
-	trackerData.selectedImageSource = newData->selectedImageSource;
-	trackerData.poseList = newData->poseList;
+	trackerData->selectedImageSource = newData->selectedImageSource;
 
-	mainDockWidget->UpdateTrackerList(trackerData.trackerId, newData->trackerId);
+	// Perform deep copy of poseList
+	trackerData->poseList.clear();
+	for (const QSharedPointer<Pose> &posePtr : newData->poseList) {
+		if (posePtr) {
+			trackerData->poseList.append(posePtr->clone());
+		}
+	}
+
+	mainDockWidget->UpdateTrackerList(trackerData->trackerId, newData->trackerId);
 }
 
 void FaceTracker::InitiateNetworkTracking()
 {
-	if (!trackerData.isEnabled)
+	if (!trackerData->isEnabled)
 		return;
 
 	ui->errorLabel->setVisible(false);
 	if (!networkTracking) {
 		networkTracking =
-			new NetworkTracking(this, trackerData.port, trackerData.destIpAddress, trackerData.destPort);
+			new NetworkTracking(this, trackerData->port, trackerData->destIpAddress, trackerData->destPort);
 		QObject::connect(networkTracking, &NetworkTracking::ReceivedData, this,
 				 &FaceTracker::HandleTrackingData);
 
@@ -191,20 +252,20 @@ void FaceTracker::InitiateNetworkTracking()
 		QObject::connect(networkTracking, &NetworkTracking::ConnectionErrorToggle, this,
 				 &FaceTracker::ToggleConnectionError);
 	} else {
-		networkTracking->UpdateConnection(trackerData.port, trackerData.destIpAddress, trackerData.destPort);
+		networkTracking->UpdateConnection(trackerData->port, trackerData->destIpAddress, trackerData->destPort);
 	}
 }
 
 void FaceTracker::EnableTimer()
 {
-	trackerData.isEnabled = true;
+	trackerData->isEnabled = true;
 	ui->trackerNameLabel->setEnabled(true);
 	InitiateNetworkTracking();
 }
 
 void FaceTracker::DisableTimer()
 {
-	trackerData.isEnabled = false;
+	trackerData->isEnabled = false;
 	ui->trackerNameLabel->setEnabled(false);
 	if (networkTracking) {
 		networkTracking->deleteLater();
@@ -218,7 +279,7 @@ void FaceTracker::DisableTimer()
 void FaceTracker::SettingsActionSelected()
 {
 	if (!settingsDialogUi) {
-		settingsDialogUi = new SettingsDialog(this, &trackerData, mainDockWidget);
+		settingsDialogUi = new SettingsDialog(this, trackerData, mainDockWidget);
 		QObject::connect(settingsDialogUi, &SettingsDialog::SettingsUpdated, this,
 				 &FaceTracker::UpdateTrackerDataFromDialog);
 
@@ -239,7 +300,7 @@ void FaceTracker::SettingsActionSelected()
 
 void FaceTracker::DeleteActionSelected()
 {
-	emit RequestDelete(trackerData.trackerId);
+	emit RequestDelete(trackerData->trackerId);
 }
 
 void FaceTracker::HandleTrackingData(VTubeStudioTrackingData data)
