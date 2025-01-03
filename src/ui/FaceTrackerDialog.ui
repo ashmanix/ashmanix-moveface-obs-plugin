@@ -445,10 +445,54 @@
              <property name="resizeAnchor">
               <enum>QGraphicsView::AnchorViewCenter</enum>
              </property>
+             <property name="rubberBandSelectionMode">
+              <enum>Qt::IntersectsItemShape</enum>
+             </property>
              <property name="class" stdset="0">
               <string>bg-base</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QToolButton" name="centerOnImagesToolButton">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="moveImageUpLevelToolButton">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="moveImageDownLevelToolButton">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
@@ -467,8 +511,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>870</width>
-            <height>402</height>
+            <width>855</width>
+            <height>410</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -870,8 +914,6 @@
    <header>widgets/avatar-graphics-view.hpp</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="plugin.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

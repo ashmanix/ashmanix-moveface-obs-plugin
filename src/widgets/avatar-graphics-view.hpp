@@ -5,6 +5,8 @@
 #include <QGraphicsView>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
 
 #include <obs.h>
 #include "plugin-support.h"

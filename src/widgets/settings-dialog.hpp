@@ -64,6 +64,7 @@ private:
 	void LoadSelectedPoseConfig();
 	int GetSelectedRow();
 	void ResetPoseUITab();
+	void CenterSceneOnItems();
 
 protected:
 	void showEvent(QShowEvent *event) override;
@@ -89,6 +90,9 @@ private slots:
 	void OnPoseRowsRemoved(const QModelIndex &parent, int first, int last);
 	void OnPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 				const QList<int> &roles = QList<int>());
+	void HandleCenterViewButtonClick();
+	void HandleMoveImageUpClick();
+	void HandleMoveImageDownClick();
 };
 
 #endif // SETTINGSDIALOG_H

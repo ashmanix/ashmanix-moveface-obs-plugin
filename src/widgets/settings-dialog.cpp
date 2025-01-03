@@ -74,6 +74,24 @@ void SettingsDialog::UpdateStyledUIComponents()
 		ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
 	}
 
+	QString upIconPath = QDir::fromNativeSeparators(baseUrl + "up.svg");
+	if (QFileInfo::exists(upIconPath)) {
+		QIcon upIcon(upIconPath);
+		ui->moveImageUpLevelToolButton->setIcon(upIcon);
+	}
+
+	QString downIconPath = QDir::fromNativeSeparators(baseUrl + "down.svg");
+	if (QFileInfo::exists(downIconPath)) {
+		QIcon downIcon(downIconPath);
+		ui->moveImageDownLevelToolButton->setIcon(downIcon);
+	}
+
+	QString centerIconPath = QDir::fromNativeSeparators(baseUrl + "center.svg");
+	if (QFileInfo::exists(centerIconPath)) {
+		QIcon centerIcon(centerIconPath);
+		ui->centerOnImagesToolButton->setIcon(centerIcon);
+	}
+
 	ui->noConfigLabel->setStyleSheet("font-size: 20pt;");
 	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 }
@@ -160,6 +178,13 @@ void SettingsDialog::ConnectUISignalHandlers()
 			 [this]() { HandleClearImageUrl(PoseImage::TONGUEOUT); });
 
 	QObject::connect(ui->poseListView, &QListView::clicked, this, &SettingsDialog::HandlePoseListClick);
+
+	QObject::connect(ui->centerOnImagesToolButton, &QToolButton::clicked, this,
+			 &SettingsDialog::HandleCenterViewButtonClick);
+	QObject::connect(ui->moveImageUpLevelToolButton, &QToolButton::clicked, this,
+			 &SettingsDialog::HandleMoveImageUpClick);
+	QObject::connect(ui->moveImageDownLevelToolButton, &QToolButton::clicked, this,
+			 &SettingsDialog::HandleMoveImageDownClick);
 
 	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::OnPoseRowsInserted);
 	QObject::connect(poseListModel, &QAbstractItemModel::rowsRemoved, this, &SettingsDialog::OnPoseRowsRemoved);
@@ -264,6 +289,11 @@ void SettingsDialog::SetupDialogUI(QSharedPointer<TrackerDataStruct> settingsDia
 	ui->mouthOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
 	ui->mouthSmileUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
 	ui->tongueOutUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+
+	ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
+	ui->moveImageUpLevelToolButton->setToolTip(obs_module_text("DialogMoveImageUpLevelToolTip"));
+	ui->moveImageDownLevelToolButton->setToolTip(obs_module_text("DialogMoveImageDownLevelToolTip"));
+	ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
 
 	// Initialize the mapping between PoseImage enums and QLineEdit pointers
 	poseImageLineEdits[PoseImage::BODY] = ui->bodyUrlLineEdit;
@@ -493,10 +523,9 @@ void SettingsDialog::AddImageToScene(PoseImageData *imageData, bool clearScene)
 			LOG_ERROR,
 			QString("Image data for file: %1 not found!").arg(imageData->imageUrl).toStdString().c_str());
 
-	obs_log(LOG_INFO, "YO!");
-
 	imageData->pixmapItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 	avatarPreviewScene->addItem(imageData->pixmapItem);
+	CenterSceneOnItems();
 }
 
 void SettingsDialog::ClearScene()
@@ -591,6 +620,25 @@ void SettingsDialog::ResetPoseUITab()
 	ClearCurrentPoseConfig();
 	ui->imageConfigWidget->setVisible(false);
 	ui->noConfigLabel->setVisible(true);
+}
+
+void SettingsDialog::CenterSceneOnItems()
+{
+	if (!avatarPreviewScene)
+		return;
+
+	if (avatarPreviewScene->items().isEmpty()) {
+		return; // No items to center on
+	}
+
+	// Calculate the bounding rectangle of all items
+	QRectF boundingRect = avatarPreviewScene->itemsBoundingRect();
+
+	// Center the view on the center of the bounding rectangle
+	ui->avatarGraphicsView->centerOn(boundingRect.center());
+
+	QRectF paddedRect = boundingRect.adjusted(-10, -10, 10, 10);
+	ui->avatarGraphicsView->fitInView(paddedRect, Qt::KeepAspectRatio);
 }
 
 //  ------------------------------------------------ Protected ------------------------------------------------
@@ -844,4 +892,57 @@ void SettingsDialog::OnPoseDataChanged(const QModelIndex &topLeft, const QModelI
 		}
 	}
 	FormChangeDetected();
+}
+
+void SettingsDialog::HandleCenterViewButtonClick()
+{
+	CenterSceneOnItems();
+}
+
+void SettingsDialog::HandleMoveImageUpClick()
+{
+	if (!avatarPreviewScene)
+		return;
+
+	if (avatarPreviewScene->items().isEmpty() || avatarPreviewScene->selectedItems().isEmpty()) {
+		return;
+	}
+
+	qreal maxZIndex = 0;
+	for (QGraphicsItem *item : avatarPreviewScene->items()) {
+		maxZIndex = std::max(maxZIndex, item->zValue());
+	}
+
+	int itemsAtMaxZ = 0;
+	for (QGraphicsItem *item : avatarPreviewScene->items()) {
+		if (item->zValue() == maxZIndex)
+			itemsAtMaxZ++;
+	}
+
+	obs_log(LOG_INFO, "Max Z Level: %d", static_cast<int>(maxZIndex));
+
+	for (QGraphicsItem *item : avatarPreviewScene->selectedItems()) {
+		qreal itemZValue = item->zValue();
+		if (itemZValue < maxZIndex || (itemZValue == maxZIndex && itemsAtMaxZ > 1)) {
+			item->setZValue(item->zValue() + 1);
+		}
+		obs_log(LOG_INFO, "New Z Level: %d", static_cast<int>(item->zValue()));
+	}
+}
+
+void SettingsDialog::HandleMoveImageDownClick()
+{
+	if (!avatarPreviewScene)
+		return;
+
+	if (avatarPreviewScene->items().isEmpty() || avatarPreviewScene->selectedItems().isEmpty()) {
+		return;
+	}
+	for (QGraphicsItem *item : avatarPreviewScene->selectedItems()) {
+		qreal zIndex = item->zValue();
+		if (zIndex != 0) {
+			item->setZValue(item->zValue() - 1);
+		}
+		obs_log(LOG_INFO, "New Z Level: %d", static_cast<int>(item->zValue()));
+	}
 }
