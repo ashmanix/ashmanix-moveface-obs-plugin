@@ -153,7 +153,7 @@ void FaceTracker::LoadPoseData()
 			PoseImageData &data = selectedPose->poseImages[i];
 
 			if (!data.imageUrl.isEmpty()) {
-				data.pixmapItem = new QGraphicsPixmapItem();
+				data.pixmapItem = new MovablePixmapItem(poseEnum);
 
 				QPixmap pixmap(data.imageUrl);
 				if (!pixmap.isNull()) {

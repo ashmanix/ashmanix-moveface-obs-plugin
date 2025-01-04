@@ -105,8 +105,7 @@ void SettingsDialog::UpdateStyledUIComponents()
 	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 	ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
-	ui->poseListView->setStyleSheet(
-					"QListView::item {"
+	ui->poseListView->setStyleSheet("QListView::item {"
 					"   padding-top: 5px;"
 					"   padding-bottom: 5px;"
 					"}");
@@ -551,8 +550,11 @@ void SettingsDialog::AddImageToScene(PoseImageData *imageData, bool clearScene)
 			LOG_ERROR,
 			QString("Image data for file: %1 not found!").arg(imageData->imageUrl).toStdString().c_str());
 
-	imageData->pixmapItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 	avatarPreviewScene->addItem(imageData->pixmapItem);
+
+	QObject::connect(imageData->pixmapItem, &MovablePixmapItem::positionChanged, this,
+			 &SettingsDialog::HandleImageMove);
+
 	CenterSceneOnItems();
 }
 
@@ -561,8 +563,7 @@ void SettingsDialog::ClearScene()
 	if (avatarPreviewScene) {
 		QList<QGraphicsItem *> items = avatarPreviewScene->items();
 		for (QGraphicsItem *item : items) {
-			// Check if the item is a QGraphicsPixmapItem (commonly used for images)
-			if (dynamic_cast<QGraphicsPixmapItem *>(item)) {
+			if (dynamic_cast<MovablePixmapItem *>(item)) {
 				avatarPreviewScene->removeItem(item);
 			}
 		}
@@ -861,7 +862,7 @@ void SettingsDialog::HandleImageUrlButtonClicked(PoseImage poseEnum)
 		return;
 	}
 
-	selectedPose->poseImages[imageIndex].pixmapItem = new QGraphicsPixmapItem(pixmap);
+	selectedPose->poseImages[imageIndex].pixmapItem = new MovablePixmapItem(pixmap);
 
 	switch (poseEnum) {
 	case PoseImage::BODY:
@@ -1028,4 +1029,47 @@ void SettingsDialog::HandleImageZoomClick(bool isZoomOut)
 	} else {
 		ui->avatarGraphicsView->scale(zoomScaleFactor, zoomScaleFactor);
 	}
+}
+
+void SettingsDialog::HandleImageMove(qreal x, qreal y, qreal z, PoseImage pImageType)
+{
+	int selectedRow = GetSelectedRow();
+
+	obs_log(LOG_INFO, QString("Updated Pose %1: x=%2, y=%3, z=%4")
+				  .arg(x)
+				  .arg(y)
+				  .arg(z)
+				  .toStdString()
+				  .c_str());
+
+	if (selectedRow != -1) {
+		QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
+		switch (pImageType) {
+		case PoseImage::BODY:
+			selectedPose->bodyPosition = {x, y, z};
+			/* code */
+			break;
+		case PoseImage::MOUTHCLOSED:
+			selectedPose->mouthPosition = {x, y, z};
+			break;
+		case PoseImage::EYESOPEN:
+			selectedPose->eyesPosition = {x, y, z};
+			break;
+
+		default:
+			break;
+		}
+		// Optionally, mark the form as changed
+		FormChangeDetected();
+		// Log the update
+		obs_log(LOG_INFO, QString("Updated Pose %1: x=%2, y=%3, z=%4")
+					  .arg(selectedPose->poseId)
+					  .arg(x)
+					  .arg(y)
+					  .arg(z)
+					  .toStdString()
+					  .c_str());
+	}
+
+	FormChangeDetected();
 }

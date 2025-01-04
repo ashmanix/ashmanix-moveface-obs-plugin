@@ -49,6 +49,8 @@ target_sources(
     src/widgets/obs-dock-wrapper.hpp
     src/widgets/avatar-graphics-view.cpp
     src/widgets/avatar-graphics-view.hpp
+    src/utils/pose-image.hpp
+    src/widgets/pixmap-item.hpp
     src/utils/tracker-utils.cpp
     src/utils/tracker-utils.hpp
     src/utils/obs-utils.cpp

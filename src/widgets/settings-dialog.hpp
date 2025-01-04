@@ -16,6 +16,7 @@
 #include <QModelIndex>
 #include <QList>
 
+#include "../widgets/pixmap-item.hpp"
 #include "../main-widget-dock.hpp"
 #include "../utils/tracker-utils.hpp"
 #include "../utils/network-tracking.hpp"
@@ -96,6 +97,7 @@ private slots:
 	void HandleMoveImageUpClick();
 	void HandleMoveImageDownClick();
 	void HandleImageZoomClick(bool isZoomOut = false);
+	void HandleImageMove(qreal x, qreal y, qreal z, PoseImage pImageType);
 };
 
 #endif // SETTINGSDIALOG_H

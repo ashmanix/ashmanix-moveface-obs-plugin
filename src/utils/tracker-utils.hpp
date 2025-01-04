@@ -14,12 +14,14 @@
 #include <QGraphicsPixmapItem>
 
 #include <obs.h>
+#include "pose-image.hpp"
+#include "../widgets/pixmap-item.hpp"
 #include "plugin-support.h"
 
 #include <array>
 
 #define CONFIG "config.json"
-// Test
+
 struct Result {
 	bool success;
 	QString errorMessage;
@@ -47,18 +49,6 @@ struct Vector3 {
 		vec.z = obj["z"].toDouble();
 		return vec;
 	}
-};
-
-enum class PoseImage {
-	BODY,
-	EYESOPEN,
-	EYESHALFOPEN,
-	EYESCLOSED,
-	MOUTHCLOSED,
-	MOUTHOPEN,
-	MOUTHSMILE,
-	TONGUEOUT,
-	COUNT,
 };
 
 enum class BlendShapeKey {
@@ -446,11 +436,9 @@ struct BlendShapeRule {
 
 struct PoseImageData {
 	QString imageUrl;
-	QGraphicsPixmapItem *pixmapItem;
+	MovablePixmapItem *pixmapItem;
 
-	PoseImageData(const QString &url = "", QGraphicsPixmapItem *item = nullptr)
-		: imageUrl(url),
-		  pixmapItem(item) {};
+	PoseImageData(const QString &url = "", MovablePixmapItem *item = nullptr) : imageUrl(url), pixmapItem(item) {};
 };
 
 // For poses we will concentrate first on

@@ -21,6 +21,7 @@
 #include "../ui/ui_FaceTracker.h"
 #include "../utils/tracker-utils.hpp"
 #include "../utils/network-tracking.hpp"
+#include "pixmap-item.hpp"
 #include "../main-widget-dock.hpp"
 
 // Forward declarations
