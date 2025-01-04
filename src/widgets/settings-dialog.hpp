@@ -93,6 +93,7 @@ private slots:
 	void HandleCenterViewButtonClick();
 	void HandleMoveImageUpClick();
 	void HandleMoveImageDownClick();
+	void HandleImageZoomClick(bool isZoomOut = false);
 };
 
 #endif // SETTINGSDIALOG_H

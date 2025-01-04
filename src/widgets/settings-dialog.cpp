@@ -51,6 +51,14 @@ void SettingsDialog::UpdateStyledUIComponents()
 		QIcon plusIcon(plusIconPath);
 
 		ui->addPoseToolButton->setIcon(plusIcon);
+		ui->zoomInToolButton->setIcon(plusIcon);
+	}
+
+	QString minusIconPath = QDir::fromNativeSeparators(baseUrl + "minus.svg");
+	if (QFileInfo::exists(minusIconPath)) {
+		QIcon minusIcon(minusIconPath);
+
+		ui->zoomOutToolButton->setIcon(minusIcon);
 	}
 
 	QString trashIconPath = QDir::fromNativeSeparators(baseUrl + "trash.svg");
@@ -92,8 +100,9 @@ void SettingsDialog::UpdateStyledUIComponents()
 		ui->centerOnImagesToolButton->setIcon(centerIcon);
 	}
 
-	ui->noConfigLabel->setStyleSheet("font-size: 20pt;");
+	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
+	ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
 }
 
 void SettingsDialog::SetFormDetails(QSharedPointer<TrackerDataStruct> settingsDialogData)
@@ -185,6 +194,9 @@ void SettingsDialog::ConnectUISignalHandlers()
 			 &SettingsDialog::HandleMoveImageUpClick);
 	QObject::connect(ui->moveImageDownLevelToolButton, &QToolButton::clicked, this,
 			 &SettingsDialog::HandleMoveImageDownClick);
+
+	QObject::connect(ui->zoomInToolButton, &QToolButton::clicked, this, [this]() { HandleImageZoomClick(false); });
+	QObject::connect(ui->zoomOutToolButton, &QToolButton::clicked, this, [this]() { HandleImageZoomClick(true); });
 
 	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::OnPoseRowsInserted);
 	QObject::connect(poseListModel, &QAbstractItemModel::rowsRemoved, this, &SettingsDialog::OnPoseRowsRemoved);
@@ -294,6 +306,8 @@ void SettingsDialog::SetupDialogUI(QSharedPointer<TrackerDataStruct> settingsDia
 	ui->moveImageUpLevelToolButton->setToolTip(obs_module_text("DialogMoveImageUpLevelToolTip"));
 	ui->moveImageDownLevelToolButton->setToolTip(obs_module_text("DialogMoveImageDownLevelToolTip"));
 	ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
+	ui->zoomOutToolButton->setToolTip(obs_module_text("DialogZoomOutToolTip"));
+	ui->zoomInToolButton->setToolTip(obs_module_text("DialogZoomInToolTip"));
 
 	// Initialize the mapping between PoseImage enums and QLineEdit pointers
 	poseImageLineEdits[PoseImage::BODY] = ui->bodyUrlLineEdit;
@@ -515,7 +529,7 @@ void SettingsDialog::AddImageToScene(PoseImageData *imageData, bool clearScene)
 		view->setScene(avatarPreviewScene);
 		view->setRenderHint(QPainter::Antialiasing);
 		// Create a QGraphicsView to visualize the scene
-		view->setDragMode(QGraphicsView::RubberBandDrag);
+		view->setDragMode(QGraphicsView::ScrollHandDrag);
 	}
 
 	if (imageData->pixmapItem == nullptr)
@@ -657,7 +671,10 @@ void SettingsDialog::showEvent(QShowEvent *event)
 	LoadSelectedPoseConfig();
 }
 
-void SettingsDialog::closeEvent(QCloseEvent *) {}
+void SettingsDialog::closeEvent(QCloseEvent *)
+{
+	ResetPoseUITab();
+}
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------
 
@@ -947,5 +964,16 @@ void SettingsDialog::HandleMoveImageDownClick()
 			item->setZValue(item->zValue() - 1);
 		}
 		obs_log(LOG_INFO, "New Z Level: %d", static_cast<int>(item->zValue()));
+	}
+}
+
+void SettingsDialog::HandleImageZoomClick(bool isZoomOut)
+{
+	double zoomScaleFactor = 1.15;
+
+	if (isZoomOut) {
+		ui->avatarGraphicsView->scale(1.0 / zoomScaleFactor, 1.0 / zoomScaleFactor);
+	} else {
+		ui->avatarGraphicsView->scale(zoomScaleFactor, zoomScaleFactor);
 	}
 }
