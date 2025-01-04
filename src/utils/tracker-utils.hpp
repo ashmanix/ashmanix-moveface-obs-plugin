@@ -503,6 +503,23 @@ struct Pose {
 	{
 	}
 
+	Pose &operator=(const Pose &other)
+	{
+		if (this == &other) {
+			return *this; // Handle self-assignment
+		}
+
+		// Copy each member variable
+		poseId = other.poseId;
+		poseImages = other.poseImages;
+		bodyPosition = other.bodyPosition;
+		eyesPosition = other.eyesPosition;
+		mouthPosition = other.mouthPosition;
+		blendShapesRuleList = other.blendShapesRuleList;
+
+		return *this;
+	}
+
 	bool shouldUsePose(QMap<BlendShapeKey, BlendShape> blendShapes)
 	{
 		for (auto rule : blendShapesRuleList) {
