@@ -20,7 +20,6 @@
 #include "widgets/obs-dock-wrapper.hpp"
 #include "ui/ui_MainWidget.h"
 
-
 // Forward declerations
 class FaceTracker;
 

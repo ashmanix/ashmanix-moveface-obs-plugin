@@ -18,7 +18,7 @@ public:
 	explicit AvatarGraphicsView(QWidget *parent = nullptr) : QGraphicsView(parent)
 	{
 		setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-        setRenderHint(QPainter::Antialiasing);
+		setRenderHint(QPainter::Antialiasing);
 		setDragMode(QGraphicsView::RubberBandDrag);
 	}
 

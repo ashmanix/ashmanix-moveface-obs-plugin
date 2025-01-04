@@ -39,7 +39,7 @@ private:
 
 	QStandardItemModel *poseListModel = nullptr;
 	QList<QSharedPointer<Pose>> settingsPoseList;
-	QMap<PoseImage, QLineEdit*> poseImageLineEdits;
+	QMap<PoseImage, QLineEdit *> poseImageLineEdits;
 	QGraphicsScene *avatarPreviewScene = nullptr;
 	int previouslySelectedPoseIndex = -1;
 
@@ -68,7 +68,7 @@ private:
 
 protected:
 	void showEvent(QShowEvent *event) override;
-  	void closeEvent(QCloseEvent *) override;
+	void closeEvent(QCloseEvent *) override;
 
 signals:
 	void SettingsUpdated(QSharedPointer<TrackerDataStruct> newData);
@@ -89,7 +89,7 @@ private slots:
 	void OnPoseRowsInserted(const QModelIndex &parent, int first, int last);
 	void OnPoseRowsRemoved(const QModelIndex &parent, int first, int last);
 	void OnPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-				const QList<int> &roles = QList<int>());
+			       const QList<int> &roles = QList<int>());
 	void HandleCenterViewButtonClick();
 	void HandleMoveImageUpClick();
 	void HandleMoveImageDownClick();

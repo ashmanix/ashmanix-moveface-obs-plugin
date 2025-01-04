@@ -757,9 +757,9 @@ void SettingsDialog::HandleImageUrlButtonClicked(PoseImage poseEnum)
 
 	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
 
-	size_t imageIndex = static_cast<size_t>(poseEnum);
+	int imageIndex = static_cast<int>(poseEnum);
 
-	if (!(imageIndex >= 0 && imageIndex < selectedPose->poseImages.size())) {
+	if (!(imageIndex >= 0 && static_cast<size_t>(imageIndex) < selectedPose->poseImages.size())) {
 		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
 		return;
 	}
@@ -821,9 +821,12 @@ void SettingsDialog::HandleClearImageUrl(PoseImage poseEnum)
 	FormChangeDetected();
 
 	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
-	size_t imageIndex = static_cast<size_t>(poseEnum);
+	int imageIndex = static_cast<int>(poseEnum);
 
-	if (imageIndex >= 0 && imageIndex < selectedPose->poseImages.size()) {
+	if (imageIndex < 0)
+		return;
+
+	if (imageIndex >= 0 && static_cast<size_t>(imageIndex) < selectedPose->poseImages.size()) {
 		PoseImageData &poseData = selectedPose->poseImages[imageIndex];
 		poseImageLineEdits[poseEnum]->setText(QString());
 
