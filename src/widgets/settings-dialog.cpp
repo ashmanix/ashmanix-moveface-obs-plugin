@@ -86,12 +86,14 @@ void SettingsDialog::UpdateStyledUIComponents()
 	if (QFileInfo::exists(upIconPath)) {
 		QIcon upIcon(upIconPath);
 		ui->moveImageUpLevelToolButton->setIcon(upIcon);
+		ui->movePoseUpToolButton->setIcon(upIcon);
 	}
 
 	QString downIconPath = QDir::fromNativeSeparators(baseUrl + "down.svg");
 	if (QFileInfo::exists(downIconPath)) {
 		QIcon downIcon(downIconPath);
 		ui->moveImageDownLevelToolButton->setIcon(downIcon);
+		ui->movePoseDownToolButton->setIcon(downIcon);
 	}
 
 	QString centerIconPath = QDir::fromNativeSeparators(baseUrl + "center.svg");
@@ -103,6 +105,11 @@ void SettingsDialog::UpdateStyledUIComponents()
 	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 	ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
+	ui->poseListView->setStyleSheet(
+					"QListView::item {"
+					"   padding-top: 5px;"
+					"   padding-bottom: 5px;"
+					"}");
 }
 
 void SettingsDialog::SetFormDetails(QSharedPointer<TrackerDataStruct> settingsDialogData)
@@ -147,6 +154,8 @@ void SettingsDialog::ConnectUISignalHandlers()
 
 	QObject::connect(ui->addPoseToolButton, &QToolButton::clicked, this, &SettingsDialog::AddPose);
 	QObject::connect(ui->deletePoseToolButton, &QToolButton::clicked, this, &SettingsDialog::DeletePose);
+	QObject::connect(ui->movePoseUpToolButton, &QToolButton::clicked, this, [this]() { HandleMovePose(true); });
+	QObject::connect(ui->movePoseDownToolButton, &QToolButton::clicked, this, [this]() { HandleMovePose(); });
 
 	QObject::connect(ui->dialogButtonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::OkButtonClicked);
 
@@ -269,11 +278,16 @@ void SettingsDialog::SetupDialogUI(QSharedPointer<TrackerDataStruct> settingsDia
 
 	ui->addPoseToolButton->setToolTip(obs_module_text("DialogAddPoseToolTip"));
 	ui->deletePoseToolButton->setToolTip(obs_module_text("DialogDeletePoseToolTip"));
+	ui->movePoseUpToolButton->setToolTip(obs_module_text("DialogMovePoseUpToolTip"));
+	ui->movePoseDownToolButton->setToolTip(obs_module_text("DialogMovePoseDownToolTip"));
 
 	ui->poseListLabel->setText(obs_module_text("DialogPostListLabel"));
 	ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
 	poseListModel = new QStandardItemModel(this);
 	ui->poseListView->setModel(poseListModel);
+	ui->poseListView->setDragEnabled(false);
+	ui->poseListView->setAcceptDrops(false);
+	ui->poseListView->setDragDropOverwriteMode(false);
 
 	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyUrlLabel"));
 	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenUrlLabel"));
@@ -523,7 +537,7 @@ void SettingsDialog::AddImageToScene(PoseImageData *imageData, bool clearScene)
 		QGraphicsView *view = ui->avatarGraphicsView;
 		avatarPreviewScene = new QGraphicsScene(this);
 
-		avatarPreviewScene->setSceneRect(0, 0, 10000, 10000);
+		avatarPreviewScene->setSceneRect(0, 0, 3000, 5000);
 		view->scale(0.1, 0.1);
 
 		view->setScene(avatarPreviewScene);
@@ -631,6 +645,7 @@ int SettingsDialog::GetSelectedRow()
 void SettingsDialog::ResetPoseUITab()
 {
 	ui->poseListView->selectionModel()->clearSelection();
+	previouslySelectedPoseIndex = -1;
 	ClearCurrentPoseConfig();
 	ui->imageConfigWidget->setVisible(false);
 	ui->noConfigLabel->setVisible(true);
@@ -668,7 +683,6 @@ void SettingsDialog::showEvent(QShowEvent *event)
 	ui->ipAddressViewLabel->setText(NetworkTracking::GetIpAddresses());
 
 	ClearCurrentPoseConfig();
-	LoadSelectedPoseConfig();
 }
 
 void SettingsDialog::closeEvent(QCloseEvent *)
@@ -753,6 +767,38 @@ void SettingsDialog::DeletePose()
 	if (rowIndex != -1) {
 		poseListModel->takeRow(rowIndex);
 	}
+}
+
+void SettingsDialog::HandleMovePose(bool isDirectionUp)
+{
+	if (!poseListModel)
+		return;
+
+	int selectedRow = GetSelectedRow();
+	if (selectedRow == -1)
+		return;
+
+	int targetRow = isDirectionUp ? selectedRow - 1 : selectedRow + 1;
+
+	if (targetRow < 0 || targetRow >= poseListModel->rowCount())
+		return;
+
+	QStandardItem *currentItem = poseListModel->item(selectedRow, 0);
+	QStandardItem *targetItem = poseListModel->item(targetRow, 0);
+
+	if (!currentItem || !targetItem)
+		return;
+
+	QString tempText = currentItem->text();
+	currentItem->setText(targetItem->text());
+	targetItem->setText(tempText);
+
+	settingsPoseList.swapItemsAt(selectedRow, targetRow);
+
+	ui->poseListView->setCurrentIndex(poseListModel->index(targetRow, 0));
+	previouslySelectedPoseIndex = targetRow;
+	LoadSelectedPoseConfig();
+	FormChangeDetected();
 }
 
 void SettingsDialog::HandleImageUrlButtonClicked(PoseImage poseEnum)
@@ -869,6 +915,9 @@ void SettingsDialog::OnPoseRowsInserted(const QModelIndex &parent, int first, in
 {
 	Q_UNUSED(parent);
 
+	if (isMovingPoseListRows)
+		return;
+
 	// For each newly inserted row, create a default Pose or read from the model
 	// and insert into settingsPoseList at the correct position.
 	for (int row = first; row <= last; ++row) {
@@ -888,6 +937,9 @@ void SettingsDialog::OnPoseRowsInserted(const QModelIndex &parent, int first, in
 void SettingsDialog::OnPoseRowsRemoved(const QModelIndex &parent, int first, int last)
 {
 	Q_UNUSED(parent);
+
+	if (isMovingPoseListRows)
+		return;
 
 	// Remove the corresponding poses from settingsPoseList
 	for (int row = last; row >= first; --row) {

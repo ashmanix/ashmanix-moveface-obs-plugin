@@ -42,6 +42,7 @@ private:
 	QMap<PoseImage, QLineEdit *> poseImageLineEdits;
 	QGraphicsScene *avatarPreviewScene = nullptr;
 	int previouslySelectedPoseIndex = -1;
+	bool isMovingPoseListRows = false;
 
 	void ConnectUISignalHandlers();
 	void ConnectObsSignalHandlers();
@@ -83,6 +84,7 @@ private slots:
 	void SyncPoseListToModel();
 	void AddPose();
 	void DeletePose();
+	void HandleMovePose(bool isDirectionUp = false);
 	void HandleImageUrlButtonClicked(PoseImage image);
 	void HandleClearImageUrl(PoseImage image);
 	void HandlePoseListClick(QModelIndex modelIndex);
