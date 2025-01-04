@@ -19,7 +19,7 @@
 #include <array>
 
 #define CONFIG "config.json"
-
+// Test
 struct Result {
 	bool success;
 	QString errorMessage;
