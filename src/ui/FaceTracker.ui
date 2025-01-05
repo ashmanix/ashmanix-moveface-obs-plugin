@@ -103,6 +103,9 @@
         </item>
         <item>
          <widget class="QLabel" name="trackerNameLabel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Name</string>
           </property>

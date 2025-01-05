@@ -20,6 +20,8 @@
 #include "plugin-support.h"
 #include "../ui/ui_FaceTracker.h"
 #include "../utils/tracker-utils.hpp"
+#include "../utils/tracker-data.hpp"
+#include "../utils/vtube-studio-data.hpp"
 #include "../utils/network-tracking.hpp"
 #include "pixmap-item.hpp"
 #include "../main-widget-dock.hpp"
@@ -27,6 +29,7 @@
 // Forward declarations
 class SettingsDialog;
 class MainWidgetDock;
+class Pose;
 
 class FaceTracker : public QWidget {
 	Q_OBJECT
@@ -34,13 +37,13 @@ public:
 	explicit FaceTracker(QWidget *parent = nullptr, obs_data_t *savedData = nullptr,
 			     MainWidgetDock *mDockWidget = nullptr);
 	~FaceTracker();
-	QString GetTrackerID();
-	void SetTrackerID(const QString &newId = QString());
-	TrackerDataStruct GetTrackerData();
+	QString getTrackerID();
+	void setTrackerID(const QString &newId = QString());
+	TrackerData getTrackerData();
 
-	void SaveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
-	void LoadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
-	void UpdateWidgetStyles();
+	void saveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
+	void loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
+	void updateWidgetStyles();
 
 private:
 	Ui::FaceTracker *ui = nullptr;
@@ -48,30 +51,30 @@ private:
 
 	QString title;
 	bool isConnected;
-	QSharedPointer<TrackerDataStruct> trackerData;
+	QSharedPointer<TrackerData> trackerData;
 	MainWidgetDock *mainDockWidget = nullptr;
 
 	NetworkTracking *networkTracking = nullptr;
 
-	void SetupWidgetUI();
-	void ConnectUISignalHandlers();
-	void SetTrackerData();
-	void LoadPoseData();
-	void SetConnected(bool isConnectedInput);
-	void UpdateTrackerDataFromDialog(QSharedPointer<TrackerDataStruct> newData);
-	void InitiateNetworkTracking();
-	void EnableTimer();
-	void DisableTimer();
+	void setupWidgetUI();
+	void connectUISignalHandlers();
+	void setTrackerData();
+	void loadPoseData();
+	void setConnected(bool isConnectedInput);
+	void updateTrackerDataFromDialog(QSharedPointer<TrackerData> newData);
+	void initiateNetworkTracking();
+	void enableTimer();
+	void disableTimer();
 
 signals:
-	void RequestDelete(QString id);
+	void requestDelete(QString id);
 
 private slots:
-	void SettingsActionSelected();
-	void DeleteActionSelected();
-	void HandleTrackingData(VTubeStudioTrackingData data);
-	void ToggleEnabled(int checkState);
-	void ToggleConnectionError(bool isError);
+	void settingsActionSelected();
+	void deleteActionSelected();
+	void handleTrackingData(VTubeStudioData data);
+	void toggleEnabled(int checkState);
+	void toggleConnectionError(bool isError);
 };
 
 #endif // FACETRACKER_H

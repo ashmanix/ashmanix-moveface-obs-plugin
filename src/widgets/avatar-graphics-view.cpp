@@ -41,25 +41,25 @@ void AvatarGraphicsView::mouseMoveEvent(QMouseEvent *event)
 		m_lastPanPoint = event->pos();
 		event->accept();
 	} else {
-		for (QGraphicsItem *item : items()) {
-			QRectF sceneRect = this->sceneRect();
-			QRectF itemRect = item->sceneBoundingRect();
+		// for (QGraphicsItem *item : items()) {
+		// 	QRectF sceneRect = this->sceneRect();
+		// 	QRectF itemRect = item->sceneBoundingRect();
 
-			// Check and adjust the item's position
-			if (!sceneRect.contains(itemRect)) {
-				QPointF newPos = item->pos();
-				if (itemRect.left() < sceneRect.left())
-					newPos.setX(sceneRect.left());
-				if (itemRect.top() < sceneRect.top())
-					newPos.setY(sceneRect.top());
-				if (itemRect.right() > sceneRect.right())
-					newPos.setX(sceneRect.right() - itemRect.width());
-				if (itemRect.bottom() > sceneRect.bottom())
-					newPos.setY(sceneRect.bottom() - itemRect.height());
+		// 	// Check and adjust the item's position
+		// 	if (!sceneRect.contains(itemRect)) {
+		// 		QPointF newPos = item->pos();
+		// 		if (itemRect.left() < sceneRect.left())
+		// 			newPos.setX(sceneRect.left());
+		// 		if (itemRect.top() < sceneRect.top())
+		// 			newPos.setY(sceneRect.top());
+		// 		if (itemRect.right() > sceneRect.right())
+		// 			newPos.setX(sceneRect.right() - itemRect.width());
+		// 		if (itemRect.bottom() > sceneRect.bottom())
+		// 			newPos.setY(sceneRect.bottom() - itemRect.height());
 
-				item->setPos(newPos);
-			}
-		}
+		// 		item->setPos(newPos);
+		// 	}
+		// }
 		QGraphicsView::mouseMoveEvent(event);
 	}
 }

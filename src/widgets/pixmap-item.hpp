@@ -17,6 +17,7 @@ public:
 		// Enable the item to be movable and selectable
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
 		poseImageType = pImageType;
+		setTransformOriginPoint(pixmap.width() / 2, pixmap.height() / 2);
 	}
 
 	// New overloaded constructor
@@ -29,6 +30,7 @@ public:
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
 	}
 
+private:
 	PoseImage poseImageType;
 
 signals:

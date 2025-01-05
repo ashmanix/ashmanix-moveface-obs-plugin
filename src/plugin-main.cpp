@@ -47,7 +47,7 @@ void obs_module_unload(void)
 
 void obs_module_post_load(void)
 {
-	mainWidgetDock->ConfigureWebSocketConnection();
+	mainWidgetDock->configureWebSocketConnection();
 }
 
 const char *obs_module_name(void)

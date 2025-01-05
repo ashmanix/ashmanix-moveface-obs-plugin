@@ -28,17 +28,10 @@ class MainWidgetDock : public OBSDock {
 public:
 	explicit MainWidgetDock(QWidget *parent = nullptr);
 	~MainWidgetDock();
-	void ConfigureWebSocketConnection();
+	void configureWebSocketConnection();
 
-	Result ValidateNewTrackerID(QString id);
-	Result UpdateTrackerList(QString oldId, QString newId);
-
-	// struct WebsocketCallbackData {
-	// 	MainWidgetDock *instance;
-	// 	WebsocketRequestType requestType;
-	// 	const char *requestDataKey;
-	// 	const char *requestTrackerIdKey;
-	// };
+	Result validateNewTrackerID(QString id);
+	Result updateTrackerList(QString oldId, QString newId);
 
 private:
 	QMap<QString, FaceTracker *> trackerWidgetMap;
@@ -53,24 +46,24 @@ private:
 	obs_websocket_vendor vendor = nullptr;
 	Ui::MainWidget *ui;
 
-	void SetupCountdownWidgetUI();
-	void ConnectUISignalHandlers();
-	void ConnectTrackerSignalHandlers(FaceTracker *faceTracker);
-	void SaveSettings();
-	int GetNumberOfTimers();
-	void RegisterAllHotkeys(obs_data_t *savedData);
-	void UnregisterAllHotkeys();
-	void AddTracker(obs_data_t *savedData = nullptr);
+	void setupCountdownWidgetUI();
+	void connectUISignalHandlers();
+	void connectTrackerSignalHandlers(FaceTracker *faceTracker);
+	void saveSettings();
+	int getNumberOfTimers();
+	void registerAllHotkeys(obs_data_t *savedData);
+	void unregisterAllHotkeys();
+	void addTracker(obs_data_t *savedData = nullptr);
 
-	static void OBSFrontendEventHandler(enum obs_frontend_event event, void *private_data);
-	static void UpdateWidgetStyles(MainWidgetDock *mainWidgetDock);
-	static void LoadSavedSettings(MainWidgetDock *trackerWidgetDock);
+	static void obsFrontendEventHandler(enum obs_frontend_event event, void *private_data);
+	static void updateWidgetStyles(MainWidgetDock *mainWidgetDock);
+	static void loadSavedSettings(MainWidgetDock *trackerWidgetDock);
 
 signals:
 
 private slots:
-	void AddTrackerButtonClicked();
-	void RemoveTrackerButtonClicked(QString id);
+	void addTrackerButtonClicked();
+	void removeTrackerButtonClicked(QString id);
 };
 
 #endif // MAINWIDGETDOCK_H

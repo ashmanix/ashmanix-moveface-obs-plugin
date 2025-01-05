@@ -1,10 +1,6 @@
-// pose-image.hpp
-#ifndef POSE_IMAGE_HPP
-#define POSE_IMAGE_HPP
+#ifndef POSEIMAGE_HPP
+#define POSEIMAGE_HPP
 
-#include <QString>
-
-// Define the PoseImage enum and related functions here
 enum class PoseImage {
 	BODY,
 	EYESOPEN,
@@ -17,6 +13,4 @@ enum class PoseImage {
 	COUNT,
 };
 
-// Optionally, move blendShapeKeyToString and blendShapeKeyFromString here if they are related
-
-#endif // POSE_IMAGE_HPP
+#endif // POSEIMAGE_HPP

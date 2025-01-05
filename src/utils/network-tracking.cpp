@@ -7,7 +7,7 @@ NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port, QString in_de
 	port = in_port;
 	destIpAddress = in_destIpAddress;
 	destPort = in_destPort;
-	StartConnection();
+	startConnection();
 }
 
 NetworkTracking::~NetworkTracking()
@@ -18,12 +18,12 @@ NetworkTracking::~NetworkTracking()
 		networkTrackingDataRequestTimer->stop();
 	if (connectionTimer) {
 		connectionTimer->stop();
-		emit ConnectionToggle(false);
+		emit connectionToggle(false);
 	}
 	obs_log(LOG_INFO, "Closing network connection");
 }
 
-bool NetworkTracking::UpdateConnection(quint16 newPort, std::optional<QString> in_destIpAddress,
+bool NetworkTracking::updateConnection(quint16 newPort, std::optional<QString> in_destIpAddress,
 				       std::optional<quint16> in_destPort)
 {
 	port = newPort;
@@ -34,10 +34,10 @@ bool NetworkTracking::UpdateConnection(quint16 newPort, std::optional<QString> i
 	if (in_destPort.has_value())
 		destPort = *in_destPort;
 
-	return StartConnection();
+	return startConnection();
 }
 
-bool NetworkTracking::SendUDPData(QString destIpAddress, quint16 destPort, QByteArray data)
+bool NetworkTracking::sendUDPData(QString destIpAddress, quint16 destPort, QByteArray data)
 {
 	bool result = false;
 	if (udpSocket) {
@@ -59,7 +59,7 @@ bool NetworkTracking::SendUDPData(QString destIpAddress, quint16 destPort, QByte
 	return result;
 }
 
-QString NetworkTracking::GetIpAddresses()
+QString NetworkTracking::getIpAddresses()
 {
 	// Get all network interfaces
 	QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
@@ -77,7 +77,7 @@ QString NetworkTracking::GetIpAddresses()
 	return ipAddresses;
 }
 
-void NetworkTracking::ProcessReceivedTrackingData()
+void NetworkTracking::processReceivedTrackingData()
 {
 	while (udpSocket->hasPendingDatagrams()) {
 		QByteArray datagram;
@@ -99,21 +99,20 @@ void NetworkTracking::ProcessReceivedTrackingData()
 				QJsonObject jsonObj = jsonDocument.object();
 				if (isConnected == false) {
 					isConnected = true;
-					emit ConnectionToggle(isConnected);
+					emit connectionToggle(isConnected);
 				}
 
-				VTubeStudioTrackingData receivedTrackingData =
-					VTubeStudioTrackingData::fromJson(jsonObj);
+				VTubeStudioData receivedTrackingData = VTubeStudioData::fromJson(jsonObj);
 
-				if (receivedTrackingData.faceFound == true) {
-					emit ReceivedData(receivedTrackingData);
+				if (receivedTrackingData.getFaceFound() == true) {
+					emit receivedData(receivedTrackingData);
 				}
 			}
 		}
 	}
 }
 
-bool NetworkTracking::StartConnection()
+bool NetworkTracking::startConnection()
 {
 
 	if (udpSocket)
@@ -124,23 +123,23 @@ bool NetworkTracking::StartConnection()
 		return false;
 	}
 
-	connect(udpSocket, &QUdpSocket::readyRead, this, &NetworkTracking::ProcessReceivedTrackingData);
+	connect(udpSocket, &QUdpSocket::readyRead, this, &NetworkTracking::processReceivedTrackingData);
 
-	ResetConnectionTimer();
-	SetSendPeriodicData();
+	resetConnectionTimer();
+	setSendPeriodicData();
 
 	obs_log(LOG_INFO, "Server listening on port: %d", port);
 	return true;
 }
 
-void NetworkTracking::ResetConnectionTimer()
+void NetworkTracking::resetConnectionTimer()
 {
 	// We send out the signal periodically as required by vTubeStudio
 	if (!connectionTimer) {
 		connectionTimer = new QTimer();
 		QObject::connect(connectionTimer, &QTimer::timeout, [this]() {
 			isConnected = false;
-			emit ConnectionToggle(isConnected);
+			emit connectionToggle(isConnected);
 		});
 	}
 	//Reset timer
@@ -149,14 +148,14 @@ void NetworkTracking::ResetConnectionTimer()
 	connectionTimer->start(timePeriod);
 }
 
-void NetworkTracking::SetSendPeriodicData()
+void NetworkTracking::setSendPeriodicData()
 {
 	// We send out the signal periodically as required by vTubeStudio to continue
 	// receiving tracking data
 	if (!networkTrackingDataRequestTimer) {
 		networkTrackingDataRequestTimer = new QTimer();
 		QObject::connect(networkTrackingDataRequestTimer, &QTimer::timeout, this,
-				 [this]() { RequestTrackingData(destPort, destIpAddress); });
+				 [this]() { requestTrackingData(destPort, destIpAddress); });
 	}
 	//Reset timer
 	networkTrackingDataRequestTimer->stop();
@@ -166,7 +165,7 @@ void NetworkTracking::SetSendPeriodicData()
 	networkErrorCount = 0;
 }
 
-void NetworkTracking::RequestTrackingData(quint16 destPort, QString destIpAddress)
+void NetworkTracking::requestTrackingData(quint16 destPort, QString destIpAddress)
 {
 	if (udpSocket) {
 		QJsonArray ports;
@@ -175,14 +174,14 @@ void NetworkTracking::RequestTrackingData(quint16 destPort, QString destIpAddres
 
 		QJsonDocument jsonDoc(initiateTrackingObject);
 		QByteArray jsonString = jsonDoc.toJson(QJsonDocument::Indented);
-		bool result = SendUDPData(destIpAddress, destPort, jsonString);
+		bool result = sendUDPData(destIpAddress, destPort, jsonString);
 		if (!result) {
 			networkErrorCount++;
 		} else {
 			networkErrorCount = 0;
 		}
 		if (networkErrorCount >= MAXERRORCOUNT) {
-			emit ConnectionErrorToggle(true);
+			emit connectionErrorToggle(true);
 			obs_log(LOG_WARNING, "Send connection max errors reached, cancelling send messages");
 			networkTrackingDataRequestTimer->stop();
 		}

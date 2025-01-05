@@ -7,12 +7,15 @@
 #include <QNetworkInterface>
 #include <QHostAddress>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QTimer>
 
 #include <obs.h>
 
 #include "plugin-support.h"
-#include "tracker-utils.hpp"
+#include "vtube-studio-data.hpp"
+
+// Forward declarations
 
 class NetworkTracking : public QWidget {
 	Q_OBJECT
@@ -22,20 +25,18 @@ public:
 			quint16 destPort = 21412);
 	~NetworkTracking();
 
-	bool UpdateConnection(quint16 newPort, std::optional<QString> in_destIpAddress = std::nullopt,
+	bool updateConnection(quint16 newPort, std::optional<QString> in_destIpAddress = std::nullopt,
 			      std::optional<quint16> in_destPort = std::nullopt);
-	bool SendUDPData(QString destIpAddress, quint16 destPort, QByteArray data);
-	static QString GetIpAddresses();
-
-	void StopDataRequestTimer();
+	bool sendUDPData(QString destIpAddress, quint16 destPort, QByteArray data);
+	static QString getIpAddresses();
 
 signals:
-	void ReceivedData(VTubeStudioTrackingData data);
-	void ConnectionToggle(bool isConnected);
-	void ConnectionErrorToggle(bool isError);
+	void receivedData(VTubeStudioData data);
+	void connectionToggle(bool isConnected);
+	void connectionErrorToggle(bool isError);
 
 private slots:
-	void ProcessReceivedTrackingData();
+	void processReceivedTrackingData();
 
 private:
 	QTimer *networkTrackingDataRequestTimer = nullptr;
@@ -58,10 +59,10 @@ private:
 		{"sentBy", "vTuberApp"},
 	};
 
-	bool StartConnection();
-	void ResetConnectionTimer();
-	void SetSendPeriodicData();
-	void RequestTrackingData(quint16 destPort, QString destIpAddress);
+	bool startConnection();
+	void resetConnectionTimer();
+	void setSendPeriodicData();
+	void requestTrackingData(quint16 destPort, QString destIpAddress);
 };
 
 #endif // NETWORKTRACKING_H

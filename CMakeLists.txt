@@ -42,21 +42,37 @@ target_sources(
     src/plugin-main.cpp
     src/main-widget-dock.hpp
     src/main-widget-dock.cpp
-    src/widgets/face-tracker.cpp
     src/widgets/face-tracker.hpp
-    src/widgets/settings-dialog.cpp
+    src/widgets/face-tracker.cpp
     src/widgets/settings-dialog.hpp
+    src/widgets/settings-dialog.cpp
     src/widgets/obs-dock-wrapper.hpp
-    src/widgets/avatar-graphics-view.cpp
     src/widgets/avatar-graphics-view.hpp
-    src/utils/pose-image.hpp
+    src/widgets/avatar-graphics-view.cpp
     src/widgets/pixmap-item.hpp
-    src/utils/tracker-utils.cpp
-    src/utils/tracker-utils.hpp
-    src/utils/obs-utils.cpp
-    src/utils/obs-utils.hpp
-    src/utils/network-tracking.cpp
+    src/utils/blendshape-key.hpp
+    src/utils/blendshape-key.cpp
+    src/utils/blendshape-rule.hpp
+    src/utils/blendshape-rule.cpp
+    src/utils/blendshape.hpp
+    src/utils/blendshape.cpp
     src/utils/network-tracking.hpp
+    src/utils/network-tracking.cpp
+    src/utils/obs-utils.hpp
+    src/utils/obs-utils.cpp
+    src/utils/pose-image-data.hpp
+    src/utils/pose-image-data.cpp
+    src/utils/pose-image.hpp
+    src/utils/pose.hpp
+    src/utils/pose.cpp
+    src/utils/tracker-data.hpp
+    src/utils/tracker-data.cpp
+    src/utils/tracker-utils.hpp
+    src/utils/tracker-utils.cpp
+    src/utils/vector3.hpp
+    src/utils/vector3.cpp
+    src/utils/vtube-studio-data.hpp
+    src/utils/vtube-studio-data.cpp
 )
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
