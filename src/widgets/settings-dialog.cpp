@@ -1035,12 +1035,7 @@ void SettingsDialog::HandleImageMove(qreal x, qreal y, qreal z, PoseImage pImage
 {
 	int selectedRow = GetSelectedRow();
 
-	obs_log(LOG_INFO, QString("Updated Pose %1: x=%2, y=%3, z=%4")
-				  .arg(x)
-				  .arg(y)
-				  .arg(z)
-				  .toStdString()
-				  .c_str());
+	obs_log(LOG_INFO, QString("Updated Pose %1: x=%2, y=%3, z=%4").arg(x).arg(y).arg(z).toStdString().c_str());
 
 	if (selectedRow != -1) {
 		QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
