@@ -42,7 +42,18 @@ Pose &Pose::operator=(const Pose &other)
 
 QSharedPointer<Pose> Pose::clone() const
 {
-	return QSharedPointer<Pose>(new Pose(*this)); // Utilizes the copy constructor
+	QSharedPointer<Pose> clonedPose(new Pose(*this)); // Utilizes the copy constructor
+
+	// Deep clone each PoseImageData's MovablePixmapItem
+    std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> clonedPoseImages = m_poseImages;
+    for (PoseImageData &poseImageData : clonedPoseImages) {
+        if (poseImageData.getPixmapItem()) {
+            poseImageData.setPixmapItem(poseImageData.getPixmapItem()->clone());
+        }
+    }
+    clonedPose->m_poseImages = clonedPoseImages;
+    
+    return clonedPose;
 }
 
 QString Pose::getPoseId()
@@ -119,9 +130,9 @@ PoseImageData *Pose::getPoseImageData(PoseImage pose)
 	return nullptr;
 }
 
-PoseImageData Pose::getPoseImageAt(int index)
+PoseImageData *Pose::getPoseImageAt(int index)
 {
-	return m_poseImages.at(index);
+	return &m_poseImages.at(index);
 }
 
 QJsonObject Pose::toJson() const

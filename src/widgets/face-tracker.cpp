@@ -153,37 +153,37 @@ void FaceTracker::loadPoseData()
 
 		for (size_t i = 0; i < selectedPose->getPoseImageListSize(); ++i) {
 			PoseImage poseEnum = static_cast<PoseImage>(i);
-			PoseImageData data = selectedPose->getPoseImageAt(i);
+			PoseImageData *data = selectedPose->getPoseImageAt(i);
 
-			if (!data.getImageUrl().isEmpty()) {
-				data.setPixmapItem(new MovablePixmapItem(poseEnum));
+			if (!data->getImageUrl().isEmpty()) {
+				data->setPixmapItem(QSharedPointer<MovablePixmapItem>(new MovablePixmapItem(poseEnum)));
 
-				QPixmap pixmap(data.getImageUrl());
+				QPixmap pixmap(data->getImageUrl());
 				if (!pixmap.isNull()) {
-					data.getPixmapItem()->setPixmap(pixmap);
+					data->getPixmapItem()->setPixmap(pixmap);
 				} else {
 					obs_log(LOG_ERROR, "Failed to load pixmap from URL: %s",
-						data.getImageUrl().toStdString().c_str());
-					data.clearPixmapItem();
+						data->getImageUrl().toStdString().c_str());
+					data->clearPixmapItem();
 					continue;
 				}
 
 				switch (poseEnum) {
 				case PoseImage::BODY:
-					data.setImagePosition(selectedPose->getBodyPosition().getX(),
+					data->setImagePosition(selectedPose->getBodyPosition().getX(),
 							      selectedPose->getBodyPosition().getY());
 					break;
 				case PoseImage::EYESOPEN:
 				case PoseImage::EYESHALFOPEN:
 				case PoseImage::EYESCLOSED:
-					data.setImagePosition(selectedPose->getEyesPosition().getX(),
+					data->setImagePosition(selectedPose->getEyesPosition().getX(),
 							      selectedPose->getEyesPosition().getY());
 					break;
 				case PoseImage::MOUTHCLOSED:
 				case PoseImage::MOUTHOPEN:
 				case PoseImage::MOUTHSMILE:
 				case PoseImage::TONGUEOUT:
-					data.setImagePosition(selectedPose->getMouthPosition().getX(),
+					data->setImagePosition(selectedPose->getMouthPosition().getX(),
 							      selectedPose->getMouthPosition().getY());
 					break;
 				default:

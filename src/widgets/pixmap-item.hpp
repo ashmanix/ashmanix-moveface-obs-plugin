@@ -1,4 +1,3 @@
-// MovablePixmapItem.hpp
 #ifndef MOVABLEPIXMAPITEM_HPP
 #define MOVABLEPIXMAPITEM_HPP
 
@@ -28,6 +27,20 @@ public:
 	{
 		// Enable the item to be movable and selectable
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
+	}
+
+	virtual ~MovablePixmapItem() {};
+
+	// Get clone of MovablePixmapItem
+	QSharedPointer<MovablePixmapItem> clone() const
+	{
+		MovablePixmapItem *newItem = new MovablePixmapItem(this->pixmap(), nullptr, this->poseImageType);
+
+		newItem->setTransformOriginPoint(this->transformOriginPoint());
+		newItem->setPos(this->pos());
+		newItem->setZValue(this->zValue());
+
+		return QSharedPointer<MovablePixmapItem>(newItem);
 	}
 
 private:

@@ -102,6 +102,12 @@ void SettingsDialog::updateStyledUIComponents()
 		ui->centerOnImagesToolButton->setIcon(centerIcon);
 	}
 
+	ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
+						    "background-color: transparent;"
+						    "}"
+						    "#trackingScrollAreaWidgetContents {"
+						    "background-color: transparent;"
+						    "}");
 	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 	ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
@@ -571,16 +577,17 @@ void SettingsDialog::addImageToScene(PoseImageData *imageData, bool useImagePos,
 		qreal centerX = sceneRect.width() / 2;
 		qreal centerY = sceneRect.height() / 2;
 
-		QGraphicsPixmapItem *imagePixmap = static_cast<QGraphicsPixmapItem *>(imageData->getPixmapItem());
+		QGraphicsPixmapItem *imagePixmap =
+			static_cast<QGraphicsPixmapItem *>(imageData->getPixmapItem().data());
 
 		qreal imagePixmapX = centerX - imagePixmap->pixmap().width() / 2;
 		qreal imagePixmapY = centerY - imagePixmap->pixmap().height() / 2;
 
 		imageData->setImagePosition(imagePixmapX, imagePixmapY);
 	}
-	avatarPreviewScene->addItem(imageData->getPixmapItem());
+	avatarPreviewScene->addItem(imageData->getPixmapItem().data());
 
-	QObject::connect(imageData->getPixmapItem(), &MovablePixmapItem::positionChanged, this,
+	QObject::connect(imageData->getPixmapItem().data(), &MovablePixmapItem::positionChanged, this,
 			 &SettingsDialog::handleImageMove);
 
 	centerSceneOnItems();
@@ -723,7 +730,7 @@ void SettingsDialog::showEvent(QShowEvent *event)
 
 void SettingsDialog::closeEvent(QCloseEvent *)
 {
-	resetPoseUITab();
+	cancelButtonClicked();
 }
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------
@@ -755,6 +762,7 @@ void SettingsDialog::okButtonClicked()
 
 void SettingsDialog::syncPoseListToModel()
 {
+	// Disconnect setting row update signal during sync with tracker data
 	QObject::disconnect(poseListModel, &QAbstractItemModel::rowsInserted, this,
 			    &SettingsDialog::onPoseRowsInserted);
 
@@ -779,7 +787,7 @@ void SettingsDialog::syncPoseListToModel()
 
 		poseListModel->appendRow(item);
 	}
-
+	// Reenable signal
 	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
 }
 
@@ -881,21 +889,22 @@ void SettingsDialog::handleImageUrlButtonClicked(PoseImage poseEnum)
 		return;
 	}
 
-	selectedPose->getPoseImageAt(imageIndex).getImageUrl() = fileName;
+	selectedPose->getPoseImageAt(imageIndex)->getImageUrl() = fileName;
 
-	if (selectedPose->getPoseImageAt(imageIndex).getPixmapItem()) {
-		selectedPose->getPoseImageAt(imageIndex).clearPixmapItem();
+	if (selectedPose->getPoseImageAt(imageIndex)->getPixmapItem()) {
+		selectedPose->getPoseImageAt(imageIndex)->clearPixmapItem();
 	}
 
 	QPixmap pixmap(fileName);
 	if (pixmap.isNull()) {
 		obs_log(LOG_WARNING,
 			QString("Failed to load pixmap from file: %1").arg(fileName).toStdString().c_str());
-		selectedPose->getPoseImageAt(imageIndex).clearPixmapItem();
+		selectedPose->getPoseImageAt(imageIndex)->clearPixmapItem();
 		return;
 	}
 
-	selectedPose->getPoseImageAt(imageIndex).setPixmapItem(new MovablePixmapItem(pixmap));
+	selectedPose->getPoseImageAt(imageIndex)
+		->setPixmapItem(QSharedPointer<MovablePixmapItem>(new MovablePixmapItem(pixmap)));
 
 	switch (poseEnum) {
 	case PoseImage::BODY:
@@ -924,12 +933,12 @@ void SettingsDialog::handleClearImageUrl(PoseImage poseEnum)
 		return;
 
 	if (imageIndex >= 0 && static_cast<size_t>(imageIndex) < selectedPose->getPoseImageListSize()) {
-		PoseImageData poseData = selectedPose->getPoseImageAt(imageIndex);
+		PoseImageData *poseData = selectedPose->getPoseImageAt(imageIndex);
 		poseImageLineEdits[poseEnum]->setText(QString());
 
-		poseData.setImageUrl(QString());
-		if (poseData.getPixmapItem()) {
-			poseData.clearPixmapItem();
+		poseData->setImageUrl(QString());
+		if (poseData->getPixmapItem()) {
+			poseData->clearPixmapItem();
 		}
 	} else {
 		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
