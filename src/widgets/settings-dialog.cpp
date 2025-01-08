@@ -279,7 +279,7 @@ void SettingsDialog::setupDialogUI(QSharedPointer<TrackerData> settingsDialogDat
 
 	// ----------------------------------------------- Tracking Tab -----------------------------------------------
 
-	ui->imageGroupBox->setTitle(obs_module_text("DialogAvatarGroupBoxTitle"));
+	// ui->imageGroupBox->setTitle(obs_module_text("DialogAvatarGroupBoxTitle"));
 
 	ui->addPoseToolButton->setToolTip(obs_module_text("DialogAddPoseToolTip"));
 	ui->deletePoseToolButton->setToolTip(obs_module_text("DialogDeletePoseToolTip"));
