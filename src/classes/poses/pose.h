@@ -1,7 +1,7 @@
 #ifndef POSE_H
 #define POSE_H
 
-#include "vector3.hpp"
+#include "vector3.h"
 #include <array>
 #include <vector>
 #include <QJsonObject>
@@ -9,12 +9,12 @@
 #include <QSharedPointer>
 #include <obs.h>
 
-#include "pose-image.hpp"
-#include "pose-image-data.hpp"
-#include "blendshape-key.hpp"
-#include "pose-image-data.hpp"
-#include "blendshape-rule.hpp"
-#include "blendshape.hpp"
+#include "pose-image.h"
+#include "pose-image-data.h"
+#include "pose-image-data.h"
+#include "../blendshapes/blendshape-key.h"
+#include "../blendshapes/blendshape-rule.h"
+#include "../blendshapes/blendshape.h"
 
 // Forward declarations
 

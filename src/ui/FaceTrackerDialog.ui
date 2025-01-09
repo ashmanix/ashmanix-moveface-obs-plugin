@@ -1515,7 +1515,7 @@
   <customwidget>
    <class>AvatarGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>widgets/avatar-graphics-view.hpp</header>
+   <header>widgets/settings-dialog/avatar-graphics-view.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

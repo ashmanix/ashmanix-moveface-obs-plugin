@@ -8,8 +8,8 @@
 #include <QSharedPointer>
 #include <QMap>
 
-#include "vector3.hpp"
-#include "blendshape.hpp"
+#include "../poses/vector3.h"
+#include "../blendshapes/blendshape.h"
 
 class VTubeStudioData {
 public:

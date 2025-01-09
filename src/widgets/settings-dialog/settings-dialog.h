@@ -16,16 +16,16 @@
 #include <QModelIndex>
 #include <QList>
 
-#include "../widgets/pixmap-item.hpp"
-#include "../main-widget-dock.hpp"
-#include "../utils/blendshape-key.hpp"
-#include "../utils/tracker-utils.hpp"
-#include "../utils/tracker-data.hpp"
-#include "../utils/pose-image-data.hpp"
-#include "../utils/pose-image.hpp"
-#include "../utils/pose.hpp"
-#include "../utils/network-tracking.hpp"
-#include "../ui/ui_FaceTrackerDialog.h"
+#include "../../classes/poses/pixmap-item.h"
+#include "../../classes/blendshapes/blendshape-key.h"
+#include "../../utils/utils.h"
+#include "../../classes/poses/pose-image-data.h"
+#include "../../classes/poses/pose-image.h"
+#include "../../classes/poses/pose.h"
+#include "../comms/network-tracking.h"
+#include "../main-widget-dock.h"
+#include "../../classes/tracking/tracker-data.h"
+#include "../../ui/ui_FaceTrackerDialog.h"
 
 class SettingsDialog : public QDialog {
 	Q_OBJECT

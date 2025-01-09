@@ -1,5 +1,5 @@
-#include "tracker-data.hpp"
-#include "pose.hpp"
+#include "tracker-data.h"
+#include "../poses/pose.h"
 
 TrackerData::TrackerData(QString trackerId, QString selectedImageSource, QString destIpAddress)
 {

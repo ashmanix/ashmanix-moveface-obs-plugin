@@ -1,7 +1,7 @@
-#include "face-tracker.hpp"
-#include "settings-dialog.hpp"
-#include "../utils/pose-image-data.hpp"
-#include "../utils/pose.hpp"
+#include "face-tracker.h"
+#include "./settings-dialog/settings-dialog.h"
+#include "../classes/poses/pose-image-data.h"
+#include "../classes/poses/pose.h"
 
 FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock *mDockWidget)
 	: QWidget(parent),

@@ -1,5 +1,5 @@
-#include "blendshape-rule.hpp"
-#include "blendshape.hpp"
+#include "blendshape-rule.h"
+#include "blendshape.h"
 
 bool BlendshapeRule::evaluate(const Blendshape &blendShape) const
 {

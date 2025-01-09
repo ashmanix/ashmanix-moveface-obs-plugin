@@ -18,13 +18,12 @@
 #include <obs-websocket-api.h>
 
 #include "plugin-support.h"
+#include "../utils/utils.h"
+#include "../classes/tracking/vtube-studio-data.h"
+#include "../classes/tracking/tracker-data.h"
+#include "./comms/network-tracking.h"
+#include "../classes/poses/pixmap-item.h"
 #include "../ui/ui_FaceTracker.h"
-#include "../utils/tracker-utils.hpp"
-#include "../utils/tracker-data.hpp"
-#include "../utils/vtube-studio-data.hpp"
-#include "../utils/network-tracking.hpp"
-#include "pixmap-item.hpp"
-#include "../main-widget-dock.hpp"
 
 // Forward declarations
 class SettingsDialog;

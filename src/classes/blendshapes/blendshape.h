@@ -1,7 +1,7 @@
 #ifndef BLENDSHAPE_H
 #define BLENDSHAPE_H
 
-#include "blendshape-key.hpp"
+#include "blendshape-key.h"
 #include <QJsonObject>
 
 class Blendshape {

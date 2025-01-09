@@ -3,7 +3,7 @@
 
 #include <QGraphicsPixmapItem>
 #include <QObject>
-#include "../utils/pose-image.hpp"
+#include "pose-image.h"
 
 class MovablePixmapItem : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT

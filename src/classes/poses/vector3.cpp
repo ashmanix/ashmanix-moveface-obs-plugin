@@ -1,4 +1,4 @@
-#include "vector3.hpp"
+#include "vector3.h"
 
 Vector3::Vector3(double x, double y, double z) : m_x(x), m_y(y), m_z(z) {}
 

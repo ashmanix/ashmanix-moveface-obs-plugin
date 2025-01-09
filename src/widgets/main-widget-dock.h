@@ -15,10 +15,9 @@
 #include <obs-websocket-api.h>
 
 #include "plugin-support.h"
-#include "./utils/obs-utils.hpp"
-#include "./utils/tracker-utils.hpp"
-#include "widgets/obs-dock-wrapper.hpp"
-#include "ui/ui_MainWidget.h"
+#include "./utils/utils.h"
+#include "widgets/obs-dock-wrapper.h"
+#include "../ui/ui_MainWidget.h"
 
 // Forward declerations
 class FaceTracker;

@@ -17,7 +17,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include <QMainWindow>
-#include <main-widget-dock.hpp>
+#include "widgets/main-widget-dock.h"
 #include <obs-module.h>
 #include <plugin-support.h>
 

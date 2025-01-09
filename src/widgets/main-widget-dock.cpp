@@ -1,5 +1,5 @@
-#include "main-widget-dock.hpp"
-#include "widgets/face-tracker.hpp"
+#include "main-widget-dock.h"
+#include "./widgets/face-tracker.h"
 
 MainWidgetDock::MainWidgetDock(QWidget *parent) : OBSDock(parent), ui(new Ui::MainWidget)
 {

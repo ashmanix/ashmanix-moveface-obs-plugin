@@ -1,5 +1,5 @@
-#include "pose-image-data.hpp"
-#include "../widgets/pixmap-item.hpp"
+#include "pose-image-data.h"
+#include "pixmap-item.h"
 
 PoseImageData::PoseImageData(const QString &url, QSharedPointer<MovablePixmapItem> item)
 	: m_imageUrl(url),

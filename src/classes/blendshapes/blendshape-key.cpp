@@ -1,4 +1,4 @@
-#include "blendshape-key.hpp"
+#include "blendshape-key.h"
 
 QString blendshapeKeyToString(BlendshapeKey key)
 {

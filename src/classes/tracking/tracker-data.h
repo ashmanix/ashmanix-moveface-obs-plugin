@@ -7,7 +7,7 @@
 #include <QJsonDocument>
 #include <obs.h>
 
-#include "plugin-support.h"
+#include "../../plugin-support.h"
 
 // Forward declarations
 class Pose;

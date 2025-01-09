@@ -1,4 +1,4 @@
-#include "pose.hpp"
+#include "pose.h"
 
 Pose::Pose()
 	: m_poseId(""),

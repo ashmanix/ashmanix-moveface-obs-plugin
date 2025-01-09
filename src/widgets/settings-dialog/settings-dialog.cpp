@@ -1,4 +1,4 @@
-#include "settings-dialog.hpp"
+#include "settings-dialog.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tData, MainWidgetDock *mWidget)
 	: QDialog(parent),

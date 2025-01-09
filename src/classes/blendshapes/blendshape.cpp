@@ -1,4 +1,4 @@
-#include "blendshape.hpp"
+#include "blendshape.h"
 
 QJsonObject Blendshape::toJson() const
 {

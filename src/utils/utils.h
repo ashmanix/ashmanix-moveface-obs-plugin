@@ -1,15 +1,25 @@
-#ifndef OBSUTILS_H
-#define OBSUTILS_H
+#ifndef UTILS_H
+#define UTILS_H
 
-#include <obs.h>
+#include <QString>
+#include <QUuid>
+#include <QCryptographicHash>
+#include <QFileInfo>
+
 #include <obs.hpp>
 #include <obs-module.h>
 #include <obs-frontend-api.h>
 
-#include "./tracker-utils.hpp"
-#include "../plugin-support.h"
+#include "plugin-support.h"
 
 Q_DECLARE_OPAQUE_POINTER(obs_data_t *)
+#define CONFIG "config.json"
+
+struct Result {
+	bool success;
+	QString errorMessage;
+};
+
 
 struct RegisterHotkeyCallbackData {
 	std::function<void()> function; // Function pointer to callback function
@@ -23,4 +33,7 @@ void SaveHotkey(obs_data_t *sv_data, obs_hotkey_id id, const char *name);
 void HotkeyCallback(void *incoming_data, obs_hotkey_id id, obs_hotkey_t *hotkey, bool pressed);
 QString GetDataFolderPath();
 
-#endif // OBSUTILS_H
+QString GenerateUniqueID();
+bool FileExists(QString filePath);
+
+#endif // UTILS_H

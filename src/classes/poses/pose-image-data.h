@@ -2,7 +2,7 @@
 #define POSEIMAGEDATA_H
 
 #include <QString>
-#include "../widgets/pixmap-item.hpp"
+#include "pixmap-item.h"
 
 class PoseImageData {
 public:

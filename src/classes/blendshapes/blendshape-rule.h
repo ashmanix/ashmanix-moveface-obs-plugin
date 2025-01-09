@@ -1,7 +1,7 @@
 #ifndef BLENDSHAPERULE_H
 #define BLENDSHAPERULE_H
 
-#include "blendshape-key.hpp"
+#include "blendshape-key.h"
 
 // Forward declarations
 class Blendshape;

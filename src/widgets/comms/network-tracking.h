@@ -13,7 +13,7 @@
 #include <obs.h>
 
 #include "plugin-support.h"
-#include "vtube-studio-data.hpp"
+#include "../../classes/tracking/vtube-studio-data.h"
 
 // Forward declarations
 

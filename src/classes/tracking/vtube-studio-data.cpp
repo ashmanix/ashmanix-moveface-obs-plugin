@@ -1,4 +1,4 @@
-#include "vtube-studio-data.hpp"
+#include "vtube-studio-data.h"
 
 VTubeStudioData::VTubeStudioData() {}
 
