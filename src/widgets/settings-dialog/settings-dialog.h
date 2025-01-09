@@ -25,7 +25,7 @@
 #include "../comms/network-tracking.h"
 #include "../main-widget-dock.h"
 #include "../../classes/tracking/tracker-data.h"
-#include "../../ui/ui_FaceTrackerDialog.h"
+#include "../../ui/settings-dialog/ui_FaceTrackerDialog.h"
 
 class SettingsDialog : public QDialog {
 	Q_OBJECT

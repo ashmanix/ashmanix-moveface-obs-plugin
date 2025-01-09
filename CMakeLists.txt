@@ -36,50 +36,16 @@ endif()
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 
-set(CPP_FILES
-  src/classes/blendshapes/blendshape-key.cpp
-  src/classes/blendshapes/blendshape-rule.cpp
-  src/classes/blendshapes/blendshape.cpp
-  src/classes/poses/pose-image-data.cpp
-  src/classes/poses/pose.cpp
-  src/classes/poses/vector3.cpp
-  src/classes/tracking/tracker-data.cpp
-  src/classes/tracking/vtube-studio-data.cpp
-  src/plugin-main.cpp
-  src/utils/utils.cpp
-  src/widgets/comms/network-tracking.cpp
-  src/widgets/face-tracker.cpp
-  src/widgets/main-widget-dock.cpp
-  src/widgets/settings-dialog/avatar-graphics-view.cpp
-  src/widgets/settings-dialog/settings-dialog.cpp
-)
-
-set(HEADER_FILES
-  src/classes/blendshapes/blendshape-key.h
-  src/classes/blendshapes/blendshape-rule.h
-  src/classes/blendshapes/blendshape.h
-  src/classes/poses/pixmap-item.h
-  src/classes/poses/pose-image-data.h
-  src/classes/poses/pose-image.h
-  src/classes/poses/pose.h
-  src/classes/poses/vector3.h
-  src/classes/tracking/tracker-data.h
-  src/classes/tracking/vtube-studio-data.h
-  src/plugin-support.h
-  src/utils/utils.h
-  src/widgets/comms/network-tracking.h
-  src/widgets/face-tracker.h
-  src/widgets/main-widget-dock.h
-  src/widgets/obs-dock-wrapper.h
-  src/widgets/settings-dialog/avatar-graphics-view.h
-  src/widgets/settings-dialog/settings-dialog.h
+file(GLOB_RECURSE SRC_FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/*.ui"
 )
 
 target_sources(
   ${CMAKE_PROJECT_NAME}
   PRIVATE
-  ${CPP_FILES}
-  ${HEADER_FILES}
+  ${SRC_FILES}
 )
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

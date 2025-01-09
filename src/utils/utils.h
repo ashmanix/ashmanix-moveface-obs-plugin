@@ -21,19 +21,19 @@ struct Result {
 };
 
 
-struct RegisterHotkeyCallbackData {
+struct RegisterhotkeyCallbackData {
 	std::function<void()> function; // Function pointer to callback function
 	std::string hotkeyLogMessage;   // Message to log when hotkey is triggered
 };
 
-void LoadHotkey(int &id, const char *name, const char *description, std::function<void()> function,
+void loadHotkey(int &id, const char *name, const char *description, std::function<void()> function,
 		std::string buttonLogMessage, obs_data_t *savedData);
 
-void SaveHotkey(obs_data_t *sv_data, obs_hotkey_id id, const char *name);
-void HotkeyCallback(void *incoming_data, obs_hotkey_id id, obs_hotkey_t *hotkey, bool pressed);
-QString GetDataFolderPath();
+void saveHotkey(obs_data_t *sv_data, obs_hotkey_id id, const char *name);
+void hotkeyCallback(void *incoming_data, obs_hotkey_id id, obs_hotkey_t *hotkey, bool pressed);
+QString getDataFolderPath();
 
-QString GenerateUniqueID();
+QString generateUniqueID();
 bool FileExists(QString filePath);
 
 #endif // UTILS_H

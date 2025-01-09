@@ -30,8 +30,8 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::updateStyledUIComponents()
 {
-	QString baseUrl = obs_frontend_is_theme_dark() ? GetDataFolderPath() + "/icons/dark/"
-						       : GetDataFolderPath() + "/icons/light/";
+	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
+						       : getDataFolderPath() + "/icons/light/";
 	QString searchIconPath = QDir::fromNativeSeparators(baseUrl + "search.svg");
 	if (QFileInfo::exists(searchIconPath)) {
 		QIcon searchIcon(searchIconPath);

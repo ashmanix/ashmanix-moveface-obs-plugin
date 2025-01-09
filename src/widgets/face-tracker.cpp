@@ -18,7 +18,7 @@ FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock 
 
 	if (trackerData->getTrackerId().size() == 0) {
 		// Get a unique ID for the tracker
-		trackerData->setTrackerId(GenerateUniqueID());
+		trackerData->setTrackerId(generateUniqueID());
 	}
 
 	this->setProperty("id", trackerData->getTrackerId());

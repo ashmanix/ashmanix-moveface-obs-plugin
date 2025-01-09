@@ -113,7 +113,7 @@ void MainWidgetDock::saveSettings()
 	obs_data_set_array(settings, "tracker_widgets", obsDataArray);
 
 	// ----------------------------------- Save Hotkeys -----------------------------------
-	SaveHotkey(settings, addTrackerHotkeyId, addTrackerHotkeyName);
+	saveHotkey(settings, addTrackerHotkeyId, addTrackerHotkeyName);
 	// ------------------------------------------------------------------------------------
 
 	char *file = obs_module_config_path(CONFIG);
@@ -167,7 +167,7 @@ void MainWidgetDock::updateWidgetStyles(MainWidgetDock *trackerWidgetDock)
 
 void MainWidgetDock::registerAllHotkeys(obs_data_t *savedData)
 {
-	LoadHotkey(
+	loadHotkey(
 		addTrackerHotkeyId, addTrackerHotkeyName, obs_module_text("AddTrackerHotkeyDescription"),
 		[this]() { ui->addTrackerButton->click(); }, "Add Timer Hotkey Pressed", savedData);
 }
