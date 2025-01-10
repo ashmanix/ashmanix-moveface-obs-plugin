@@ -9,7 +9,7 @@ PoseListWidget::PoseListWidget(QWidget *parent, QSharedPointer<TrackerData> tDat
 	ui->setupUi(this);
 	setupListUI();
 	if (tData)
-		setListDetails(tData);
+		setupListData(tData);
 
 	connectUISignalHandlers();
 }
@@ -33,6 +33,7 @@ void PoseListWidget::setupListData(QSharedPointer<TrackerData> settingsDialogDat
 	if (poseListModel)
 		poseListModel->clear();
 	// loop through data and add ID's to list
+	
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -61,7 +62,7 @@ void PoseListWidget::setupListUI(QSharedPointer<TrackerData> PoseListWidgetData)
 	ui->movePoseDownToolButton->setToolTip(obs_module_text("DialogMovePoseDownToolTip"));
 
 	ui->poseListLabel->setText(obs_module_text("DialogPostListLabel"));
-	
+
 	poseListModel = new QStandardItemModel(this);
 	ui->poseListView->setModel(poseListModel);
 	ui->poseListView->setDragEnabled(false);
