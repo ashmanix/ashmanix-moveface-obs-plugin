@@ -148,7 +148,7 @@ void FaceTracker::setTrackerData()
 
 void FaceTracker::loadPoseData()
 {
-	for (size_t i = 0; i < trackerData->getPoseList().size(); i++) {
+	for (qsizetype i = 0; i < trackerData->getPoseList().size(); i++) {
 		QSharedPointer<Pose> selectedPose = trackerData->getPoseAt(i);
 
 		for (size_t j = 0; j < selectedPose->getPoseImageListSize(); ++j) {
