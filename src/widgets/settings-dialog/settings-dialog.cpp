@@ -7,8 +7,10 @@ SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tDat
 	ui->setupUi(this);
 	trackerData = tData;
 	mainWidget = mWidget;
-	poseListWidget = new PoseListWidget(this, tData = trackerData);
-	imageFilesWidget = new ImageFilesWidget(this, tData = trackerData);
+	poseListWidget = new PoseListWidget(this, trackerData);
+	imageFilesWidget = new ImageFilesWidget(this);
+	faceSettingsWidget = new FaceSettingsWidget(this);
+
 	setTitle();
 
 	connectUISignalHandlers();
@@ -133,6 +135,9 @@ void SettingsDialog::connectUISignalHandlers()
 	QObject::connect(poseListWidget, &PoseListWidget::rowsSelected, this, &SettingsDialog::onPoseSelected);
 	QObject::connect(poseListWidget, &PoseListWidget::rowMoved, this, &SettingsDialog::onPoseRowMoved);
 
+	QObject::connect(faceSettingsWidget, &FaceSettingsWidget::blendshapeLimitChanged, this,
+			 &SettingsDialog::handleBlendshapelimitChange);
+
 	QPushButton *applyButton = ui->dialogButtonBox->button(QDialogButtonBox::Apply);
 	if (applyButton) {
 		connect(applyButton, &QPushButton::clicked, this, &SettingsDialog::applyButtonClicked);
@@ -198,6 +203,7 @@ void SettingsDialog::setupDialogUI(QSharedPointer<TrackerData> settingsDialogDat
 
 	ui->poseVerticalLayout->addWidget(poseListWidget);
 	ui->poseVerticalLayout->addWidget(imageFilesWidget);
+	ui->settingsVerticalLayout->addWidget(faceSettingsWidget);
 
 	ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
 	ui->moveImageUpLevelToolButton->setToolTip(obs_module_text("DialogMoveImageUpLevelToolTip"));
@@ -453,6 +459,7 @@ void SettingsDialog::clearScene()
 void SettingsDialog::clearCurrentPoseConfig()
 {
 	imageFilesWidget->clearSelection();
+	faceSettingsWidget->clearSelection();
 	clearScene();
 }
 
@@ -471,6 +478,8 @@ void SettingsDialog::loadSelectedPoseConfig()
 	clearCurrentPoseConfig();
 	clearScene();
 	imageFilesWidget->toggleVisible(true);
+	faceSettingsWidget->setData(selectedPose);
+	faceSettingsWidget->toggleVisible(true);
 
 	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
 		auto poseEnum = static_cast<PoseImage>(i);
@@ -525,6 +534,7 @@ void SettingsDialog::resetPoseUITab()
 	clearCurrentPoseConfig();
 	poseListWidget->clearSelection();
 	imageFilesWidget->toggleVisible(false);
+	faceSettingsWidget->toggleVisible(false);
 }
 
 void SettingsDialog::centerSceneOnItems()
@@ -882,4 +892,37 @@ void SettingsDialog::handleImageMove(qreal x, qreal y, qreal z, PoseImage pImage
 	}
 
 	formChangeDetected();
+}
+
+void SettingsDialog::handleBlendshapelimitChange(PoseImage poseEnum, double value)
+{
+	obs_log(LOG_INFO, "Pose: %s, value: %f", poseImageToString(poseEnum).toStdString().c_str(), value);
+
+	int selectedRow = getSelectedRow();
+	if (selectedRow == -1)
+		return;
+
+	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
+
+	switch (poseEnum) {
+	case PoseImage::EYESHALFOPEN:
+		selectedPose->setEyesHalfOpenLimit(value);
+		formChangeDetected();
+		break;
+	case PoseImage::EYESOPEN:
+		selectedPose->setEyesOpenLimit(value);
+		formChangeDetected();
+		break;
+	case PoseImage::MOUTHOPEN:
+		selectedPose->setMouthOpenLimit(value);
+		formChangeDetected();
+		break;
+	case PoseImage::TONGUEOUT:
+		selectedPose->setTongueOutLimit(value);
+		formChangeDetected();
+		break;
+
+	default:
+		break;
+	}
 }

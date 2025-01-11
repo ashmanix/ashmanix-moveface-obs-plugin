@@ -88,14 +88,14 @@ void ImageFilesWidget::connectUISignalHandlers()
 void ImageFilesWidget::setupWidgetUI()
 {
 	ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
-	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyUrlLabel"));
-	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenUrlLabel"));
-	ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenUrlLabel"));
-	ui->eyesClosedUrlLabel->setText(obs_module_text("DialogEyesClosedUrlLabel"));
-	ui->mouthClosedUrlLabel->setText(obs_module_text("DialogMouthClosedUrlLabel"));
-	ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenUrlLabel"));
-	ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileUrlLabel"));
-	ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutUrlLabel"));
+	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyLabel"));
+	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
+	ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
+	ui->eyesClosedUrlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
+	ui->mouthClosedUrlLabel->setText(obs_module_text("DialogMouthClosedLabel"));
+	ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
+	ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileLabel"));
+	ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutLabel"));
 
 	ui->bodyUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
 	ui->eyesOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));

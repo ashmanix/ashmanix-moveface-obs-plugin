@@ -28,6 +28,7 @@
 #include "../main-widget-dock.h"
 #include "pose-list-widget.h"
 #include "image-files-widget.h"
+#include "face-settings-widget.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_FaceTrackerDialog.h"
 
@@ -45,6 +46,7 @@ private:
 	MainWidgetDock *mainWidget;
 	PoseListWidget *poseListWidget;
 	ImageFilesWidget *imageFilesWidget;
+	FaceSettingsWidget *faceSettingsWidget;
 
 	QSharedPointer<TrackerData> trackerData;
 	bool isError = false;
@@ -108,6 +110,7 @@ private slots:
 	void handleMoveImageDownClick();
 	void handleImageZoomClick(bool isZoomOut = false);
 	void handleImageMove(qreal x, qreal y, qreal z, PoseImage pImageType);
+	void handleBlendshapelimitChange(PoseImage poseEnum, double value);
 };
 
 #endif // SETTINGSDIALOG_H

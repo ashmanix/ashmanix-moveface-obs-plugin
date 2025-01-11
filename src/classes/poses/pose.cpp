@@ -13,6 +13,10 @@ Pose::Pose(const Pose &other)
 	  m_bodyPosition(other.m_bodyPosition),
 	  m_eyesPosition(other.m_eyesPosition),
 	  m_mouthPosition(other.m_mouthPosition),
+	  m_eyesHalfOpenLimit(other.m_eyesHalfOpenLimit),
+	  m_eyesOpenLimit(other.m_eyesOpenLimit),
+	  m_mouthOpenLimit(other.m_mouthOpenLimit),
+	  m_tongueOutLimit(other.m_tongueOutLimit),
 	  m_blendShapesRuleList(other.m_blendShapesRuleList)
 {
 	// Deep copy
@@ -30,6 +34,10 @@ Pose &Pose::operator=(const Pose &other)
 	m_bodyPosition = other.m_bodyPosition;
 	m_eyesPosition = other.m_eyesPosition;
 	m_mouthPosition = other.m_mouthPosition;
+	m_eyesHalfOpenLimit = other.m_eyesHalfOpenLimit;
+	m_eyesOpenLimit = other.m_eyesOpenLimit;
+	m_mouthOpenLimit = other.m_mouthOpenLimit;
+	m_tongueOutLimit = other.m_tongueOutLimit;
 	m_blendShapesRuleList = other.m_blendShapesRuleList;
 
 	return *this;
@@ -56,22 +64,62 @@ QString Pose::getPoseId()
 	return m_poseId;
 }
 
-size_t Pose::getPoseImageListSize()
+size_t Pose::getPoseImageListSize() const
 {
 	return m_poseImages.size();
 }
 
-Vector3 Pose::getBodyPosition()
+double Pose::getEyesHalfOpenLimit() const
+{
+	return m_eyesHalfOpenLimit;
+}
+
+double Pose::getEyesOpenLimit() const
+{
+	return m_eyesOpenLimit;
+}
+
+double Pose::getMouthOpenLimit() const
+{
+	return m_mouthOpenLimit;
+}
+
+double Pose::getTongueOutLimit() const
+{
+	return m_tongueOutLimit;
+}
+
+Vector3 Pose::getBodyPosition() const
 {
 	return m_bodyPosition;
 }
-Vector3 Pose::getEyesPosition()
+Vector3 Pose::getEyesPosition() const
 {
 	return m_eyesPosition;
 }
-Vector3 Pose::getMouthPosition()
+Vector3 Pose::getMouthPosition() const
 {
 	return m_mouthPosition;
+}
+
+void Pose::setEyesHalfOpenLimit(double newLimit)
+{
+	m_eyesHalfOpenLimit = newLimit;
+}
+
+void Pose::setEyesOpenLimit(double newLimit)
+{
+	m_eyesOpenLimit = newLimit;
+}
+
+void Pose::setMouthOpenLimit(double newLimit)
+{
+	m_mouthOpenLimit = newLimit;
+}
+
+void Pose::setTongueOutLimit(double newLimit)
+{
+	m_tongueOutLimit = newLimit;
 }
 
 void Pose::setBodyPosition(Vector3 newPosition)
@@ -143,6 +191,11 @@ QJsonObject Pose::toJson() const
 	}
 	obj["poseImages"] = imagesObj;
 
+	obj["eyesHalfOpenLimit"] = m_eyesHalfOpenLimit;
+	obj["eyesOpenLimit"] = m_eyesOpenLimit;
+	obj["mouthOpenLimit"] = m_mouthOpenLimit;
+	obj["tongueOutLimit"] = m_tongueOutLimit;
+
 	obj["bodyPosition"] = m_bodyPosition.toJson();
 	obj["eyesPosition"] = m_eyesPosition.toJson();
 	obj["mouthPosition"] = m_mouthPosition.toJson();
@@ -175,6 +228,18 @@ Pose Pose::fromJson(const QJsonObject &obj)
 			pose.m_poseImages[i].setImageUrl(imageData["imageUrl"].toString());
 		}
 	}
+
+	double eyesHalfOpenLimitObj = obj["eyesHalfOpenLimit"].toDouble();
+	pose.m_eyesHalfOpenLimit = eyesHalfOpenLimitObj;
+
+	double eyesOpenLimitObj = obj["eyesOpenLimit"].toDouble();
+	pose.m_eyesOpenLimit = eyesOpenLimitObj;
+
+	double mouthOpenLimitObj = obj["mouthOpenLimit"].toDouble();
+	pose.m_mouthOpenLimit = mouthOpenLimitObj;
+
+	double tongueOutLimitObj = obj["tongueOutLimit"].toDouble();
+	pose.m_tongueOutLimit = tongueOutLimitObj;
 
 	QJsonObject bodyPosObj = obj["bodyPosition"].toObject();
 	pose.setBodyPosition(Vector3::fromJson(bodyPosObj));
