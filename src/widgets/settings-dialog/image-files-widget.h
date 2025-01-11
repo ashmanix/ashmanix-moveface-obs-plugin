@@ -25,7 +25,7 @@ public:
 	// void setListItem(PoseImage poseEnum, QString fileName);
 	void clearSelection();
 	void toggleVisible(bool isVisible);
-    QMap<PoseImage, QLineEdit *> getposeLineEditsMap() const;
+	QMap<PoseImage, QLineEdit *> getposeLineEditsMap() const;
 	auto getPoseListIerator(PoseImage poseEnum);
 
 private:

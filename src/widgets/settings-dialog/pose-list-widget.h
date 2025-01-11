@@ -14,7 +14,6 @@
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_PoseListView.h"
 
-
 class PoseListWidget : public QWidget {
 	Q_OBJECT
 public:

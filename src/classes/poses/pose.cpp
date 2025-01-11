@@ -45,15 +45,15 @@ QSharedPointer<Pose> Pose::clone() const
 	QSharedPointer<Pose> clonedPose(new Pose(*this)); // Utilizes the copy constructor
 
 	// Deep clone each PoseImageData's MovablePixmapItem
-    std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> clonedPoseImages = m_poseImages;
-    for (PoseImageData &poseImageData : clonedPoseImages) {
-        if (poseImageData.getPixmapItem()) {
-            poseImageData.setPixmapItem(poseImageData.getPixmapItem()->clone());
-        }
-    }
-    clonedPose->m_poseImages = clonedPoseImages;
-    
-    return clonedPose;
+	std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> clonedPoseImages = m_poseImages;
+	for (PoseImageData &poseImageData : clonedPoseImages) {
+		if (poseImageData.getPixmapItem()) {
+			poseImageData.setPixmapItem(poseImageData.getPixmapItem()->clone());
+		}
+	}
+	clonedPose->m_poseImages = clonedPoseImages;
+
+	return clonedPose;
 }
 
 QString Pose::getPoseId()

@@ -36,16 +36,13 @@ endif()
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 
-file(GLOB_RECURSE SRC_FILES
+file(
+  GLOB_RECURSE SRC_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/*.ui"
 )
 
-target_sources(
-  ${CMAKE_PROJECT_NAME}
-  PRIVATE
-  ${SRC_FILES}
-)
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${SRC_FILES})
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

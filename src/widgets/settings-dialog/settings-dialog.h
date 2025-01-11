@@ -103,7 +103,7 @@ private slots:
 	void onPoseRowsRemoved(QList<int> rowsList);
 	void onPoseDataChanged(QMap<int, QString> rowMap);
 	void onPoseRowMoved(int sourceRow, int targetRow);
-	
+
 	void handleCenterViewButtonClick();
 	void handleMoveImageUpClick();
 	void handleMoveImageDownClick();

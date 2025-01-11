@@ -171,20 +171,20 @@ void FaceTracker::loadPoseData()
 				switch (poseEnum) {
 				case PoseImage::BODY:
 					data->setImagePosition(selectedPose->getBodyPosition().getX(),
-							      selectedPose->getBodyPosition().getY());
+							       selectedPose->getBodyPosition().getY());
 					break;
 				case PoseImage::EYESOPEN:
 				case PoseImage::EYESHALFOPEN:
 				case PoseImage::EYESCLOSED:
 					data->setImagePosition(selectedPose->getEyesPosition().getX(),
-							      selectedPose->getEyesPosition().getY());
+							       selectedPose->getEyesPosition().getY());
 					break;
 				case PoseImage::MOUTHCLOSED:
 				case PoseImage::MOUTHOPEN:
 				case PoseImage::MOUTHSMILE:
 				case PoseImage::TONGUEOUT:
 					data->setImagePosition(selectedPose->getMouthPosition().getX(),
-							      selectedPose->getMouthPosition().getY());
+							       selectedPose->getMouthPosition().getY());
 					break;
 				default:
 					break;

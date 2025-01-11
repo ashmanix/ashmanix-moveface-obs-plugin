@@ -20,7 +20,6 @@ struct Result {
 	QString errorMessage;
 };
 
-
 struct RegisterhotkeyCallbackData {
 	std::function<void()> function; // Function pointer to callback function
 	std::string hotkeyLogMessage;   // Message to log when hotkey is triggered

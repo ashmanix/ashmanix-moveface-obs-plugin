@@ -103,7 +103,7 @@ void ImageFilesWidget::connectUISignalHandlers()
 
 void ImageFilesWidget::setupWidgetUI()
 {
-    ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
+	ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
 	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyUrlLabel"));
 	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenUrlLabel"));
 	ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenUrlLabel"));
@@ -230,7 +230,7 @@ void ImageFilesWidget::handleClearImageUrlButtonClicked(PoseImage poseEnum)
 	if (imageIndex < 0)
 		return;
 
-	if (imageIndex >= 0 && imageIndex < static_cast<int> (poseImageLineEdits.size())) {
+	if (imageIndex >= 0 && imageIndex < static_cast<int>(poseImageLineEdits.size())) {
 		poseImageLineEdits[poseEnum]->setText(QString());
 	} else {
 		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
