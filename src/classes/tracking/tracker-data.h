@@ -15,7 +15,7 @@ class Pose;
 class TrackerData {
 public:
 	TrackerData(QString trackerId = "", QString selectedImageSource = "", QString destIpAddress = "192.0.0.0");
-	~TrackerData();
+	~TrackerData() = default;
 
 	QString poseListToJsonString() const;
 	void jsonStringToPoseList(const QString &jsonString);

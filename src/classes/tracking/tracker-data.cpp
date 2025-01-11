@@ -2,13 +2,11 @@
 #include "../poses/pose.h"
 
 TrackerData::TrackerData(QString trackerId, QString selectedImageSource, QString destIpAddress)
+	: m_trackerId(trackerId),
+	  m_selectedImageSource(selectedImageSource),
+	  m_destIpAddress(destIpAddress)
 {
-	m_trackerId = trackerId;
-	m_selectedImageSource = selectedImageSource;
-	m_destIpAddress = destIpAddress;
 }
-
-TrackerData::~TrackerData() {}
 
 QString TrackerData::getTrackerId()
 {

@@ -26,7 +26,7 @@ class MainWidgetDock : public OBSDock {
 	Q_OBJECT
 public:
 	explicit MainWidgetDock(QWidget *parent = nullptr);
-	~MainWidgetDock();
+	~MainWidgetDock() override;
 	void configureWebSocketConnection();
 
 	Result validateNewTrackerID(QString id);

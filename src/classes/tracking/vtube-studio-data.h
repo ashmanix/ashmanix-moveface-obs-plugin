@@ -17,14 +17,14 @@ public:
 	~VTubeStudioData();
 
 	qint64 getTimeStamp();
-	int getHotkey();
-	bool getFaceFound();
-	Vector3 getRotation();
-	Vector3 getPosition();
-	Vector3 getVNyanPos();
-	Vector3 getEyeLeft();
-	Vector3 getEyeRight();
-	QMap<BlendshapeKey, Blendshape> getBlendshapes();
+	int getHotkey() const;
+	bool getFaceFound() const;
+	Vector3 getRotation() const;
+	Vector3 getPosition() const;
+	Vector3 getVNyanPos() const;
+	Vector3 getEyeLeft() const;
+	Vector3 getEyeRight() const;
+	QMap<BlendshapeKey, Blendshape> getBlendshapes() const;
 
 	void setTimeStamp(qint64 newTimestamp);
 	void setHotkey(int newHotkey);
@@ -34,7 +34,7 @@ public:
 	void setVNyanPos(Vector3 newVNyanPos);
 	void setEyeLeft(Vector3 newPos);
 	void setEyeRight(Vector3 newPos);
-	void setBlendshapes();
+	void setBlendshapes() const;
 
 	void addBlendshape(BlendshapeKey key, Blendshape blendshape);
 

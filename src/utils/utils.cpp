@@ -26,7 +26,7 @@ void loadHotkey(int &id, const char *name, const char *description, std::functio
 					       new RegisterhotkeyCallbackData{function, buttonLogMessage});
 
 	if (savedData) {
-		if ((int)id == -1)
+		if (id == -1)
 			return;
 
 		OBSDataArrayAutoRelease array = obs_data_get_array(savedData, name);

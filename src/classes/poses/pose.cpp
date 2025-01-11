@@ -7,8 +7,11 @@ Pose::Pose()
 	  m_mouthPosition(0.0, 0.0, 0.0),
 	  m_poseImages() // Default-initialized
 {
-	for (size_t i = 0; i < m_poseImages.size(); ++i) {
-		m_poseImages[i] = PoseImageData();
+	// for (size_t i = 0; i < m_poseImages.size(); ++i) {
+	// 	m_poseImages[i] = PoseImageData();
+	// }
+	for (auto &poseImage : m_poseImages) {
+		poseImage = PoseImageData();
 	}
 }
 
@@ -122,8 +125,7 @@ void Pose::removeBlendShapeRule(int index)
 
 PoseImageData *Pose::getPoseImageData(PoseImage pose)
 {
-	size_t index = static_cast<size_t>(pose);
-	if (index < m_poseImages.size()) {
+	if (auto index = static_cast<size_t>(pose); index < m_poseImages.size()) {
 		return &m_poseImages[index];
 	}
 	// Return nullptr if the pose is out of range

@@ -1,50 +1,50 @@
 #include "vtube-studio-data.h"
 
-VTubeStudioData::VTubeStudioData() {}
+VTubeStudioData::VTubeStudioData() = default;
 
-VTubeStudioData::~VTubeStudioData() {}
+VTubeStudioData::~VTubeStudioData() = default;
 
 qint64 VTubeStudioData::getTimeStamp()
 {
 	return m_timestamp;
 }
 
-int VTubeStudioData::getHotkey()
+int VTubeStudioData::getHotkey() const
 {
 	return m_hotkey;
 }
 
-bool VTubeStudioData::getFaceFound()
+bool VTubeStudioData::getFaceFound() const
 {
 	return m_faceFound;
 }
 
-Vector3 VTubeStudioData::getRotation()
+Vector3 VTubeStudioData::getRotation() const
 {
 	return m_rotation;
 }
 
-Vector3 VTubeStudioData::getPosition()
+Vector3 VTubeStudioData::getPosition() const
 {
 	return m_position;
 }
 
-Vector3 VTubeStudioData::getVNyanPos()
+Vector3 VTubeStudioData::getVNyanPos() const
 {
 	return m_vNyanPos;
 }
 
-Vector3 VTubeStudioData::getEyeLeft()
+Vector3 VTubeStudioData::getEyeLeft() const
 {
 	return m_eyeLeft;
 }
 
-Vector3 VTubeStudioData::getEyeRight()
+Vector3 VTubeStudioData::getEyeRight() const
 {
 	return m_eyeRight;
 }
 
-QMap<BlendshapeKey, Blendshape> VTubeStudioData::getBlendshapes()
+QMap<BlendshapeKey, Blendshape> VTubeStudioData::getBlendshapes() const
 {
 	return m_blendshapes;
 }
@@ -89,7 +89,10 @@ void VTubeStudioData::setEyeRight(Vector3 newPos)
 	m_eyeRight = newPos;
 }
 
-void VTubeStudioData::setBlendshapes() {}
+void VTubeStudioData::setBlendshapes() const
+{
+	//TODO: to add this function later
+}
 
 void VTubeStudioData::addBlendshape(BlendshapeKey key, Blendshape blendshape)
 {
@@ -99,7 +102,7 @@ void VTubeStudioData::addBlendshape(BlendshapeKey key, Blendshape blendshape)
 QJsonObject VTubeStudioData::toJson() const
 {
 	QJsonObject obj;
-	obj["Timestamp"] = static_cast<qint64>(m_timestamp);
+	obj["Timestamp"] = m_timestamp;
 	obj["Hotkey"] = m_hotkey;
 	obj["FaceFound"] = m_faceFound;
 	obj["Rotation"] = m_rotation.toJson();

@@ -22,11 +22,9 @@ public:
 	explicit ImageFilesWidget(QWidget *parent = nullptr, QSharedPointer<TrackerData> tData = nullptr);
 	~ImageFilesWidget();
 
-	// void setListItem(PoseImage poseEnum, QString fileName);
 	void clearSelection();
 	void toggleVisible(bool isVisible);
 	QMap<PoseImage, QLineEdit *> getposeLineEditsMap() const;
-	auto getPoseListIerator(PoseImage poseEnum);
 
 private:
 	Ui::ImageFilesWidget *ui;

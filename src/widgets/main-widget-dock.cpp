@@ -10,7 +10,6 @@ MainWidgetDock::MainWidgetDock(QWidget *parent) : OBSDock(parent), ui(new Ui::Ma
 	trackerListLayout = ui->trackerListLayout;
 
 	setupCountdownWidgetUI();
-	// resize(300, 380);
 
 	obs_frontend_add_event_callback(obsFrontendEventHandler, this);
 

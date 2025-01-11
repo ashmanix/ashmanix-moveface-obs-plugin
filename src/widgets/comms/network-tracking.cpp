@@ -1,12 +1,12 @@
 #include "network-tracking.h"
 
 NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port, QString in_destIpAddress, quint16 in_destPort)
-	: QWidget(parent)
+	: QWidget(parent),
+	  port(in_port),
+	  destIpAddress(in_destIpAddress),
+	  destPort(in_destPort)
 {
-	udpSocket = new QUdpSocket(this);
-	port = in_port;
-	destIpAddress = in_destIpAddress;
-	destPort = in_destPort;
+	udpSocket = QSharedPointer<QUdpSocket>::create(this);
 	startConnection();
 }
 
@@ -37,12 +37,12 @@ bool NetworkTracking::updateConnection(quint16 newPort, std::optional<QString> i
 	return startConnection();
 }
 
-bool NetworkTracking::sendUDPData(QString destIpAddress, quint16 destPort, QByteArray data)
+bool NetworkTracking::sendUDPData(QString d_IpAddress, quint16 d_Port, QByteArray data)
 {
 	bool result = false;
 	if (udpSocket) {
-		QHostAddress destAddress = QHostAddress(destIpAddress);
-		qint64 bytesSent = udpSocket->writeDatagram(data, destAddress, destPort);
+		auto destAddress = QHostAddress(d_IpAddress);
+		qint64 bytesSent = udpSocket->writeDatagram(data, destAddress, d_Port);
 		if (bytesSent == -1) {
 			// An error occurred while sending
 			QUdpSocket::SocketError socketError = udpSocket->error();
@@ -123,7 +123,7 @@ bool NetworkTracking::startConnection()
 		return false;
 	}
 
-	connect(udpSocket, &QUdpSocket::readyRead, this, &NetworkTracking::processReceivedTrackingData);
+	connect(udpSocket.data(), &QUdpSocket::readyRead, this, &NetworkTracking::processReceivedTrackingData);
 
 	resetConnectionTimer();
 	setSendPeriodicData();

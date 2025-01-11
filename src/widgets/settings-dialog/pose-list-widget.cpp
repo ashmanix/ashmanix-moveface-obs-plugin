@@ -8,8 +8,6 @@ PoseListWidget::PoseListWidget(QWidget *parent, QSharedPointer<TrackerData> tDat
 {
 	UNUSED_PARAMETER(tData);
 	ui->setupUi(this);
-	// if (tData)
-	// setupListData(tData);
 	setupListUI();
 
 	connectUISignalHandlers();

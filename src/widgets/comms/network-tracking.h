@@ -9,6 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
+#include <QSharedPointer>
 
 #include <obs.h>
 
@@ -23,7 +24,7 @@ class NetworkTracking : public QWidget {
 public:
 	NetworkTracking(QWidget *parent = nullptr, quint16 port = 21412, QString destIpAddress = "",
 			quint16 destPort = 21412);
-	~NetworkTracking();
+	~NetworkTracking() override;
 
 	bool updateConnection(quint16 newPort, std::optional<QString> in_destIpAddress = std::nullopt,
 			      std::optional<quint16> in_destPort = std::nullopt);
@@ -46,7 +47,7 @@ private:
 	QTimer *connectionTimer = nullptr;
 	const int TRACKINGDATAPERIODINSECS = 5;
 
-	QUdpSocket *udpSocket = nullptr;
+	QSharedPointer<QUdpSocket> udpSocket = nullptr;
 	quint16 port;
 	QString destIpAddress;
 	quint16 destPort;

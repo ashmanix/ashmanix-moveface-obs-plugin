@@ -10,7 +10,7 @@ class OBSDock : public QWidget {
 public:
 	inline OBSDock(const QString &title, QWidget *parent = nullptr) : QWidget(parent) { UNUSED_PARAMETER(title); }
 
-	inline OBSDock(QWidget *parent = nullptr) : QWidget(parent) {}
+	inline explicit OBSDock(QWidget *parent = nullptr) : QWidget(parent) {}
 };
 
 #endif // OBSDOCK_H

@@ -132,10 +132,6 @@ void FaceTracker::setupWidgetUI()
 
 void FaceTracker::connectUISignalHandlers()
 {
-	// QObject::connect(ui->deleteToolButton, &QPushButton::clicked, this, &FaceTracker::DeleteButtonClicked);
-
-	// QObject::connect(ui->menuToolButton, &QPushButton::clicked, this, &FaceTracker::SettingsButtonClicked);
-
 	QObject::connect(ui->isEnabledCheckBox, &QCheckBox::stateChanged, this, &FaceTracker::toggleEnabled);
 }
 
@@ -305,9 +301,6 @@ void FaceTracker::deleteActionSelected()
 void FaceTracker::handleTrackingData(VTubeStudioData data)
 {
 	UNUSED_PARAMETER(data);
-
-	// ResetConnectionTimer();
-
 	obs_log(LOG_INFO, "data received!");
 }
 
