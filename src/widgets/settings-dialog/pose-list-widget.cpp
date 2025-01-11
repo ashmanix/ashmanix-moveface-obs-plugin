@@ -6,10 +6,11 @@ PoseListWidget::PoseListWidget(QWidget *parent, QSharedPointer<TrackerData> tDat
 	: QWidget(parent),
 	  ui(new Ui::PoseListView)
 {
+	UNUSED_PARAMETER(tData);
 	ui->setupUi(this);
+	// if (tData)
+	// setupListData(tData);
 	setupListUI();
-	if (tData)
-		setupListData(tData);
 
 	connectUISignalHandlers();
 }
@@ -28,12 +29,15 @@ int PoseListWidget::getSelectedRow()
 	return modelIndex.row();
 }
 
-void PoseListWidget::setupListData(QSharedPointer<TrackerData> settingsDialogData)
+void PoseListWidget::addRow(QString rowId)
 {
-	if (poseListModel)
-		poseListModel->clear();
-	// loop through data and add ID's to list
-	
+	QStandardItem *item = new QStandardItem(rowId);
+	poseListModel->appendRow(item);
+}
+
+void PoseListWidget::clearSelection()
+{
+	ui->poseListView->clearSelection();
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -48,12 +52,12 @@ void PoseListWidget::connectUISignalHandlers()
 
 	QObject::connect(ui->poseListView, &QListView::clicked, this, &PoseListWidget::handlePoseListClick);
 
-	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &PoseListWidget::onPoseRowsInserted);
-	QObject::connect(poseListModel, &QAbstractItemModel::rowsRemoved, this, &PoseListWidget::onPoseRowsRemoved);
-	QObject::connect(poseListModel, &QAbstractItemModel::dataChanged, this, &PoseListWidget::onPoseDataChanged);
+	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &PoseListWidget::onRowsInserted);
+	QObject::connect(poseListModel, &QAbstractItemModel::rowsRemoved, this, &PoseListWidget::onRowsRemoved);
+	QObject::connect(poseListModel, &QAbstractItemModel::dataChanged, this, &PoseListWidget::onRowsDataChanged);
 }
 
-void PoseListWidget::setupListUI(QSharedPointer<TrackerData> PoseListWidgetData)
+void PoseListWidget::setupListUI()
 {
 
 	ui->addPoseToolButton->setToolTip(obs_module_text("DialogAddPoseToolTip"));
@@ -129,8 +133,6 @@ void PoseListWidget::addPose()
 	int count = poseListModel->rowCount();
 	QStandardItem *poseItem = new QStandardItem(QString("New Pose %1").arg(count));
 	poseListModel->appendRow(poseItem);
-
-	// SIGNAL that pose was added
 }
 
 void PoseListWidget::deletePose()
@@ -143,14 +145,14 @@ void PoseListWidget::deletePose()
 	if (rowIndex != -1) {
 		poseListModel->takeRow(rowIndex);
 	}
-
-	// SIGNAL that a pose was deleted
 }
 
 void PoseListWidget::handleMovePose(bool isDirectionUp)
 {
 	if (!poseListModel)
 		return;
+
+	isMovingPoseListRows = true;
 
 	int selectedRow = getSelectedRow();
 	if (selectedRow == -1)
@@ -174,55 +176,73 @@ void PoseListWidget::handleMovePose(bool isDirectionUp)
 	ui->poseListView->setCurrentIndex(poseListModel->index(targetRow, 0));
 
 	// SIGNAL that pose was moved
+	emit rowMoved(selectedRow, targetRow);
+
+	isMovingPoseListRows = false;
 }
 
 void PoseListWidget::handlePoseListClick(QModelIndex modelIndex)
 {
-	obs_log(LOG_INFO, "Row: %d", modelIndex.row());
-
-	// SIGNAL that a pose was selected
-	emit rowSelected(modelIndex.row());
+	emit rowsSelected(modelIndex.row());
 }
 
-void PoseListWidget::onPoseRowsInserted(const QModelIndex &parent, int first, int last)
+void PoseListWidget::onRowsInserted(const QModelIndex &parent, int first, int last)
 {
 	Q_UNUSED(parent);
 
 	if (isMovingPoseListRows)
 		return;
 
-	//SIGNAL that pose row was inserted
+	QMap<int, QString> rowDataMap = {};
+
 	for (int row = first; row <= last; ++row) {
 		// E.g. read the poseId from the model
 		QModelIndex idx = poseListModel->index(row, 0);
 		QString poseId = idx.data(Qt::DisplayRole).toString();
+		rowDataMap.insert(row, poseId);
+	}
 
-		emit rowInserted(row, poseId);
+	if (rowDataMap.size() > 0) {
+		emit rowsInserted(rowDataMap);
 	}
 }
 
-void PoseListWidget::onPoseRowsRemoved(const QModelIndex &parent, int first, int last)
+void PoseListWidget::onRowsRemoved(const QModelIndex &parent, int first, int last)
 {
 	Q_UNUSED(parent);
 
 	if (isMovingPoseListRows)
 		return;
 
-	// SIGNAL that pose was removed
+	QList<int> rowList = {};
+
 	for (int row = last; row >= first; --row) {
-		emit rowRemoved(row);
+		rowList.append(row);
+	}
+
+	if (rowList.length() > 0) {
+		emit rowsRemoved(rowList);
 	}
 }
 
-void PoseListWidget::onPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+void PoseListWidget::onRowsDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 				       const QList<int> &roles)
 {
 	Q_UNUSED(&roles);
+
+	if (isMovingPoseListRows)
+		return;
+
+	QMap<int, QString> rowDataMap = {};
+
 	for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
 		// Read changed data from the model and update the Pose
 		QModelIndex idx = poseListModel->index(row, 0);
 		QString newPoseId = idx.data(Qt::DisplayRole).toString();
-		// SIGNAL new pose ID and row
-		emit rowDataChanged(row, newPoseId);
+		rowDataMap.insert(row, newPoseId);
+	}
+
+	if (rowDataMap.size() > 0) {
+		emit rowsDataChanged(rowDataMap);
 	}
 }

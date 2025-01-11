@@ -7,12 +7,14 @@ SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tDat
 	ui->setupUi(this);
 	trackerData = tData;
 	mainWidget = mWidget;
+	poseListWidget = new PoseListWidget(this, tData = trackerData);
+	imageFilesWidget = new ImageFilesWidget(this, tData = trackerData);
 	setTitle();
-
-	setupDialogUI(trackerData);
 
 	connectUISignalHandlers();
 	connectObsSignalHandlers();
+
+	setupDialogUI(trackerData);
 }
 
 SettingsDialog::~SettingsDialog()
@@ -24,33 +26,17 @@ SettingsDialog::~SettingsDialog()
 
 	delete ui;
 	settingsPoseList.clear();
-
-	this->deleteLater();
 }
 
 void SettingsDialog::updateStyledUIComponents()
 {
 	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
 						       : getDataFolderPath() + "/icons/light/";
-	QString searchIconPath = QDir::fromNativeSeparators(baseUrl + "search.svg");
-	if (QFileInfo::exists(searchIconPath)) {
-		QIcon searchIcon(searchIconPath);
-
-		ui->bodyUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesHalfOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesClosedUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthClosedUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthSmileUrlBrowseToolButton->setIcon(searchIcon);
-		ui->tongueOutUrlBrowseToolButton->setIcon(searchIcon);
-	}
 
 	QString plusIconPath = QDir::fromNativeSeparators(baseUrl + "plus.svg");
 	if (QFileInfo::exists(plusIconPath)) {
 		QIcon plusIcon(plusIconPath);
 
-		ui->addPoseToolButton->setIcon(plusIcon);
 		ui->zoomInToolButton->setIcon(plusIcon);
 	}
 
@@ -61,39 +47,16 @@ void SettingsDialog::updateStyledUIComponents()
 		ui->zoomOutToolButton->setIcon(minusIcon);
 	}
 
-	QString trashIconPath = QDir::fromNativeSeparators(baseUrl + "trash.svg");
-	if (QFileInfo::exists(trashIconPath)) {
-		QIcon trashIcon(trashIconPath);
-
-		ui->deletePoseToolButton->setIcon(trashIcon);
-	}
-
-	QString entryClearIconPath = QDir::fromNativeSeparators(baseUrl + "entry-clear.svg");
-	if (QFileInfo::exists(entryClearIconPath)) {
-		QIcon entryClearIcon(entryClearIconPath);
-
-		ui->bodyUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesHalfOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesClosedUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthClosedUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthSmileUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
-	}
-
 	QString upIconPath = QDir::fromNativeSeparators(baseUrl + "up.svg");
 	if (QFileInfo::exists(upIconPath)) {
 		QIcon upIcon(upIconPath);
 		ui->moveImageUpLevelToolButton->setIcon(upIcon);
-		ui->movePoseUpToolButton->setIcon(upIcon);
 	}
 
 	QString downIconPath = QDir::fromNativeSeparators(baseUrl + "down.svg");
 	if (QFileInfo::exists(downIconPath)) {
 		QIcon downIcon(downIconPath);
 		ui->moveImageDownLevelToolButton->setIcon(downIcon);
-		ui->movePoseDownToolButton->setIcon(downIcon);
 	}
 
 	QString centerIconPath = QDir::fromNativeSeparators(baseUrl + "center.svg");
@@ -102,19 +65,7 @@ void SettingsDialog::updateStyledUIComponents()
 		ui->centerOnImagesToolButton->setIcon(centerIcon);
 	}
 
-	ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
-						    "background-color: transparent;"
-						    "}"
-						    "#trackingScrollAreaWidgetContents {"
-						    "background-color: transparent;"
-						    "}");
-	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
-	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 	ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
-	ui->poseListView->setStyleSheet("QListView::item {"
-					"   padding-top: 5px;"
-					"   padding-bottom: 5px;"
-					"}");
 }
 
 void SettingsDialog::setFormDetails(QSharedPointer<TrackerData> settingsDialogData)
@@ -157,50 +108,14 @@ void SettingsDialog::connectUISignalHandlers()
 
 	QObject::connect(ui->portSpinBox, &QSpinBox::valueChanged, this, &SettingsDialog::formChangeDetected);
 
-	QObject::connect(ui->addPoseToolButton, &QToolButton::clicked, this, &SettingsDialog::addPose);
-	QObject::connect(ui->deletePoseToolButton, &QToolButton::clicked, this, &SettingsDialog::deletePose);
-	QObject::connect(ui->movePoseUpToolButton, &QToolButton::clicked, this, [this]() { handleMovePose(true); });
-	QObject::connect(ui->movePoseDownToolButton, &QToolButton::clicked, this, [this]() { handleMovePose(); });
-
 	QObject::connect(ui->dialogButtonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::okButtonClicked);
 
 	QObject::connect(ui->dialogButtonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::cancelButtonClicked);
 
-	QObject::connect(ui->bodyUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::BODY); });
-	QObject::connect(ui->eyesOpenUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::EYESOPEN); });
-	QObject::connect(ui->eyesHalfOpenUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::EYESHALFOPEN); });
-	QObject::connect(ui->eyesClosedUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::EYESCLOSED); });
-	QObject::connect(ui->mouthClosedUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::MOUTHCLOSED); });
-	QObject::connect(ui->mouthOpenUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::MOUTHOPEN); });
-	QObject::connect(ui->mouthSmileUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::MOUTHSMILE); });
-	QObject::connect(ui->tongueOutUrlBrowseToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageUrlButtonClicked(PoseImage::TONGUEOUT); });
-
-	QObject::connect(ui->bodyUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::BODY); });
-	QObject::connect(ui->eyesOpenUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::EYESOPEN); });
-	QObject::connect(ui->eyesHalfOpenUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::EYESHALFOPEN); });
-	QObject::connect(ui->eyesClosedUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::EYESCLOSED); });
-	QObject::connect(ui->mouthClosedUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::MOUTHCLOSED); });
-	QObject::connect(ui->mouthOpenUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::MOUTHOPEN); });
-	QObject::connect(ui->mouthSmileUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::MOUTHSMILE); });
-	QObject::connect(ui->tongueOutUrlDeleteToolButton, &QToolButton::clicked, this,
-			 [this]() { handleClearImageUrl(PoseImage::TONGUEOUT); });
-
-	QObject::connect(ui->poseListView, &QListView::clicked, this, &SettingsDialog::handlePoseListClick);
+	QObject::connect(imageFilesWidget, &ImageFilesWidget::imageUrlSet, this, &SettingsDialog::handleSetImageUrl);
+	QObject::connect(imageFilesWidget, &ImageFilesWidget::imageUrlCleared, this,
+			 &SettingsDialog::handleClearImageUrl);
+	QObject::connect(imageFilesWidget, &ImageFilesWidget::raiseWindow, this, &SettingsDialog::handleRaisedWindow);
 
 	QObject::connect(ui->centerOnImagesToolButton, &QToolButton::clicked, this,
 			 &SettingsDialog::handleCenterViewButtonClick);
@@ -212,9 +127,11 @@ void SettingsDialog::connectUISignalHandlers()
 	QObject::connect(ui->zoomInToolButton, &QToolButton::clicked, this, [this]() { handleImageZoomClick(false); });
 	QObject::connect(ui->zoomOutToolButton, &QToolButton::clicked, this, [this]() { handleImageZoomClick(true); });
 
-	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
-	QObject::connect(poseListModel, &QAbstractItemModel::rowsRemoved, this, &SettingsDialog::onPoseRowsRemoved);
-	QObject::connect(poseListModel, &QAbstractItemModel::dataChanged, this, &SettingsDialog::onPoseDataChanged);
+	QObject::connect(poseListWidget, &PoseListWidget::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
+	QObject::connect(poseListWidget, &PoseListWidget::rowsRemoved, this, &SettingsDialog::onPoseRowsRemoved);
+	QObject::connect(poseListWidget, &PoseListWidget::rowsDataChanged, this, &SettingsDialog::onPoseDataChanged);
+	QObject::connect(poseListWidget, &PoseListWidget::rowsSelected, this, &SettingsDialog::onPoseSelected);
+	QObject::connect(poseListWidget, &PoseListWidget::rowMoved, this, &SettingsDialog::onPoseRowMoved);
 
 	QPushButton *applyButton = ui->dialogButtonBox->button(QDialogButtonBox::Apply);
 	if (applyButton) {
@@ -279,47 +196,8 @@ void SettingsDialog::setupDialogUI(QSharedPointer<TrackerData> settingsDialogDat
 
 	// ----------------------------------------------- Tracking Tab -----------------------------------------------
 
-	// ui->imageGroupBox->setTitle(obs_module_text("DialogAvatarGroupBoxTitle"));
-
-	ui->addPoseToolButton->setToolTip(obs_module_text("DialogAddPoseToolTip"));
-	ui->deletePoseToolButton->setToolTip(obs_module_text("DialogDeletePoseToolTip"));
-	ui->movePoseUpToolButton->setToolTip(obs_module_text("DialogMovePoseUpToolTip"));
-	ui->movePoseDownToolButton->setToolTip(obs_module_text("DialogMovePoseDownToolTip"));
-
-	ui->poseListLabel->setText(obs_module_text("DialogPostListLabel"));
-	ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
-	poseListModel = new QStandardItemModel(this);
-	ui->poseListView->setModel(poseListModel);
-	ui->poseListView->setDragEnabled(false);
-	ui->poseListView->setAcceptDrops(false);
-	ui->poseListView->setDragDropOverwriteMode(false);
-
-	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyUrlLabel"));
-	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenUrlLabel"));
-	ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenUrlLabel"));
-	ui->eyesClosedUrlLabel->setText(obs_module_text("DialogEyesClosedUrlLabel"));
-	ui->mouthClosedUrlLabel->setText(obs_module_text("DialogMouthClosedUrlLabel"));
-	ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenUrlLabel"));
-	ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileUrlLabel"));
-	ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutUrlLabel"));
-
-	ui->bodyUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->eyesOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->eyesHalfOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->eyesClosedUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->mouthClosedUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->mouthOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->mouthSmileUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->tongueOutUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-
-	ui->bodyUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->eyesOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->eyesHalfOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->eyesClosedUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->mouthClosedUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->mouthOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->mouthSmileUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->tongueOutUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	ui->poseVerticalLayout->addWidget(poseListWidget);
+	ui->poseVerticalLayout->addWidget(imageFilesWidget);
 
 	ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
 	ui->moveImageUpLevelToolButton->setToolTip(obs_module_text("DialogMoveImageUpLevelToolTip"));
@@ -327,19 +205,6 @@ void SettingsDialog::setupDialogUI(QSharedPointer<TrackerData> settingsDialogDat
 	ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
 	ui->zoomOutToolButton->setToolTip(obs_module_text("DialogZoomOutToolTip"));
 	ui->zoomInToolButton->setToolTip(obs_module_text("DialogZoomInToolTip"));
-
-	// Initialize the mapping between PoseImage enums and QLineEdit pointers
-	poseImageLineEdits[PoseImage::BODY] = ui->bodyUrlLineEdit;
-	poseImageLineEdits[PoseImage::EYESOPEN] = ui->eyesOpenUrlLineEdit;
-	poseImageLineEdits[PoseImage::EYESHALFOPEN] = ui->eyesHalfOpenUrlEdit;
-	poseImageLineEdits[PoseImage::EYESCLOSED] = ui->eyesClosedUrlLineEdit;
-	poseImageLineEdits[PoseImage::MOUTHCLOSED] = ui->mouthClosedUrlLineEdit;
-	poseImageLineEdits[PoseImage::MOUTHOPEN] = ui->mouthOpenUrlLineEdit;
-	poseImageLineEdits[PoseImage::MOUTHSMILE] = ui->mouthSmileUrlLineEdit;
-	poseImageLineEdits[PoseImage::TONGUEOUT] = ui->tongueOutUrlLineEdit;
-
-	ui->imageConfigWidget->setVisible(false);
-	ui->noConfigLabel->setVisible(true);
 
 	updateStyledUIComponents();
 
@@ -381,13 +246,6 @@ void SettingsDialog::applyFormChanges()
 		newData->setDestinationPort(ui->destPortSpinBox->text().toInt());
 
 		newData->copyListToPoseList(settingsPoseList);
-
-		// newData->poseList.clear();
-		// for (const QSharedPointer<Pose> &posePtr : settingsPoseList) {
-		// 	if (posePtr) {
-		// 		newData->poseList.append(posePtr->clone());
-		// 	}
-		// }
 
 		ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 		emit settingsUpdated(newData);
@@ -553,16 +411,16 @@ void SettingsDialog::addImageToScene(PoseImageData *imageData, bool useImagePos,
 		view->setDragMode(QGraphicsView::ScrollHandDrag);
 
 		// Create a pen for the boundary rectangle
-		QPen boundaryPen(Qt::red);
-		boundaryPen.setWidth(3);
+		// QPen boundaryPen(Qt::red);
+		// boundaryPen.setWidth(3);
 
 		// Create a rectangle to show the scene area
-		QGraphicsRectItem *boundaryRect = new QGraphicsRectItem(avatarPreviewScene->sceneRect());
-		boundaryRect->setPen(boundaryPen);
-		boundaryRect->setBrush(Qt::NoBrush); // No fill color
-		boundaryRect->setZValue(1000);
+		// QGraphicsRectItem *boundaryRect = new QGraphicsRectItem(avatarPreviewScene->sceneRect());
+		// boundaryRect->setPen(boundaryPen);
+		// boundaryRect->setBrush(Qt::NoBrush); // No fill color
+		// boundaryRect->setZValue(1000);
 
-		avatarPreviewScene->addItem(boundaryRect);
+		// avatarPreviewScene->addItem(boundaryRect);
 	}
 
 	if (imageData->getPixmapItem() == nullptr)
@@ -607,17 +465,7 @@ void SettingsDialog::clearScene()
 
 void SettingsDialog::clearCurrentPoseConfig()
 {
-	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
-		PoseImage poseEnum = static_cast<PoseImage>(i);
-		auto it = poseImageLineEdits.find(poseEnum);
-		if (it != poseImageLineEdits.end()) {
-			QLineEdit *lineEdit = it.value(); // For QMap
-			// If using std::map, use it->second
-			if (lineEdit) {
-				lineEdit->clear();
-			}
-		}
-	}
+	imageFilesWidget->clearSelection();
 	clearScene();
 }
 
@@ -635,14 +483,15 @@ void SettingsDialog::loadSelectedPoseConfig()
 	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
 	clearCurrentPoseConfig();
 	clearScene();
+	imageFilesWidget->toggleVisible(true);
 
 	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
 		PoseImage poseEnum = static_cast<PoseImage>(i);
+		QMap<PoseImage, QLineEdit *> poseImageLineEdits = imageFilesWidget->getposeLineEditsMap();
 		auto it = poseImageLineEdits.find(poseEnum);
 		if (it != poseImageLineEdits.end()) {
 			QLineEdit *lineEdit = it.value();
 			QString fileName = selectedPose->getPoseImageData(poseEnum)->getImageUrl();
-
 			if (lineEdit) {
 				lineEdit->setText(fileName);
 			}
@@ -662,7 +511,6 @@ void SettingsDialog::loadSelectedPoseConfig()
 
 			switch (poseEnum) {
 			case PoseImage::BODY:
-
 				addImageToScene(imageData, true);
 				break;
 			case PoseImage::MOUTHCLOSED:
@@ -681,17 +529,14 @@ void SettingsDialog::loadSelectedPoseConfig()
 
 int SettingsDialog::getSelectedRow()
 {
-	QModelIndex modelIndex = ui->poseListView->currentIndex();
-	return modelIndex.row();
+	return poseListWidget->getSelectedRow();
 }
 
 void SettingsDialog::resetPoseUITab()
 {
-	ui->poseListView->selectionModel()->clearSelection();
 	previouslySelectedPoseIndex = -1;
 	clearCurrentPoseConfig();
-	ui->imageConfigWidget->setVisible(false);
-	ui->noConfigLabel->setVisible(true);
+	imageFilesWidget->toggleVisible(false);
 }
 
 void SettingsDialog::centerSceneOnItems()
@@ -735,6 +580,12 @@ void SettingsDialog::closeEvent(QCloseEvent *)
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------
 
+void SettingsDialog::handleRaisedWindow()
+{
+	this->raise();
+	this->activateWindow();
+}
+
 void SettingsDialog::formChangeDetected()
 {
 	ui->dialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(true);
@@ -763,10 +614,9 @@ void SettingsDialog::okButtonClicked()
 void SettingsDialog::syncPoseListToModel()
 {
 	// Disconnect setting row update signal during sync with tracker data
-	QObject::disconnect(poseListModel, &QAbstractItemModel::rowsInserted, this,
-			    &SettingsDialog::onPoseRowsInserted);
+	QObject::disconnect(poseListWidget, &PoseListWidget::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
 
-	poseListModel->clear();
+	poseListWidget->clearList();
 
 	settingsPoseList.clear();
 	previouslySelectedPoseIndex = -1;
@@ -783,81 +633,18 @@ void SettingsDialog::syncPoseListToModel()
 		settingsPoseList.append(clonedPosePtr);
 
 		// const Pose &p = *clonedPosePtr;
-		QStandardItem *item = new QStandardItem(clonedPosePtr->getPoseId());
+		// QStandardItem *item = new QStandardItem(clonedPosePtr->getPoseId());
 
-		poseListModel->appendRow(item);
+		poseListWidget->addRow(clonedPosePtr->getPoseId());
+		obs_log(LOG_INFO, "tracker data ID: %s is being loaded",
+			clonedPosePtr->getPoseId().toStdString().c_str());
 	}
 	// Reenable signal
-	QObject::connect(poseListModel, &QAbstractItemModel::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
+	QObject::connect(poseListWidget, &PoseListWidget::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
 }
 
-void SettingsDialog::addPose()
+void SettingsDialog::handleSetImageUrl(PoseImage poseEnum, QString fileName)
 {
-	if (!poseListModel)
-		return obs_log(LOG_ERROR, "No list model found!");
-
-	int count = poseListModel->rowCount();
-	QStandardItem *poseItem = new QStandardItem(QString("New Pose %1").arg(count));
-	poseListModel->appendRow(poseItem);
-}
-
-void SettingsDialog::deletePose()
-{
-	QModelIndex modelIndex = ui->poseListView->currentIndex();
-	int rowIndex = modelIndex.row();
-
-	obs_log(LOG_INFO, "Row To Delete: %d", rowIndex);
-
-	if (rowIndex != -1) {
-		poseListModel->takeRow(rowIndex);
-	}
-}
-
-void SettingsDialog::handleMovePose(bool isDirectionUp)
-{
-	if (!poseListModel)
-		return;
-
-	int selectedRow = getSelectedRow();
-	if (selectedRow == -1)
-		return;
-
-	int targetRow = isDirectionUp ? selectedRow - 1 : selectedRow + 1;
-
-	if (targetRow < 0 || targetRow >= poseListModel->rowCount())
-		return;
-
-	QStandardItem *currentItem = poseListModel->item(selectedRow, 0);
-	QStandardItem *targetItem = poseListModel->item(targetRow, 0);
-
-	if (!currentItem || !targetItem)
-		return;
-
-	QString tempText = currentItem->text();
-	currentItem->setText(targetItem->text());
-	targetItem->setText(tempText);
-
-	settingsPoseList.swapItemsAt(selectedRow, targetRow);
-
-	ui->poseListView->setCurrentIndex(poseListModel->index(targetRow, 0));
-	previouslySelectedPoseIndex = targetRow;
-	loadSelectedPoseConfig();
-	formChangeDetected();
-}
-
-void SettingsDialog::handleImageUrlButtonClicked(PoseImage poseEnum)
-{
-	QString fileName = QFileDialog::getOpenFileName(this, obs_module_text("ImageUrlFileDialogWindowTitle"),
-							QString("%HOME%/Images"),
-							tr("Images (*.png *.jpg *.bmp *.jpeg)"));
-
-	this->raise();
-	this->activateWindow();
-
-	if (fileName.isEmpty()) {
-		return;
-	}
-
 	int selectedRow = getSelectedRow();
 	if (selectedRow == -1)
 		return;
@@ -866,30 +653,9 @@ void SettingsDialog::handleImageUrlButtonClicked(PoseImage poseEnum)
 
 	int imageIndex = static_cast<int>(poseEnum);
 
-	if (!(imageIndex >= 0 && static_cast<size_t>(imageIndex) < selectedPose->getPoseImageListSize())) {
-		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
-		return;
-	}
-
 	formChangeDetected();
 
-	if (!FileExists(fileName)) {
-		obs_log(LOG_WARNING, QString("Image file: %1 not found!").arg(fileName).toStdString().c_str());
-		return;
-	}
-
-	QLineEdit *lineEdit = poseImageLineEdits.value(poseEnum, nullptr);
-	if (lineEdit) {
-		lineEdit->setText(fileName);
-	} else {
-		obs_log(LOG_WARNING, QString("QLineEdit not found for PoseImage enum value: %1")
-					     .arg(static_cast<int>(poseEnum))
-					     .toStdString()
-					     .c_str());
-		return;
-	}
-
-	selectedPose->getPoseImageAt(imageIndex)->getImageUrl() = fileName;
+	selectedPose->getPoseImageAt(imageIndex)->setImageUrl(fileName);
 
 	if (selectedPose->getPoseImageAt(imageIndex)->getPixmapItem()) {
 		selectedPose->getPoseImageAt(imageIndex)->clearPixmapItem();
@@ -918,7 +684,7 @@ void SettingsDialog::handleImageUrlButtonClicked(PoseImage poseEnum)
 	}
 }
 
-void SettingsDialog::handleClearImageUrl(PoseImage poseEnum)
+void SettingsDialog::handleClearImageUrl(int imageIndex)
 {
 	int selectedRow = getSelectedRow();
 	if (selectedRow == -1)
@@ -927,84 +693,109 @@ void SettingsDialog::handleClearImageUrl(PoseImage poseEnum)
 	formChangeDetected();
 
 	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
-	int imageIndex = static_cast<int>(poseEnum);
+	PoseImageData *poseData = selectedPose->getPoseImageAt(imageIndex);
 
-	if (imageIndex < 0)
-		return;
-
-	if (imageIndex >= 0 && static_cast<size_t>(imageIndex) < selectedPose->getPoseImageListSize()) {
-		PoseImageData *poseData = selectedPose->getPoseImageAt(imageIndex);
-		poseImageLineEdits[poseEnum]->setText(QString());
-
-		poseData->setImageUrl(QString());
-		if (poseData->getPixmapItem()) {
-			poseData->clearPixmapItem();
-		}
-	} else {
-		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
+	poseData->setImageUrl(QString());
+	if (poseData->getPixmapItem()) {
+		poseData->clearPixmapItem();
 	}
 }
 
-void SettingsDialog::handlePoseListClick(QModelIndex modelIndex)
+void SettingsDialog::onPoseSelected(int rowIndex)
 {
-	obs_log(LOG_INFO, "Row: %d", modelIndex.row());
+	UNUSED_PARAMETER(rowIndex);
+	obs_log(LOG_INFO, "Pose selected: %d", rowIndex);
 	loadSelectedPoseConfig();
-	ui->imageConfigWidget->setVisible(true);
-	ui->noConfigLabel->setVisible(false);
 }
 
-void SettingsDialog::onPoseRowsInserted(const QModelIndex &parent, int first, int last)
+void SettingsDialog::onPoseRowsInserted(QMap<int, QString> rowMap)
 {
-	Q_UNUSED(parent);
-
 	if (isMovingPoseListRows)
 		return;
 
-	// For each newly inserted row, create a default Pose or read from the model
-	// and insert into settingsPoseList at the correct position.
-	for (int row = first; row <= last; ++row) {
-		// E.g. read the poseId from the model
-		QModelIndex idx = poseListModel->index(row, 0);
-		QString poseId = idx.data(Qt::DisplayRole).toString();
+	// Sort into ascending order to prevent indices lower down affecting indices higher
+	QList<int> sortedKeys = rowMap.keys();
+	std::sort(sortedKeys.begin(), sortedKeys.end());
 
+	QString result = "{ ";
+	for (auto it = rowMap.constBegin(); it != rowMap.constEnd(); ++it) {
+		result += QString::number(it.key()) + ": \"" + it.value() + "\", ";
+	}
+	if (rowMap.size() > 0)
+		result.chop(2); // Remove the trailing ", "
+	result += " }";
+
+	obs_log(LOG_INFO, "Map: %s", result.toStdString().c_str());
+
+	for (const int &row : sortedKeys) {
+		if (row < 0 || row > settingsPoseList.size()) {
+			obs_log(LOG_WARNING, "Invalid pose at row: %d", row);
+			continue;
+		}
+		obs_log(LOG_INFO, "Adding row: %d", row);
 		QSharedPointer<Pose> newPose = QSharedPointer<Pose>::create();
-		newPose->setPoseId(poseId);
-
+		newPose->setPoseId(rowMap.value(row));
 		settingsPoseList.insert(row, newPose);
 	}
+
 	loadSelectedPoseConfig();
 	formChangeDetected();
 }
 
-void SettingsDialog::onPoseRowsRemoved(const QModelIndex &parent, int first, int last)
+void SettingsDialog::onPoseRowsRemoved(QList<int> rowsList)
 {
-	Q_UNUSED(parent);
-
 	if (isMovingPoseListRows)
 		return;
 
-	// Remove the corresponding poses from settingsPoseList
-	for (int row = last; row >= first; --row) {
+	// Sort from greatest index to lowest to ensure no issues
+	// deleting indices that dont already exist
+	QList<int> sortedRows = rowsList;
+	std::sort(sortedRows.begin(), sortedRows.end(), std::greater<int>());
+
+	for (const int &row : sortedRows) {
 		if (row >= 0 && row < settingsPoseList.size()) {
 			settingsPoseList.removeAt(row);
+			obs_log(LOG_INFO, "Pose removed: %d", row);
+		} else {
+			obs_log(LOG_WARNING, "Invalid row index: %d", row);
 		}
 	}
+	previouslySelectedPoseIndex = -1;
 	loadSelectedPoseConfig();
 	formChangeDetected();
 }
 
-void SettingsDialog::onPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-				       const QList<int> &roles)
+void SettingsDialog::onPoseDataChanged(QMap<int, QString> rowMap)
 {
-	Q_UNUSED(&roles);
-	for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
-		// Read changed data from the model and update the Pose
-		QModelIndex idx = poseListModel->index(row, 0);
-		QString newPoseId = idx.data(Qt::DisplayRole).toString();
+	for (auto i = rowMap.cbegin(), end = rowMap.cend(); i != end; i++) {
+		int row = i.key();
 		if (row >= 0 && row < settingsPoseList.size()) {
-			settingsPoseList[row]->setPoseId(newPoseId);
+			obs_log(LOG_INFO, "Pose data changed: %d", row);
+			settingsPoseList[row]->setPoseId(i.value());
 		}
 	}
+
+	formChangeDetected();
+}
+
+void SettingsDialog::onPoseRowMoved(int sourceRow, int targetRow)
+{
+	obs_log(LOG_INFO, "Swapping from row: %d to row: %d", sourceRow, targetRow);
+
+	obs_log(LOG_INFO, "[SettingsDialog] Before swapping:");
+	for (int i = 0; i < settingsPoseList.size(); ++i) {
+		obs_log(LOG_INFO, "Row %d : %s", i, settingsPoseList[i]->getPoseId().toStdString().c_str());
+	}
+
+	settingsPoseList.swapItemsAt(sourceRow, targetRow);
+	previouslySelectedPoseIndex = targetRow;
+
+	obs_log(LOG_INFO, "[SettingsDialog] After swapping:");
+	for (int i = 0; i < settingsPoseList.size(); ++i) {
+		obs_log(LOG_INFO, "Row %d : %s", i, settingsPoseList[i]->getPoseId().toStdString().c_str());
+	}
+
+	loadSelectedPoseConfig();
 	formChangeDetected();
 }
 

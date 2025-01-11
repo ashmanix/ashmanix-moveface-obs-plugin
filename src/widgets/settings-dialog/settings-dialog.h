@@ -16,6 +16,8 @@
 #include <QModelIndex>
 #include <QList>
 
+#include <string>
+
 #include "../../classes/poses/pixmap-item.h"
 #include "../../classes/blendshapes/blendshape-key.h"
 #include "../../utils/utils.h"
@@ -24,6 +26,8 @@
 #include "../../classes/poses/pose.h"
 #include "../comms/network-tracking.h"
 #include "../main-widget-dock.h"
+#include "pose-list-widget.h"
+#include "image-files-widget.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_FaceTrackerDialog.h"
 
@@ -39,13 +43,15 @@ public:
 private:
 	Ui::FaceTrackerDialog *ui;
 	MainWidgetDock *mainWidget;
+	PoseListWidget *poseListWidget;
+	ImageFilesWidget *imageFilesWidget;
+
 	QSharedPointer<TrackerData> trackerData;
 	bool isError = false;
 	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
-	QStandardItemModel *poseListModel = nullptr;
 	QList<QSharedPointer<Pose>> settingsPoseList;
-	QMap<PoseImage, QLineEdit *> poseImageLineEdits;
+	// QMap<PoseImage, QLineEdit *> poseImageLineEdits;
 	QGraphicsScene *avatarPreviewScene = nullptr;
 	int previouslySelectedPoseIndex = -1;
 	bool isMovingPoseListRows = false;
@@ -81,6 +87,7 @@ signals:
 	void settingsUpdated(QSharedPointer<TrackerData> newData);
 
 private slots:
+	void handleRaisedWindow();
 	void formChangeDetected();
 
 	void applyButtonClicked();
@@ -88,16 +95,15 @@ private slots:
 	void okButtonClicked();
 
 	void syncPoseListToModel();
-	void addPose();
-	void deletePose();
-	void handleMovePose(bool isDirectionUp = false);
-	void handleImageUrlButtonClicked(PoseImage image);
-	void handleClearImageUrl(PoseImage image);
-	void handlePoseListClick(QModelIndex modelIndex);
-	void onPoseRowsInserted(const QModelIndex &parent, int first, int last);
-	void onPoseRowsRemoved(const QModelIndex &parent, int first, int last);
-	void onPoseDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-			       const QList<int> &roles = QList<int>());
+	void handleSetImageUrl(PoseImage poseEnum, QString fileName);
+	void handleClearImageUrl(int imageIndex);
+
+	void onPoseSelected(int rowIndex);
+	void onPoseRowsInserted(QMap<int, QString> rowMap);
+	void onPoseRowsRemoved(QList<int> rowsList);
+	void onPoseDataChanged(QMap<int, QString> rowMap);
+	void onPoseRowMoved(int sourceRow, int targetRow);
+	
 	void handleCenterViewButtonClick();
 	void handleMoveImageUpClick();
 	void handleMoveImageDownClick();
