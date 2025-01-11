@@ -99,15 +99,13 @@ void Pose::setPoseId(QString newId)
 
 bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const
 {
-	for (const auto &rule : m_blendShapesRuleList) {
+	return std::any_of(m_blendShapesRuleList.begin(), m_blendShapesRuleList.end(), [&](const auto &rule) -> bool {
 		if (blendShapes.contains(rule.key)) {
 			const Blendshape &bs = blendShapes.value(rule.key);
-			if (rule.evaluate(bs)) {
-				return true;
-			}
+			return rule.evaluate(bs);
 		}
-	}
-	return false;
+		return false;
+	});
 }
 
 void Pose::addBlendShapeRule(BlendshapeRule rule)
@@ -175,7 +173,7 @@ Pose Pose::fromJson(const QJsonObject &obj)
 
 	QJsonObject imagesObj = obj["poseImages"].toObject();
 	for (size_t i = 0; i < pose.m_poseImages.size(); ++i) {
-		PoseImage poseEnum = static_cast<PoseImage>(i);
+		auto poseEnum = static_cast<PoseImage>(i);
 		QString key = QString::number(static_cast<int>(poseEnum));
 		if (imagesObj.contains(key)) {
 			QJsonObject imageData = imagesObj[key].toObject();

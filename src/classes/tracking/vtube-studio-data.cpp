@@ -4,7 +4,7 @@ VTubeStudioData::VTubeStudioData() = default;
 
 VTubeStudioData::~VTubeStudioData() = default;
 
-qint64 VTubeStudioData::getTimeStamp()
+qint64 VTubeStudioData::getTimeStamp() const
 {
 	return m_timestamp;
 }

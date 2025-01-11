@@ -16,7 +16,7 @@ public:
 	VTubeStudioData();
 	~VTubeStudioData();
 
-	qint64 getTimeStamp();
+	qint64 getTimeStamp() const;
 	int getHotkey() const;
 	bool getFaceFound() const;
 	Vector3 getRotation() const;
