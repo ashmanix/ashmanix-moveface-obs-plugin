@@ -523,6 +523,7 @@ void SettingsDialog::resetPoseUITab()
 {
 	previouslySelectedPoseIndex = -1;
 	clearCurrentPoseConfig();
+	poseListWidget->clearSelection();
 	imageFilesWidget->toggleVisible(false);
 }
 

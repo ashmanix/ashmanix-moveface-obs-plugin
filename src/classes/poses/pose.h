@@ -50,10 +50,10 @@ public:
 	static Pose fromJson(const QJsonObject &obj);
 
 private:
-	QString m_poseId;
-	Vector3 m_bodyPosition;
-	Vector3 m_eyesPosition;
-	Vector3 m_mouthPosition;
+	QString m_poseId = "";
+	Vector3 m_bodyPosition = {0.0, 0.0, 0.0};
+	Vector3 m_eyesPosition = {0.0, 0.0, 0.0};
+	Vector3 m_mouthPosition = {0.0, 0.0, 0.0};
 	std::vector<BlendshapeRule> m_blendShapesRuleList;
 
 	std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> m_poseImages;

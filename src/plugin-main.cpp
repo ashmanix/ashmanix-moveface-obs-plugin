@@ -27,15 +27,15 @@ OBS_DECLARE_MODULE()
 OBS_MODULE_AUTHOR("Ashmanix")
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-GB")
 
-QSharedPointer<MainWidgetDock> mainWidgetDock = nullptr;
+MainWidgetDock *mainWidgetDock = nullptr;
 
 bool obs_module_load(void)
 {
 	const auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
 	obs_frontend_push_ui_translation(obs_module_get_string);
-	mainWidgetDock = QSharedPointer<MainWidgetDock>::create(main_window);
+	mainWidgetDock = new MainWidgetDock(main_window);
 
-	obs_frontend_add_dock_by_id("ashmanixMoveFaceWidget", obs_module_text("MoveFace"), mainWidgetDock.data());
+	obs_frontend_add_dock_by_id("ashmanixMoveFaceWidget", obs_module_text("MoveFace"), mainWidgetDock);
 	obs_frontend_pop_ui_translation();
 
 	obs_log(LOG_INFO, "plugin loaded successfully (version %s)", PLUGIN_VERSION);
@@ -49,7 +49,9 @@ void obs_module_unload(void)
 
 void obs_module_post_load(void)
 {
-	mainWidgetDock->configureWebSocketConnection();
+	if (mainWidgetDock) {
+		mainWidgetDock->configureWebSocketConnection();
+	}
 }
 
 const char *obs_module_name(void)

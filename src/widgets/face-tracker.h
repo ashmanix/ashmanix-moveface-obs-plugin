@@ -35,7 +35,7 @@ class FaceTracker : public QWidget {
 public:
 	explicit FaceTracker(QWidget *parent = nullptr, obs_data_t *savedData = nullptr,
 			     MainWidgetDock *mDockWidget = nullptr);
-	~FaceTracker();
+	~FaceTracker() override;
 	QString getTrackerID();
 	void setTrackerID(const QString &newId = QString());
 	TrackerData getTrackerData();

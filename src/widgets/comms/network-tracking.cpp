@@ -165,7 +165,7 @@ void NetworkTracking::setSendPeriodicData()
 	networkErrorCount = 0;
 }
 
-void NetworkTracking::requestTrackingData(quint16 destPort, QString destIpAddress)
+void NetworkTracking::requestTrackingData(quint16 dPort, QString dIpAddress)
 {
 	if (udpSocket) {
 		QJsonArray ports;
@@ -174,7 +174,7 @@ void NetworkTracking::requestTrackingData(quint16 destPort, QString destIpAddres
 
 		QJsonDocument jsonDoc(initiateTrackingObject);
 		QByteArray jsonString = jsonDoc.toJson(QJsonDocument::Indented);
-		bool result = sendUDPData(destIpAddress, destPort, jsonString);
+		bool result = sendUDPData(dIpAddress, dPort, jsonString);
 		if (!result) {
 			networkErrorCount++;
 		} else {
