@@ -13,7 +13,7 @@
 #include "plugin-support.h"
 
 Q_DECLARE_OPAQUE_POINTER(obs_data_t *)
-#define CONFIG "config.json"
+constexpr const char *CONFIG = "config.json";
 
 struct Result {
 	bool success;

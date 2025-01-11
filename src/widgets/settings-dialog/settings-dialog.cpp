@@ -435,8 +435,7 @@ void SettingsDialog::addImageToScene(PoseImageData *imageData, bool useImagePos,
 		qreal centerX = sceneRect.width() / 2;
 		qreal centerY = sceneRect.height() / 2;
 
-		auto *imagePixmap =
-			static_cast<QGraphicsPixmapItem *>(imageData->getPixmapItem().data());
+		auto *imagePixmap = static_cast<QGraphicsPixmapItem *>(imageData->getPixmapItem().data());
 
 		qreal imagePixmapX = centerX - imagePixmap->pixmap().width() / 2;
 		qreal imagePixmapY = centerY - imagePixmap->pixmap().height() / 2;

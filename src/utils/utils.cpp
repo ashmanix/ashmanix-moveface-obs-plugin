@@ -49,8 +49,7 @@ void hotkeyCallback(void *incoming_data, obs_hotkey_id id, obs_hotkey_t *hotkey,
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(hotkey);
 	if (pressed) {
-		RegisterhotkeyCallbackData *hotkey_callback_data =
-			static_cast<RegisterhotkeyCallbackData *>(incoming_data);
+		auto *hotkey_callback_data = static_cast<RegisterhotkeyCallbackData *>(incoming_data);
 		obs_log(LOG_INFO, hotkey_callback_data->hotkeyLogMessage.c_str(), " due to hotkey");
 		hotkey_callback_data->function();
 	}
