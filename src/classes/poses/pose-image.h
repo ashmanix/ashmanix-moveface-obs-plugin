@@ -1,5 +1,5 @@
-#ifndef POSEIMAGE_HPP
-#define POSEIMAGE_HPP
+#ifndef POSEIMAGE_H
+#define POSEIMAGE_H
 
 enum class PoseImage {
 	BODY,
@@ -13,7 +13,7 @@ enum class PoseImage {
 	COUNT,
 };
 
-QString poseImageToString(PoseImage poseImage)
+inline QString poseImageToString(PoseImage poseImage)
 {
 	switch (poseImage) {
 	case PoseImage::BODY:
@@ -40,4 +40,4 @@ QString poseImageToString(PoseImage poseImage)
 	}
 }
 
-#endif // POSEIMAGE_HPP
+#endif // POSEIMAGE_H
