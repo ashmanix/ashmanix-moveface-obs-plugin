@@ -30,7 +30,7 @@ public:
 	bool shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const;
 
 	QString getPoseId();
-	size_t getPoseImageListSize();
+	int getPoseImageListSize();
 	Vector3 getBodyPosition();
 	Vector3 getEyesPosition();
 	Vector3 getMouthPosition();
