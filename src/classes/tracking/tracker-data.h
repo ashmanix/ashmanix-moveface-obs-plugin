@@ -14,7 +14,7 @@ class Pose;
 
 class TrackerData {
 public:
-	TrackerData(QString trackerId = "", QString selectedImageSource = "", QString destIpAddress = "192.0.0.0");
+	TrackerData(QString trackerId = "", QString selectedImageSource = "", QString destIpAddress = "");
 	~TrackerData() = default;
 
 	QString poseListToJsonString() const;
@@ -42,7 +42,7 @@ public:
 private:
 	QString m_trackerId;
 	QString m_selectedImageSource;
-	QString m_destIpAddress = "192.0.0.0";
+	QString m_destIpAddress = "";
 	int m_destPort = 21412;
 	int m_port = 21412;
 	bool m_isEnabled = false;
