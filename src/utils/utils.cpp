@@ -10,7 +10,7 @@ QString generateUniqueID()
 bool FileExists(QString path)
 {
 	QFileInfo check_file(path);
-	// check if file exists and if yes: Is it really a file and not a directory?
+	// Check if file exists and if yes: Is it really a file and not a directory?
 	if (check_file.exists() && check_file.isFile()) {
 		return true;
 	} else {
@@ -37,7 +37,6 @@ void loadHotkey(int &id, const char *name, const char *description, std::functio
 
 void saveHotkey(obs_data_t *sv_data, obs_hotkey_id id, const char *name)
 {
-	// obs_log(LOG_INFO, "Hotkey ID: %i, Value: %s", (int)id, name);
 	if ((int)id == -1)
 		return;
 	OBSDataArrayAutoRelease array = obs_hotkey_save(id);

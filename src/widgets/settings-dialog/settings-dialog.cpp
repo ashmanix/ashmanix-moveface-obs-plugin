@@ -409,18 +409,6 @@ void SettingsDialog::addImageToScene(PoseImageData *imageData, bool useImagePos,
 		view->setRenderHint(QPainter::Antialiasing);
 		// Create a QGraphicsView to visualize the scene
 		view->setDragMode(QGraphicsView::ScrollHandDrag);
-
-		// Create a pen for the boundary rectangle
-		// QPen boundaryPen(Qt::red);
-		// boundaryPen.setWidth(3);
-
-		// Create a rectangle to show the scene area
-		// QGraphicsRectItem *boundaryRect = new QGraphicsRectItem(avatarPreviewScene->sceneRect());
-		// boundaryRect->setPen(boundaryPen);
-		// boundaryRect->setBrush(Qt::NoBrush); // No fill color
-		// boundaryRect->setZValue(1000);
-
-		// avatarPreviewScene->addItem(boundaryRect);
 	}
 
 	if (imageData->getPixmapItem() == nullptr)

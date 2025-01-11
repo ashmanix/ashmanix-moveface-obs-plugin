@@ -11,25 +11,9 @@ ImageFilesWidget::ImageFilesWidget(QWidget *parent, QSharedPointer<TrackerData> 
 	setupWidgetUI();
 
 	connectUISignalHandlers();
-
-	// if (tData)
-	// setupListData(tData);
 }
 
 ImageFilesWidget::~ImageFilesWidget() {}
-
-// void setupListData(QSharedPointer<TrackerData> trackerData) {}
-
-// void ImageFilesWidget::setListItem(PoseImage poseEnum, QString fileName)
-// {
-// 	QLineEdit *lineEdit = poseImageLineEdits.find(poseEnum);
-// 	if (lineEdit) {
-// 		lineEdit->setText(fileName);
-// 	} else {
-
-// 	obs_log(LOG_WARNING, "No line edit found for poseEnum: %s", (poseImageToString(poseEnum).toStdString().c_str());
-// 	}
-// }
 
 void ImageFilesWidget::clearSelection()
 {
