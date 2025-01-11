@@ -36,7 +36,7 @@ class SettingsDialog : public QDialog {
 public:
 	explicit SettingsDialog(QWidget *parent = nullptr, QSharedPointer<TrackerData> tData = nullptr,
 				MainWidgetDock *mWidget = nullptr);
-	~SettingsDialog();
+	~SettingsDialog() override;
 	void setFormDetails(QSharedPointer<TrackerData> settingsDialogData);
 	void updateStyledUIComponents();
 
@@ -51,7 +51,6 @@ private:
 	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
 	QList<QSharedPointer<Pose>> settingsPoseList;
-	// QMap<PoseImage, QLineEdit *> poseImageLineEdits;
 	QGraphicsScene *avatarPreviewScene = nullptr;
 	int previouslySelectedPoseIndex = -1;
 	bool isMovingPoseListRows = false;

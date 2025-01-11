@@ -30,7 +30,7 @@ public:
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
 	}
 
-	~MovablePixmapItem() = default;
+	~MovablePixmapItem() override = default;
 
 	// Get clone of MovablePixmapItem
 	QSharedPointer<MovablePixmapItem> clone() const

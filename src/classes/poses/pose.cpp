@@ -1,12 +1,12 @@
 #include "pose.h"
 
 Pose::Pose()
+	: m_poseId(""),
+	  m_bodyPosition(0.0, 0.0, 0.0),
+	  m_eyesPosition(0.0, 0.0, 0.0),
+	  m_mouthPosition(0.0, 0.0, 0.0),
+	  m_poseImages() // Default-initialized
 {
-	m_poseId = "";
-	m_bodyPosition = {0.0, 0.0, 0.0};
-	m_eyesPosition = {0.0, 0.0, 0.0};
-	m_mouthPosition = {0.0, 0.0, 0.0};
-
 	for (size_t i = 0; i < m_poseImages.size(); ++i) {
 		m_poseImages[i] = PoseImageData();
 	}

@@ -18,7 +18,7 @@ class PoseListWidget : public QWidget {
 	Q_OBJECT
 public:
 	explicit PoseListWidget(QWidget *parent = nullptr, QSharedPointer<TrackerData> tData = nullptr);
-	~PoseListWidget();
+	~PoseListWidget() override;
 
 	void clearList();
 	int getSelectedRow();

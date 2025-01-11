@@ -435,7 +435,7 @@ void SettingsDialog::addImageToScene(PoseImageData *imageData, bool useImagePos,
 		qreal centerX = sceneRect.width() / 2;
 		qreal centerY = sceneRect.height() / 2;
 
-		QGraphicsPixmapItem *imagePixmap =
+		auto *imagePixmap =
 			static_cast<QGraphicsPixmapItem *>(imageData->getPixmapItem().data());
 
 		qreal imagePixmapX = centerX - imagePixmap->pixmap().width() / 2;
@@ -486,7 +486,7 @@ void SettingsDialog::loadSelectedPoseConfig()
 	imageFilesWidget->toggleVisible(true);
 
 	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
-		PoseImage poseEnum = static_cast<PoseImage>(i);
+		auto poseEnum = static_cast<PoseImage>(i);
 		QMap<PoseImage, QLineEdit *> poseImageLineEdits = imageFilesWidget->getposeLineEditsMap();
 		auto it = poseImageLineEdits.find(poseEnum);
 		if (it != poseImageLineEdits.end()) {
@@ -632,12 +632,7 @@ void SettingsDialog::syncPoseListToModel()
 		QSharedPointer<Pose> clonedPosePtr = originalPosePtr->clone();
 		settingsPoseList.append(clonedPosePtr);
 
-		// const Pose &p = *clonedPosePtr;
-		// QStandardItem *item = new QStandardItem(clonedPosePtr->getPoseId());
-
 		poseListWidget->addRow(clonedPosePtr->getPoseId());
-		obs_log(LOG_INFO, "tracker data ID: %s is being loaded",
-			clonedPosePtr->getPoseId().toStdString().c_str());
 	}
 	// Reenable signal
 	QObject::connect(poseListWidget, &PoseListWidget::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
@@ -651,7 +646,7 @@ void SettingsDialog::handleSetImageUrl(PoseImage poseEnum, QString fileName)
 
 	QSharedPointer<Pose> selectedPose = settingsPoseList[selectedRow];
 
-	int imageIndex = static_cast<int>(poseEnum);
+	auto imageIndex = static_cast<int>(poseEnum);
 
 	formChangeDetected();
 
@@ -721,7 +716,7 @@ void SettingsDialog::onPoseRowsInserted(QMap<int, QString> rowMap)
 	for (auto it = rowMap.constBegin(); it != rowMap.constEnd(); ++it) {
 		result += QString::number(it.key()) + ": \"" + it.value() + "\", ";
 	}
-	if (rowMap.size() > 0)
+	if (rowMap.isEmpty())
 		result.chop(2); // Remove the trailing ", "
 	result += " }";
 

@@ -4,7 +4,7 @@
 #include <QString>
 #include <QHash>
 
-enum BlendshapeKey {
+enum class BlendshapeKey {
 	BROWOUTERUP_L,
 	BROWINNERUP_L,
 	BROWDOWN_L,

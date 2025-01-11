@@ -6,7 +6,7 @@
 // Forward declarations
 class Blendshape;
 
-enum ComparisonType { EQ, LT, LTEQ, GT, GTEQ };
+enum class ComparisonType { EQ, LT, LTEQ, GT, GTEQ };
 
 class BlendshapeRule {
 public:
