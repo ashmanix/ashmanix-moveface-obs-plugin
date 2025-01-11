@@ -148,10 +148,10 @@ void FaceTracker::setTrackerData()
 
 void FaceTracker::loadPoseData()
 {
-	for (int i = 0; i < trackerData->getPoseList().size(); i++) {
+	for (size_t i = 0; i < trackerData->getPoseList().size(); i++) {
 		QSharedPointer<Pose> selectedPose = trackerData->getPoseAt(i);
 
-		for (int j = 0; j < selectedPose->getPoseImageListSize(); ++j) {
+		for (size_t j = 0; j < selectedPose->getPoseImageListSize(); ++j) {
 			PoseImage poseEnum = static_cast<PoseImage>(j);
 			PoseImageData *data = selectedPose->getPoseImageAt(j);
 

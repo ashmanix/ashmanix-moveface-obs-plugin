@@ -61,7 +61,7 @@ QString Pose::getPoseId()
 	return m_poseId;
 }
 
-int Pose::getPoseImageListSize()
+size_t Pose::getPoseImageListSize()
 {
 	return m_poseImages.size();
 }
