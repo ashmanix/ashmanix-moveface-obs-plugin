@@ -7,9 +7,6 @@ Pose::Pose()
 	  m_mouthPosition(0.0, 0.0, 0.0),
 	  m_poseImages() // Default-initialized
 {
-	// for (size_t i = 0; i < m_poseImages.size(); ++i) {
-	// 	m_poseImages[i] = PoseImageData();
-	// }
 	for (auto &poseImage : m_poseImages) {
 		poseImage = PoseImageData();
 	}

@@ -20,7 +20,7 @@ class ImageFilesWidget : public QWidget {
 	Q_OBJECT
 public:
 	explicit ImageFilesWidget(QWidget *parent = nullptr, QSharedPointer<TrackerData> tData = nullptr);
-	~ImageFilesWidget();
+	~ImageFilesWidget() override;
 
 	void clearSelection();
 	void toggleVisible(bool isVisible);
