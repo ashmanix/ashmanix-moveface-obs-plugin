@@ -130,7 +130,7 @@ PoseImageData *Pose::getPoseImageData(PoseImage pose)
 	return nullptr;
 }
 
-PoseImageData *Pose::getPoseImageAt(int index)
+PoseImageData *Pose::getPoseImageAt(size_t index)
 {
 	return &m_poseImages.at(index);
 }

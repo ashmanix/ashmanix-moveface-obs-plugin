@@ -44,7 +44,7 @@ public:
 	void addBlendShapeRule(BlendshapeRule rule);
 	void removeBlendShapeRule(int index);
 
-	PoseImageData *getPoseImageAt(int index);
+	PoseImageData *getPoseImageAt(size_t index);
 	PoseImageData *getPoseImageData(PoseImage pose);
 	QJsonObject toJson() const;
 	static Pose fromJson(const QJsonObject &obj);
