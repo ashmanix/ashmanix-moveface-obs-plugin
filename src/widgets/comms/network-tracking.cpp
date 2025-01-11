@@ -93,20 +93,17 @@ void NetworkTracking::processReceivedTrackingData()
 		QJsonParseError parseError;
 		QJsonDocument jsonDocument = QJsonDocument::fromJson(datagram.data(), &parseError);
 
-		if (parseError.error == QJsonParseError::NoError) {
+		if (parseError.error == QJsonParseError::NoError && jsonDocument.isObject()) {
+			QJsonObject jsonObj = jsonDocument.object();
+			if (isConnected == false) {
+				isConnected = true;
+				emit connectionToggle(isConnected);
+			}
 
-			if (jsonDocument.isObject()) {
-				QJsonObject jsonObj = jsonDocument.object();
-				if (isConnected == false) {
-					isConnected = true;
-					emit connectionToggle(isConnected);
-				}
+			VTubeStudioData receivedTrackingData = VTubeStudioData::fromJson(jsonObj);
 
-				VTubeStudioData receivedTrackingData = VTubeStudioData::fromJson(jsonObj);
-
-				if (receivedTrackingData.getFaceFound() == true) {
-					emit receivedData(receivedTrackingData);
-				}
+			if (receivedTrackingData.getFaceFound() == true) {
+				emit receivedData(receivedTrackingData);
 			}
 		}
 	}
@@ -136,8 +133,8 @@ void NetworkTracking::resetConnectionTimer()
 {
 	// We send out the signal periodically as required by vTubeStudio
 	if (!connectionTimer) {
-		connectionTimer = new QTimer();
-		QObject::connect(connectionTimer, &QTimer::timeout, [this]() {
+		connectionTimer = QSharedPointer<QTimer>::create();
+		QObject::connect(connectionTimer.data(), &QTimer::timeout, [this]() {
 			isConnected = false;
 			emit connectionToggle(isConnected);
 		});

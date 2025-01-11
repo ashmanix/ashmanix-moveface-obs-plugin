@@ -44,7 +44,7 @@ private:
 	const int MAXERRORCOUNT = 3;
 	int networkErrorCount = 0;
 
-	QTimer *connectionTimer = nullptr;
+	QSharedPointer<QTimer> connectionTimer = nullptr;
 	const int TRACKINGDATAPERIODINSECS = 5;
 
 	QSharedPointer<QUdpSocket> udpSocket = nullptr;
