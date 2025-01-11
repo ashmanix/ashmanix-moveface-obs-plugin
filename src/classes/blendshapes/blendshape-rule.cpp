@@ -9,15 +9,15 @@ bool BlendshapeRule::evaluate(const Blendshape &blendShape) const
 	double valueToCompare = blendShape.value;
 
 	switch (compareType) {
-	case ComparisonType::EQ:
+	case EQ:
 		return valueToCompare == compareValue;
-	case ComparisonType::LT:
+	case LT:
 		return valueToCompare < compareValue;
-	case ComparisonType::LTEQ:
+	case LTEQ:
 		return valueToCompare <= compareValue;
-	case ComparisonType::GT:
+	case GT:
 		return valueToCompare > compareValue;
-	case ComparisonType::GTEQ:
+	case GTEQ:
 		return valueToCompare >= compareValue;
 
 	default:

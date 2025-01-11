@@ -2,8 +2,9 @@
 #define BLENDSHAPEKEY_H
 
 #include <QString>
+#include <QHash>
 
-enum class BlendshapeKey {
+enum BlendshapeKey {
 	BROWOUTERUP_L,
 	BROWINNERUP_L,
 	BROWDOWN_L,

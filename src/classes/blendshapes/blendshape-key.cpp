@@ -2,214 +2,128 @@
 
 QString blendshapeKeyToString(BlendshapeKey key)
 {
-	switch (key) {
-	case BlendshapeKey::BROWOUTERUP_L:
-		return "browOuterUp_L";
-	case BlendshapeKey::BROWINNERUP_L:
-		return "browInnerUp_L";
-	case BlendshapeKey::BROWDOWN_L:
-		return "browDown_L";
-	case BlendshapeKey::EYEBLINK_L:
-		return "eyeBlink_L";
-	case BlendshapeKey::EYESQUINT_L:
-		return "eyeSquint_L";
-	case BlendshapeKey::EYEWIDE_L:
-		return "eyeWide_L";
-	case BlendshapeKey::EYELOOKUP_L:
-		return "eyeLookUp_L";
-	case BlendshapeKey::EYELOOKOUT_L:
-		return "eyeLookOut_L";
-	case BlendshapeKey::EYELOOKIN_L:
-		return "eyeLookIn_L";
-	case BlendshapeKey::EYELOOKDOWN_L:
-		return "eyeLookDown_L";
-	case BlendshapeKey::NOSESNEER_L:
-		return "noseSneer_L";
-	case BlendshapeKey::MOUTHUPPERUP_L:
-		return "mouthUpperUp_L";
-	case BlendshapeKey::MOUTHSMILE_L:
-		return "mouthSmile_L";
-	case BlendshapeKey::MOUTHLEFT:
-		return "mouthLeft";
-	case BlendshapeKey::MOUTHFROWN_L:
-		return "mouthFrown_L";
-	case BlendshapeKey::MOUTHLOWERDOWN_L:
-		return "mouthLowerDown_L";
-	case BlendshapeKey::JAWLEFT:
-		return "jawLeft";
-	case BlendshapeKey::CHEEKPUFF:
-		return "cheekPuff";
-	case BlendshapeKey::MOUTHSHRUGUPPER:
-		return "mouthShrugUpper";
-	case BlendshapeKey::MOUTHFUNNEL:
-		return "mouthFunnel";
-	case BlendshapeKey::MOUTHROLLLOWER:
-		return "mouthRollLower";
-	case BlendshapeKey::JAWOPEN:
-		return "jawOpen";
-	case BlendshapeKey::TONGUEOUT:
-		return "tongueOut";
-	case BlendshapeKey::MOUTHPUCKER:
-		return "mouthPucker";
-	case BlendshapeKey::MOUTHROLLUPPER:
-		return "mouthRollUpper";
-	case BlendshapeKey::JAWRIGHT:
-		return "jawRight";
-	case BlendshapeKey::MOUTHLOWERDOWN_R:
-		return "mouthLowerDown_R";
-	case BlendshapeKey::MOUTHFROWN_R:
-		return "mouthFrown_R";
-	case BlendshapeKey::MOUTHRIGHT:
-		return "mouthRight";
-	case BlendshapeKey::MOUTHSMILE_R:
-		return "mouthSmile_R";
-	case BlendshapeKey::MOUTHUPPERUP_R:
-		return "mouthUpperUp_R";
-	case BlendshapeKey::NOSESNEER_R:
-		return "noseSneer_R";
-	case BlendshapeKey::EYELOOKDOWN_R:
-		return "eyeLookDown_R";
-	case BlendshapeKey::EYELOOKIN_R:
-		return "eyeLookIn_R";
-	case BlendshapeKey::EYELOOKOUT_R:
-		return "eyeLookOut_R";
-	case BlendshapeKey::EYELOOKUP_R:
-		return "eyeLookUp_R";
-	case BlendshapeKey::EYEWIDE_R:
-		return "eyeWide_R";
-	case BlendshapeKey::EYESQUINT_R:
-		return "eyeSquint_R";
-	case BlendshapeKey::EYEBLINK_R:
-		return "eyeBlink_R";
-	case BlendshapeKey::BROWDOWN_R:
-		return "browDown_R";
-	case BlendshapeKey::BROWINNERUP_R:
-		return "browInnerUp_R";
-	case BlendshapeKey::BROWOUTERUP_R:
-		return "browOuterUp_R";
-	case BlendshapeKey::HEADLEFT:
-		return "headLeft";
-	case BlendshapeKey::HEADRIGHT:
-		return "headRight";
-	case BlendshapeKey::HEADUP:
-		return "headUp";
-	case BlendshapeKey::HEADDOWN:
-		return "headDown";
-	case BlendshapeKey::HEADROLLLEFT:
-		return "headRollLeft";
-	case BlendshapeKey::HEADROLLRIGHT:
-		return "headRollRight";
-	case BlendshapeKey::EYEBLINKLEFT:
-		return "EyeBlinkLeft";
-	case BlendshapeKey::EYEBLINKRIGHT:
-		return "EyeBlinkRight";
-	default:
-		return QString();
+	// Define a static QHash to ensure it's initialized only once
+	static const QHash<BlendshapeKey, QString> blendshapeMap = {
+		{BROWOUTERUP_L, "browOuterUp_L"},
+		{BROWINNERUP_L, "browInnerUp_L"},
+		{BROWDOWN_L, "browDown_L"},
+		{EYEBLINK_L, "eyeBlink_L"},
+		{EYESQUINT_L, "eyeSquint_L"},
+		{EYEWIDE_L, "eyeWide_L"},
+		{EYELOOKUP_L, "eyeLookUp_L"},
+		{EYELOOKOUT_L, "eyeLookOut_L"},
+		{EYELOOKIN_L, "eyeLookIn_L"},
+		{EYELOOKDOWN_L, "eyeLookDown_L"},
+		{NOSESNEER_L, "noseSneer_L"},
+		{MOUTHUPPERUP_L, "mouthUpperUp_L"},
+		{MOUTHSMILE_L, "mouthSmile_L"},
+		{MOUTHLEFT, "mouthLeft"},
+		{MOUTHFROWN_L, "mouthFrown_L"},
+		{MOUTHLOWERDOWN_L, "mouthLowerDown_L"},
+		{JAWLEFT, "jawLeft"},
+		{CHEEKPUFF, "cheekPuff"},
+		{MOUTHSHRUGUPPER, "mouthShrugUpper"},
+		{MOUTHFUNNEL, "mouthFunnel"},
+		{MOUTHROLLLOWER, "mouthRollLower"},
+		{JAWOPEN, "jawOpen"},
+		{TONGUEOUT, "tongueOut"},
+		{MOUTHPUCKER, "mouthPucker"},
+		{MOUTHROLLUPPER, "mouthRollUpper"},
+		{JAWRIGHT, "jawRight"},
+		{MOUTHLOWERDOWN_R, "mouthLowerDown_R"},
+		{MOUTHFROWN_R, "mouthFrown_R"},
+		{MOUTHRIGHT, "mouthRight"},
+		{MOUTHSMILE_R, "mouthSmile_R"},
+		{MOUTHUPPERUP_R, "mouthUpperUp_R"},
+		{NOSESNEER_R, "noseSneer_R"},
+		{EYELOOKDOWN_R, "eyeLookDown_R"},
+		{EYELOOKIN_R, "eyeLookIn_R"},
+		{EYELOOKOUT_R, "eyeLookOut_R"},
+		{EYELOOKUP_R, "eyeLookUp_R"},
+		{EYEWIDE_R, "eyeWide_R"},
+		{EYESQUINT_R, "eyeSquint_R"},
+		{EYEBLINK_R, "eyeBlink_R"},
+		{BROWDOWN_R, "browDown_R"},
+		{BROWINNERUP_R, "browInnerUp_R"},
+		{BROWOUTERUP_R, "browOuterUp_R"},
+		{HEADLEFT, "headLeft"},
+		{HEADRIGHT, "headRight"},
+		{HEADUP, "headUp"},
+		{HEADDOWN, "headDown"},
+		{HEADROLLLEFT, "headRollLeft"},
+		{HEADROLLRIGHT, "headRollRight"},
+		{EYEBLINKLEFT, "EyeBlinkLeft"},
+		{EYEBLINKRIGHT, "EyeBlinkRight"}
+		// Add all other mappings here
+	};
+
+	// Attempt to find the key in the map
+	auto it = blendshapeMap.find(key);
+	if (it != blendshapeMap.end()) {
+		return it.value();
 	}
+
+	// Return an empty QString if the key is not found
+	return QString();
 }
 
 BlendshapeKey blendshapeKeyFromString(const QString &str)
 {
-	if (str == "browOuterUp_L")
-		return BlendshapeKey::BROWOUTERUP_L;
-	if (str == "browInnerUp_L")
-		return BlendshapeKey::BROWINNERUP_L;
-	if (str == "browDown_L")
-		return BlendshapeKey::BROWDOWN_L;
-	if (str == "eyeBlink_L")
-		return BlendshapeKey::EYEBLINK_L;
-	if (str == "eyeSquint_L")
-		return BlendshapeKey::EYESQUINT_L;
-	if (str == "eyeWide_L")
-		return BlendshapeKey::EYEWIDE_L;
-	if (str == "eyeLookUp_L")
-		return BlendshapeKey::EYELOOKUP_L;
-	if (str == "eyeLookOut_L")
-		return BlendshapeKey::EYELOOKOUT_L;
-	if (str == "eyeLookIn_L")
-		return BlendshapeKey::EYELOOKIN_L;
-	if (str == "eyeLookDown_L")
-		return BlendshapeKey::EYELOOKDOWN_L;
-	if (str == "noseSneer_L")
-		return BlendshapeKey::NOSESNEER_L;
-	if (str == "mouthUpperUp_L")
-		return BlendshapeKey::MOUTHUPPERUP_L;
-	if (str == "mouthSmile_L")
-		return BlendshapeKey::MOUTHSMILE_L;
-	if (str == "mouthLeft")
-		return BlendshapeKey::MOUTHLEFT;
-	if (str == "mouthFrown_L")
-		return BlendshapeKey::MOUTHFROWN_L;
-	if (str == "mouthLowerDown_L")
-		return BlendshapeKey::MOUTHLOWERDOWN_L;
-	if (str == "jawLeft")
-		return BlendshapeKey::JAWLEFT;
-	if (str == "cheekPuff")
-		return BlendshapeKey::CHEEKPUFF;
-	if (str == "mouthShrugUpper")
-		return BlendshapeKey::MOUTHSHRUGUPPER;
-	if (str == "mouthFunnel")
-		return BlendshapeKey::MOUTHFUNNEL;
-	if (str == "mouthRollLower")
-		return BlendshapeKey::MOUTHROLLLOWER;
-	if (str == "jawOpen")
-		return BlendshapeKey::JAWOPEN;
-	if (str == "tongueOut")
-		return BlendshapeKey::TONGUEOUT;
-	if (str == "mouthPucker")
-		return BlendshapeKey::MOUTHPUCKER;
-	if (str == "mouthRollUpper")
-		return BlendshapeKey::MOUTHROLLUPPER;
-	if (str == "jawRight")
-		return BlendshapeKey::JAWRIGHT;
-	if (str == "mouthLowerDown_R")
-		return BlendshapeKey::MOUTHLOWERDOWN_R;
-	if (str == "mouthFrown_R")
-		return BlendshapeKey::MOUTHFROWN_R;
-	if (str == "mouthRight")
-		return BlendshapeKey::MOUTHRIGHT;
-	if (str == "mouthSmile_R")
-		return BlendshapeKey::MOUTHSMILE_R;
-	if (str == "mouthUpperUp_R")
-		return BlendshapeKey::MOUTHUPPERUP_R;
-	if (str == "noseSneer_R")
-		return BlendshapeKey::NOSESNEER_R;
-	if (str == "eyeLookDown_R")
-		return BlendshapeKey::EYELOOKDOWN_R;
-	if (str == "eyeLookIn_R")
-		return BlendshapeKey::EYELOOKIN_R;
-	if (str == "eyeLookOut_R")
-		return BlendshapeKey::EYELOOKOUT_R;
-	if (str == "eyeLookUp_R")
-		return BlendshapeKey::EYELOOKUP_R;
-	if (str == "eyeWide_R")
-		return BlendshapeKey::EYEWIDE_R;
-	if (str == "eyeSquint_R")
-		return BlendshapeKey::EYESQUINT_R;
-	if (str == "eyeBlink_R")
-		return BlendshapeKey::EYEBLINK_R;
-	if (str == "browDown_R")
-		return BlendshapeKey::BROWDOWN_R;
-	if (str == "browInnerUp_R")
-		return BlendshapeKey::BROWINNERUP_R;
-	if (str == "browOuterUp_R")
-		return BlendshapeKey::BROWOUTERUP_R;
-	if (str == "headLeft")
-		return BlendshapeKey::HEADLEFT;
-	if (str == "headRight")
-		return BlendshapeKey::HEADRIGHT;
-	if (str == "headUp")
-		return BlendshapeKey::HEADUP;
-	if (str == "headDown")
-		return BlendshapeKey::HEADDOWN;
-	if (str == "headRollLeft")
-		return BlendshapeKey::HEADROLLLEFT;
-	if (str == "headRollRight")
-		return BlendshapeKey::HEADROLLRIGHT;
-	if (str == "EyeBlinkLeft")
-		return BlendshapeKey::EYEBLINKLEFT;
-	if (str == "EyeBlinkRight")
-		return BlendshapeKey::EYEBLINKRIGHT;
+	static const std::unordered_map<QString, BlendshapeKey> mapping = {
+		{"browOuterUp_L", BROWOUTERUP_L},
+		{"browInnerUp_L", BROWINNERUP_L},
+		{"browDown_L", BROWDOWN_L},
+		{"eyeBlink_L", EYEBLINK_L},
+		{"eyeSquint_L", EYESQUINT_L},
+		{"eyeWide_L", EYEWIDE_L},
+		{"eyeLookUp_L", EYELOOKUP_L},
+		{"eyeLookOut_L", EYELOOKOUT_L},
+		{"eyeLookIn_L", EYELOOKIN_L},
+		{"eyeLookDown_L", EYELOOKDOWN_L},
+		{"noseSneer_L", NOSESNEER_L},
+		{"mouthUpperUp_L", MOUTHUPPERUP_L},
+		{"mouthSmile_L", MOUTHSMILE_L},
+		{"mouthLeft", MOUTHLEFT},
+		{"mouthFrown_L", MOUTHFROWN_L},
+		{"mouthLowerDown_L", MOUTHLOWERDOWN_L},
+		{"jawLeft", JAWLEFT},
+		{"cheekPuff", CHEEKPUFF},
+		{"mouthShrugUpper", MOUTHSHRUGUPPER},
+		{"mouthFunnel", MOUTHFUNNEL},
+		{"mouthRollLower", MOUTHROLLLOWER},
+		{"jawOpen", JAWOPEN},
+		{"tongueOut", TONGUEOUT},
+		{"mouthPucker", MOUTHPUCKER},
+		{"mouthRollUpper", MOUTHROLLUPPER},
+		{"jawRight", JAWRIGHT},
+		{"mouthLowerDown_R", MOUTHLOWERDOWN_R},
+		{"mouthFrown_R", MOUTHFROWN_R},
+		{"mouthRight", MOUTHRIGHT},
+		{"mouthSmile_R", MOUTHSMILE_R},
+		{"mouthUpperUp_R", MOUTHUPPERUP_R},
+		{"noseSneer_R", NOSESNEER_R},
+		{"eyeLookDown_R", EYELOOKDOWN_R},
+		{"eyeLookIn_R", EYELOOKIN_R},
+		{"eyeLookOut_R", EYELOOKOUT_R},
+		{"eyeLookUp_R", EYELOOKUP_R},
+		{"eyeWide_R", EYEWIDE_R},
+		{"eyeSquint_R", EYESQUINT_R},
+		{"eyeBlink_R", EYEBLINK_R},
+		{"browDown_R", BROWDOWN_R},
+		{"browInnerUp_R", BROWINNERUP_R},
+		{"browOuterUp_R", BROWOUTERUP_R},
+		{"headLeft", HEADLEFT},
+		{"headRight", HEADRIGHT},
+		{"headUp", HEADUP},
+		{"headDown", HEADDOWN},
+		{"headRollLeft", HEADROLLLEFT},
+		{"headRollRight", HEADROLLRIGHT},
+		{"EyeBlinkLeft", EYEBLINKLEFT},
+		{"EyeBlinkRight", EYEBLINKRIGHT},
+	};
 
-	return BlendshapeKey::UNKNOWN;
+	auto it = mapping.find(str);
+	if (it != mapping.end())
+		return it->second;
+	return UNKNOWN;
 }

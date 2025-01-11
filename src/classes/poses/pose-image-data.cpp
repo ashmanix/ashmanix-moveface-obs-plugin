@@ -13,8 +13,6 @@ PoseImageData::PoseImageData(const PoseImageData &other)
 {
 }
 
-PoseImageData::~PoseImageData() {}
-
 PoseImageData &PoseImageData::operator=(const PoseImageData &other)
 {
 	if (this == &other)

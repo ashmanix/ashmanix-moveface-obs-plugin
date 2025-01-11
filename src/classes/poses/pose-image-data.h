@@ -14,7 +14,14 @@ public:
 	// Copy Assignment Operator for deep copying
 	PoseImageData &operator=(const PoseImageData &other);
 
-	~PoseImageData();
+	// Defaulted Move Constructor
+	PoseImageData(PoseImageData &&other) noexcept = default;
+
+	// Defaulted Move Assignment Operator
+	PoseImageData &operator=(PoseImageData &&other) noexcept = default;
+
+	// Defaulted Destructor
+	~PoseImageData() = default;
 
 	QString getImageUrl() const;
 	QSharedPointer<MovablePixmapItem> getPixmapItem() const;

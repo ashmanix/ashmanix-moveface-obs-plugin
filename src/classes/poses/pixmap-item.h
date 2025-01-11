@@ -3,6 +3,7 @@
 
 #include <QGraphicsPixmapItem>
 #include <QObject>
+#include <QSharedPointer>
 #include "pose-image.h"
 
 class MovablePixmapItem : public QObject, public QGraphicsPixmapItem {
@@ -11,11 +12,11 @@ public:
 	explicit MovablePixmapItem(const QPixmap &pixmap, QObject *parent = nullptr,
 				   PoseImage pImageType = PoseImage::BODY)
 		: QObject(parent),
-		  QGraphicsPixmapItem(pixmap)
+		  QGraphicsPixmapItem(pixmap),
+		  poseImageType(pImageType)
 	{
 		// Enable the item to be movable and selectable
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
-		poseImageType = pImageType;
 		setTransformOriginPoint(pixmap.width() / 2, pixmap.height() / 2);
 	}
 
@@ -29,12 +30,12 @@ public:
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
 	}
 
-	virtual ~MovablePixmapItem() {};
+	~MovablePixmapItem() = default;
 
 	// Get clone of MovablePixmapItem
 	QSharedPointer<MovablePixmapItem> clone() const
 	{
-		MovablePixmapItem *newItem = new MovablePixmapItem(this->pixmap(), nullptr, this->poseImageType);
+		auto newItem = QSharedPointer<MovablePixmapItem>::create(this->pixmap(), nullptr, this->poseImageType);
 
 		newItem->setTransformOriginPoint(this->transformOriginPoint());
 		newItem->setPos(this->pos());
