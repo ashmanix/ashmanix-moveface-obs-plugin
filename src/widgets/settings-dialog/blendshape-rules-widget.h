@@ -1,8 +1,8 @@
-
 #ifndef BLENDSHAPERULESWIDGET_H
 #define BLENDSHAPERULESWIDGET_H
 
 #include <QWidget>
+#include <QString>
 #include <QPushButton>
 #include <QList>
 #include <QSharedPointer>
@@ -23,13 +23,13 @@ public:
 	void clearSelection();
 	void toggleVisible(bool isVisible);
 	void setData(QSharedPointer<Pose> poseData);
+	void updateStyledUIComponents();
 
 private:
 	Ui::BlendshapeRulesWidget *ui;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();
-	void updateStyledUIComponents();
 	void toggleBlockAllUISignals(bool shouldBlock);
 
 signals:

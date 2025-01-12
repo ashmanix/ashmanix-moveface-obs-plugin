@@ -470,7 +470,7 @@
              </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="settingsVerticalLayout" stretch="1">
+             <layout class="QVBoxLayout" name="settingsVerticalLayout" stretch="">
               <property name="spacing">
                <number>5</number>
               </property>
@@ -483,92 +483,6 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item>
-               <widget class="QFrame" name="blenshapeRulesFrame">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Panel</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Plain</enum>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_10">
-                 <item>
-                  <widget class="QLabel" name="blendshapeRulesLabel">
-                   <property name="text">
-                    <string>blendshape rules</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QScrollArea" name="blendshapeRulesScrollArea">
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="widgetResizable">
-                    <bool>true</bool>
-                   </property>
-                   <widget class="QWidget" name="scrollAreaWidgetContents_3">
-                    <property name="geometry">
-                     <rect>
-                      <x>0</x>
-                      <y>0</y>
-                      <width>371</width>
-                      <height>634</height>
-                     </rect>
-                    </property>
-                    <layout class="QVBoxLayout" name="verticalLayout_13"/>
-                   </widget>
-                  </widget>
-                 </item>
-                 <item>
-                  <layout class="QHBoxLayout" name="blendshapeRuleButtonsLayout">
-                   <property name="topMargin">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QToolButton" name="addBlenshapeRuleToolButton">
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QToolButton" name="deleteBlendshapeRuleToolButton">
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="horizontalSpacer_2">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </widget>
-              </item>
              </layout>
             </item>
            </layout>

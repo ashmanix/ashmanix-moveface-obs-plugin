@@ -46,6 +46,48 @@ QMap<PoseImage, QLineEdit *> ImageFilesWidget::getposeLineEditsMap() const
 	return poseImageLineEdits;
 }
 
+void ImageFilesWidget::updateStyledUIComponents()
+{
+	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
+						       : getDataFolderPath() + "/icons/light/";
+	QString searchIconPath = QDir::fromNativeSeparators(baseUrl + "search.svg");
+	if (QFileInfo::exists(searchIconPath)) {
+		QIcon searchIcon(searchIconPath);
+
+		ui->bodyUrlBrowseToolButton->setIcon(searchIcon);
+		ui->eyesOpenUrlBrowseToolButton->setIcon(searchIcon);
+		ui->eyesHalfOpenUrlBrowseToolButton->setIcon(searchIcon);
+		ui->eyesClosedUrlBrowseToolButton->setIcon(searchIcon);
+		ui->mouthClosedUrlBrowseToolButton->setIcon(searchIcon);
+		ui->mouthOpenUrlBrowseToolButton->setIcon(searchIcon);
+		ui->mouthSmileUrlBrowseToolButton->setIcon(searchIcon);
+		ui->tongueOutUrlBrowseToolButton->setIcon(searchIcon);
+	}
+
+	QString entryClearIconPath = QDir::fromNativeSeparators(baseUrl + "entry-clear.svg");
+	if (QFileInfo::exists(entryClearIconPath)) {
+		QIcon entryClearIcon(entryClearIconPath);
+
+		ui->bodyUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->eyesOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->eyesHalfOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->eyesClosedUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->mouthClosedUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->mouthOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->mouthSmileUrlDeleteToolButton->setIcon(entryClearIcon);
+		ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
+	}
+
+	ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
+						    "background-color: transparent;"
+						    "}"
+						    "#trackingScrollAreaWidgetContents {"
+						    "background-color: transparent;"
+						    "}");
+	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
+	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
+}
+
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void ImageFilesWidget::connectUISignalHandlers()
@@ -129,48 +171,6 @@ void ImageFilesWidget::setupWidgetUI()
 	ui->noConfigLabel->setVisible(true);
 
 	updateStyledUIComponents();
-}
-
-void ImageFilesWidget::updateStyledUIComponents()
-{
-	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
-						       : getDataFolderPath() + "/icons/light/";
-	QString searchIconPath = QDir::fromNativeSeparators(baseUrl + "search.svg");
-	if (QFileInfo::exists(searchIconPath)) {
-		QIcon searchIcon(searchIconPath);
-
-		ui->bodyUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesHalfOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesClosedUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthClosedUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthSmileUrlBrowseToolButton->setIcon(searchIcon);
-		ui->tongueOutUrlBrowseToolButton->setIcon(searchIcon);
-	}
-
-	QString entryClearIconPath = QDir::fromNativeSeparators(baseUrl + "entry-clear.svg");
-	if (QFileInfo::exists(entryClearIconPath)) {
-		QIcon entryClearIcon(entryClearIconPath);
-
-		ui->bodyUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesHalfOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesClosedUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthClosedUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthSmileUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
-	}
-
-	ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
-						    "background-color: transparent;"
-						    "}"
-						    "#trackingScrollAreaWidgetContents {"
-						    "background-color: transparent;"
-						    "}");
-	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
-	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 }
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------

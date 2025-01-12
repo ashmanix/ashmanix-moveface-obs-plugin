@@ -6,7 +6,7 @@
 // Forward declarations
 class Blendshape;
 
-enum class ComparisonType { EQ, LT, LTEQ, GT, GTEQ };
+enum class ComparisonType { EQ, LT, LTEQ, GT, GTEQ, COUNT };
 
 class BlendshapeRule {
 public:
@@ -15,6 +15,7 @@ public:
 	double compareValue;
 
 	bool evaluate(const Blendshape &blendShape) const;
+	static QString comparisonTypeToString(ComparisonType key);
 };
 
 #endif // BLENDSHAPERULE_H

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SingleBlendshapeRuleUI</class>
+ <widget class="QWidget" name="SingleBlendshapeRuleUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>388</width>
+    <height>100</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="2">
+       <widget class="QDoubleSpinBox" name="blendshapeValueSpinBox"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="blendshapeNameComboBox"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comparisonTypeComboBox"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QToolButton" name="deleteToolButton">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

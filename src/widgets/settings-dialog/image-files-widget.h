@@ -25,6 +25,7 @@ public:
 	void clearSelection();
 	void toggleVisible(bool isVisible);
 	QMap<PoseImage, QLineEdit *> getposeLineEditsMap() const;
+	void updateStyledUIComponents();
 
 private:
 	Ui::ImageFilesWidget *ui;
@@ -32,7 +33,6 @@ private:
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();
-	void updateStyledUIComponents();
 
 signals:
 	void imageUrlSet(PoseImage poseEnum, QString filename);
