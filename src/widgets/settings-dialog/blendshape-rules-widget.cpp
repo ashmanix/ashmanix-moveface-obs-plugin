@@ -23,6 +23,7 @@ BlendshapeRulesWidget::~BlendshapeRulesWidget()
 
 void BlendshapeRulesWidget::clearAll()
 {
+	blockSignals(true);
 	// Clear widget list
 	for (auto i = m_blendshapeRulesWidgetMap.begin(), end = m_blendshapeRulesWidgetMap.end(); i != end; i++) {
 		auto rule = *i;
@@ -30,6 +31,7 @@ void BlendshapeRulesWidget::clearAll()
 	}
 
 	m_blendshapeRulesWidgetMap.clear();
+	blockSignals(false);
 }
 
 void BlendshapeRulesWidget::toggleVisible(bool isVisible)
@@ -50,6 +52,7 @@ void BlendshapeRulesWidget::setData(QSharedPointer<Pose> in_pose)
 	if (!m_pose)
 		return obs_log(LOG_WARNING, "No pose data found when loading blendshape rules!");
 
+	blockSignals(true);
 	QMap<QString, QSharedPointer<BlendshapeRule>> *bsList = m_pose->getBlendshapeList();
 	// list rules
 	if (!bsList->isEmpty()) {
@@ -59,6 +62,7 @@ void BlendshapeRulesWidget::setData(QSharedPointer<Pose> in_pose)
 			addBlendshapeRule(rule);
 		}
 	}
+	blockSignals(false);
 }
 
 void BlendshapeRulesWidget::updateStyledUIComponents()
@@ -70,6 +74,8 @@ void BlendshapeRulesWidget::updateStyledUIComponents()
 		QIcon plusIcon(plusIconUrl);
 		m_ui->addBlenshapeRuleToolButton->setIcon(plusIcon);
 	}
+
+	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -93,7 +99,7 @@ void BlendshapeRulesWidget::setupWidgetUI()
 {
 	m_ui->blenshapeRulesLabel->setText(obs_module_text("DialogBlendshapeRulesLabel"));
 	m_ui->blenshapeRulesLabel->setToolTip(obs_module_text("DialogBlendshapeRulesLabelToolTip"));
-	
+
 	m_ui->addBlenshapeRuleToolButton->setToolTip(obs_module_text("DialogAddBlendshapeRuleTooltip"));
 
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));

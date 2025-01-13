@@ -112,7 +112,7 @@ private slots:
 	void handleMoveImageDownClick();
 	void handleImageZoomClick(bool isZoomOut = false);
 	void handleImageMove(qreal x, qreal y, qreal z, PoseImage pImageType);
-	void handleBlendshapelimitChange(PoseImage poseEnum, double value);
+	// void handleBlendshapelimitChange(PoseImage poseEnum, double value);
 };
 
 #endif // SETTINGSDIALOG_H

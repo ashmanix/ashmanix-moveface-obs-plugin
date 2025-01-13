@@ -3,24 +3,24 @@
 
 FaceSettingsWidget::FaceSettingsWidget(QWidget *parent, QSharedPointer<Pose> poseData)
 	: QWidget(parent),
-	  m_ui(new Ui::FaceSettingsWidget)
+	  m_ui(new Ui::FaceSettingsWidget),
+	  m_pose(poseData)
 {
-	UNUSED_PARAMETER(poseData);
 	m_ui->setupUi(this);
 
 	setupWidgetUI();
 
 	connectUISignalHandlers();
 
-	if (poseData)
-		setData(poseData);
+	if (m_pose)
+		setData();
 }
 
 FaceSettingsWidget::~FaceSettingsWidget() = default;
 
 void FaceSettingsWidget::clearSelection()
 {
-	blockSignals(true);
+	toggleBlockAllUISignals(true);
 
 	for (auto [key, value] : m_faceConfigDoubleSpinBoxes.asKeyValueRange()) {
 		value->setValue(0);
@@ -30,7 +30,7 @@ void FaceSettingsWidget::clearSelection()
 		value->setValue(0);
 	}
 
-	blockSignals(false);
+	toggleBlockAllUISignals(false);
 }
 
 void FaceSettingsWidget::toggleVisible(bool isVisible)
@@ -44,21 +44,29 @@ void FaceSettingsWidget::toggleVisible(bool isVisible)
 	}
 }
 
-void FaceSettingsWidget::setData(QSharedPointer<Pose> poseData)
+void FaceSettingsWidget::setData(QSharedPointer<Pose> in_pose)
 {
+	clearSelection();
+
+	if (in_pose)
+		m_pose = in_pose;
+
+	if (!m_pose)
+		return obs_log(LOG_WARNING, "No pose data found when loading face settings!");
+
 	toggleBlockAllUISignals(true);
 
-	m_ui->eyesHalfOpenSpinBox->setValue(poseData->getEyesHalfOpenLimit());
-	m_ui->eyesHalfOpenSlider->setValue(poseData->getEyesHalfOpenLimit() * 1000);
+	m_ui->eyesHalfOpenSpinBox->setValue(m_pose->getEyesHalfOpenLimit());
+	m_ui->eyesHalfOpenSlider->setValue(m_pose->getEyesHalfOpenLimit() * 1000);
 
-	m_ui->eyesOpenSpinBox->setValue(poseData->getEyesOpenLimit());
-	m_ui->eyesOpenSlider->setValue(poseData->getEyesOpenLimit() * 1000);
+	m_ui->eyesOpenSpinBox->setValue(m_pose->getEyesOpenLimit());
+	m_ui->eyesOpenSlider->setValue(m_pose->getEyesOpenLimit() * 1000);
 
-	m_ui->mouthOpenSpinBox->setValue(poseData->getMouthOpenLimit());
-	m_ui->mouthOpenSlider->setValue(poseData->getMouthOpenLimit() * 1000);
+	m_ui->mouthOpenSpinBox->setValue(m_pose->getMouthOpenLimit());
+	m_ui->mouthOpenSlider->setValue(m_pose->getMouthOpenLimit() * 1000);
 
-	m_ui->tongueOutSpinBox->setValue(poseData->getTongueOutLimit());
-	m_ui->tongueOutSlider->setValue(poseData->getTongueOutLimit() * 1000);
+	m_ui->tongueOutSpinBox->setValue(m_pose->getTongueOutLimit());
+	m_ui->tongueOutSlider->setValue(m_pose->getTongueOutLimit() * 1000);
 
 	toggleBlockAllUISignals(false);
 }
@@ -149,13 +157,38 @@ void FaceSettingsWidget::toggleBlockAllUISignals(bool shouldBlock)
 	}
 }
 
+void FaceSettingsWidget::handleBlendshapelimitChange(PoseImage poseEnum, double value)
+{
+	if (!m_pose)
+		return;
+
+	switch (poseEnum) {
+	case PoseImage::EYESHALFOPEN:
+		m_pose->setEyesHalfOpenLimit(value);
+		emit blendshapeLimitChanged();
+		break;
+	case PoseImage::EYESOPEN:
+		m_pose->setEyesOpenLimit(value);
+		emit blendshapeLimitChanged();
+		break;
+	case PoseImage::MOUTHOPEN:
+		m_pose->setMouthOpenLimit(value);
+		emit blendshapeLimitChanged();
+		break;
+	case PoseImage::TONGUEOUT:
+		m_pose->setTongueOutLimit(value);
+		emit blendshapeLimitChanged();
+		break;
+
+	default:
+		break;
+	}
+}
+
 //  ---------------------------------------------- Private Slots -----------------------------------------------
 
 void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinnerValue)
 {
-	// QString poseEnumString = poseImageToString(poseEnum);
-	// obs_log(LOG_INFO, "Slider: %s value: %s", poseEnumString.toStdString().c_str(), std::to_string(value).c_str());
-
 	// Slider value runs between 0 - 1000 so spinbox value is spinnerValue/1000
 	double blendshapeLimit = spinnerValue / 1000;
 
@@ -164,7 +197,7 @@ void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinner
 		dSpinBox->blockSignals(true);
 		if (dSpinBox) {
 			dSpinBox->setValue(spinnerValue / 1000);
-			emit blendshapeLimitChanged(poseEnum, blendshapeLimit);
+			handleBlendshapelimitChange(poseEnum, blendshapeLimit);
 		}
 		// Eyes open value cannot be less than eyes half open value
 		if (poseEnum == PoseImage::EYESHALFOPEN && (m_ui->eyesOpenSlider->value() < spinnerValue)) {
@@ -176,7 +209,7 @@ void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinner
 
 			m_ui->eyesOpenSlider->blockSignals(false);
 			m_ui->eyesOpenSpinBox->blockSignals(false);
-			emit blendshapeLimitChanged(PoseImage::EYESOPEN, blendshapeLimit);
+			handleBlendshapelimitChange(PoseImage::EYESOPEN, blendshapeLimit);
 		} else if (poseEnum == PoseImage::EYESOPEN && (m_ui->eyesHalfOpenSlider->value() > spinnerValue)) {
 			m_ui->eyesHalfOpenSlider->blockSignals(true);
 			m_ui->eyesHalfOpenSpinBox->blockSignals(true);
@@ -186,7 +219,7 @@ void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinner
 
 			m_ui->eyesHalfOpenSlider->blockSignals(false);
 			m_ui->eyesHalfOpenSpinBox->blockSignals(false);
-			emit blendshapeLimitChanged(PoseImage::EYESHALFOPEN, blendshapeLimit);
+			handleBlendshapelimitChange(PoseImage::EYESHALFOPEN, blendshapeLimit);
 		}
 		dSpinBox->blockSignals(false);
 	}
@@ -194,9 +227,6 @@ void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinner
 
 void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxValue)
 {
-	// QString poseEnumString = poseImageToString(poseEnum);
-	// obs_log(LOG_INFO, "SpinBox: %s value: %f", poseEnumString.toStdString().c_str(), value);
-
 	// Slider value runs between 0 - 1000 so slider value is spinbox value * 1000
 	double sliderValue = spinBoxValue * 1000;
 
@@ -205,7 +235,7 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 		slider->blockSignals(true);
 		if (slider) {
 			slider->setValue(sliderValue);
-			emit blendshapeLimitChanged(poseEnum, spinBoxValue);
+			handleBlendshapelimitChange(poseEnum, spinBoxValue);
 		}
 		// Eyes open value cannot be less than eyes half open value
 		if (poseEnum == PoseImage::EYESHALFOPEN && (m_ui->eyesOpenSlider->value() < spinBoxValue)) {
@@ -217,7 +247,7 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 
 			m_ui->eyesOpenSlider->blockSignals(false);
 			m_ui->eyesOpenSpinBox->blockSignals(false);
-			emit blendshapeLimitChanged(PoseImage::EYESOPEN, spinBoxValue);
+			handleBlendshapelimitChange(PoseImage::EYESOPEN, spinBoxValue);
 		} else if (poseEnum == PoseImage::EYESOPEN && (m_ui->eyesHalfOpenSlider->value() > spinBoxValue)) {
 			m_ui->eyesHalfOpenSlider->blockSignals(true);
 			m_ui->eyesHalfOpenSpinBox->blockSignals(true);
@@ -227,7 +257,7 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 
 			m_ui->eyesHalfOpenSlider->blockSignals(false);
 			m_ui->eyesHalfOpenSpinBox->blockSignals(false);
-			emit blendshapeLimitChanged(PoseImage::EYESHALFOPEN, spinBoxValue);
+			handleBlendshapelimitChange(PoseImage::EYESHALFOPEN, spinBoxValue);
 		}
 		slider->blockSignals(false);
 	}

@@ -18,25 +18,28 @@
 class FaceSettingsWidget : public QWidget {
 	Q_OBJECT
 public:
-	explicit FaceSettingsWidget(QWidget *parent = nullptr, QSharedPointer<Pose> poseData = nullptr);
+	explicit FaceSettingsWidget(QWidget *parent, QSharedPointer<Pose> poseData = nullptr);
 	~FaceSettingsWidget() override;
 
 	void clearSelection();
 	void toggleVisible(bool isVisible);
-	void setData(QSharedPointer<Pose> poseData);
+	void setData(QSharedPointer<Pose> poseData = nullptr);
 	void updateStyledUIComponents();
 
 private:
 	Ui::FaceSettingsWidget *m_ui;
+	QSharedPointer<Pose> m_pose;
 	QMap<PoseImage, QDoubleSpinBox *> m_faceConfigDoubleSpinBoxes;
 	QMap<PoseImage, QSlider *> m_faceConfigSliders;
+	bool m_isDataLoading = false;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();
 	void toggleBlockAllUISignals(bool shouldBlock);
+	void handleBlendshapelimitChange(PoseImage poseEnum, double value);
 
 signals:
-	void blendshapeLimitChanged(PoseImage poseEnum, double value);
+	void blendshapeLimitChanged();
 
 private slots:
 	void handleSliderMovement(PoseImage poseEnum, double value);

@@ -145,7 +145,7 @@ void SettingsDialog::connectUISignalHandlers()
 	QObject::connect(m_poseListWidget, &PoseListWidget::rowMoved, this, &SettingsDialog::onPoseRowMoved);
 
 	QObject::connect(m_faceSettingsWidget, &FaceSettingsWidget::blendshapeLimitChanged, this,
-			 &SettingsDialog::handleBlendshapelimitChange);
+			 &SettingsDialog::formChangeDetected);
 
 	QObject::connect(m_blendshapeRulesWidget, &BlendshapeRulesWidget::blendshapeRuleChanged, this,
 			 &SettingsDialog::formChangeDetected);
@@ -911,35 +911,35 @@ void SettingsDialog::handleImageMove(qreal x, qreal y, qreal z, PoseImage pImage
 	formChangeDetected();
 }
 
-void SettingsDialog::handleBlendshapelimitChange(PoseImage poseEnum, double value)
-{
-	obs_log(LOG_INFO, "Pose: %s, value: %f", poseImageToString(poseEnum).toStdString().c_str(), value);
+// void SettingsDialog::handleBlendshapelimitChange(PoseImage poseEnum, double value)
+// {
+// 	obs_log(LOG_INFO, "Pose: %s, value: %f", poseImageToString(poseEnum).toStdString().c_str(), value);
 
-	int selectedRow = getSelectedRow();
-	if (selectedRow == -1)
-		return;
+// 	int selectedRow = getSelectedRow();
+// 	if (selectedRow == -1)
+// 		return;
 
-	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
+// 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 
-	switch (poseEnum) {
-	case PoseImage::EYESHALFOPEN:
-		selectedPose->setEyesHalfOpenLimit(value);
-		formChangeDetected();
-		break;
-	case PoseImage::EYESOPEN:
-		selectedPose->setEyesOpenLimit(value);
-		formChangeDetected();
-		break;
-	case PoseImage::MOUTHOPEN:
-		selectedPose->setMouthOpenLimit(value);
-		formChangeDetected();
-		break;
-	case PoseImage::TONGUEOUT:
-		selectedPose->setTongueOutLimit(value);
-		formChangeDetected();
-		break;
+// 	switch (poseEnum) {
+// 	case PoseImage::EYESHALFOPEN:
+// 		selectedPose->setEyesHalfOpenLimit(value);
+// 		formChangeDetected();
+// 		break;
+// 	case PoseImage::EYESOPEN:
+// 		selectedPose->setEyesOpenLimit(value);
+// 		formChangeDetected();
+// 		break;
+// 	case PoseImage::MOUTHOPEN:
+// 		selectedPose->setMouthOpenLimit(value);
+// 		formChangeDetected();
+// 		break;
+// 	case PoseImage::TONGUEOUT:
+// 		selectedPose->setTongueOutLimit(value);
+// 		formChangeDetected();
+// 		break;
 
-	default:
-		break;
-	}
-}
+// 	default:
+// 		break;
+// 	}
+// }
