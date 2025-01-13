@@ -372,7 +372,7 @@ bool SettingsDialog::getImageSources(void *list_property, obs_source_t *source)
 	if (!isImageSourceType)
 		return true;
 
-	QComboBox *sourceListUi = static_cast<QComboBox *>(list_property);
+	auto sourceListUi = static_cast<QComboBox *>(list_property);
 
 	const char *name = obs_source_get_name(source);
 	sourceListUi->addItem(name);
@@ -649,8 +649,6 @@ void SettingsDialog::handleSetImageUrl(PoseImage poseEnum, QString fileName)
 	if (selectedRow == -1)
 		return;
 
-	// obs_log(LOG_INFO, "Pose: %s", poseImageToString(poseEnum).toStdString().c_str());
-
 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 
 	auto imageIndex = static_cast<int>(poseEnum);
@@ -695,7 +693,6 @@ void SettingsDialog::handleClearImageUrl(int imageIndex)
 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 	PoseImageData *poseData = selectedPose->getPoseImageAt(imageIndex);
 
-	// poseData->setImageUrl(QString());
 	if (poseData->getPixmapItem()) {
 		poseData->clearPixmapItem();
 	}

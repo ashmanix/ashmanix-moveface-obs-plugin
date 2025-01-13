@@ -11,7 +11,6 @@
 
 #include "pose-image.h"
 #include "pose-image-data.h"
-#include "pose-image-data.h"
 #include "../blendshapes/blendshape-key.h"
 #include "../blendshapes/blendshape-rule.h"
 #include "../blendshapes/blendshape.h"
@@ -24,12 +23,12 @@ public:
 	Pose(const Pose &other);
 	Pose &operator=(const Pose &other);
 
-	~Pose() = default;
+	~Pose();
 
 	QSharedPointer<Pose> clone() const;
 	bool shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const;
 
-	QString getPoseId();
+	QString getPoseId() const;
 	size_t getPoseImageListSize() const;
 
 	double getEyesHalfOpenLimit() const;

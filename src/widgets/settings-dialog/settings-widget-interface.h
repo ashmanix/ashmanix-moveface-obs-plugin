@@ -8,8 +8,8 @@ class Pose;
 
 class SettingsWidgetInterface {
 public:
-	SettingsWidgetInterface() {}
-	virtual ~SettingsWidgetInterface() {}
+	SettingsWidgetInterface() = default;
+	virtual ~SettingsWidgetInterface() = default;
 	virtual void setData(QSharedPointer<Pose> pose) = 0;
 	virtual void clearSelection() = 0;
 	virtual void toggleVisible(bool isVisible) = 0;

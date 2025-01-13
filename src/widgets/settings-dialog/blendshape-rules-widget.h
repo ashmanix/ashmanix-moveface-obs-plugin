@@ -24,7 +24,7 @@ class BlendshapeRulesWidget : public QWidget, public SettingsWidgetInterface {
 	Q_OBJECT
 public:
 	explicit BlendshapeRulesWidget(QWidget *parent = nullptr, QSharedPointer<Pose> pose = nullptr);
-	~BlendshapeRulesWidget();
+	~BlendshapeRulesWidget() override;
 
 	void clearSelection() override;
 	void toggleVisible(bool isVisible) override;

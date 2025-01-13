@@ -43,6 +43,8 @@ Pose &Pose::operator=(const Pose &other)
 	return *this;
 }
 
+Pose::~Pose() {}
+
 QSharedPointer<Pose> Pose::clone() const
 {
 	QSharedPointer<Pose> clonedPose(new Pose(*this)); // Utilizes the copy constructor
@@ -59,7 +61,7 @@ QSharedPointer<Pose> Pose::clone() const
 	return clonedPose;
 }
 
-QString Pose::getPoseId()
+QString Pose::getPoseId() const
 {
 	return m_poseId;
 }
@@ -271,8 +273,7 @@ Pose Pose::fromJson(const QJsonObject &obj)
 		if (ruleValue.isObject()) {
 			QJsonObject ruleObj = ruleValue.toObject();
 			QSharedPointer<BlendshapeRule> rule = QSharedPointer<BlendshapeRule>::create(
-				static_cast<QString>(ruleObj["id"].toString()),
-				static_cast<BlendshapeKey>(ruleObj["key"].toInt()),
+				ruleObj["id"].toString(), static_cast<BlendshapeKey>(ruleObj["key"].toInt()),
 				static_cast<ComparisonType>(ruleObj["compareType"].toInt()),
 				ruleObj["compareValue"].toDouble());
 			pose.addBlendShapeRule(rule);

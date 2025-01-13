@@ -58,7 +58,6 @@ void BlendshapeRulesWidget::setData(QSharedPointer<Pose> in_pose)
 	if (!bsList->isEmpty()) {
 		for (auto i = bsList->begin(), end = bsList->end(); i != end; i++) {
 			auto rule = *i;
-			// obs_log(LOG_INFO, "Adding rule: %s", rule->getID().toStdString().c_str());
 			addBlendshapeRule(rule);
 		}
 	}
@@ -88,7 +87,6 @@ void BlendshapeRulesWidget::connectUISignalHandlers()
 
 void BlendshapeRulesWidget::connectBlendshapeRuleSignalHandlers(SingleBlendshapeRuleWidget *bsRuleWidget)
 {
-	// UNUSED_PARAMETER(bsRuleWidget);
 	QObject::connect(bsRuleWidget, &SingleBlendshapeRuleWidget::change, this,
 			 [this]() { emit blendshapeRuleChanged(); });
 	QObject::connect(bsRuleWidget, &SingleBlendshapeRuleWidget::removeBlendshapeRule, this,
@@ -157,31 +155,3 @@ void BlendshapeRulesWidget::handleBlendshapeRuleDeleteButtonClicked(QString id)
 		obs_log(LOG_INFO, (QString("Blendshape rule %1 deleted").arg(id)).toStdString().c_str());
 	}
 }
-
-// void BlendshapeRulesWidget::handleBlendshapeKeyChanged(BlendshapeKey bsKey, QString id)
-// {
-// 	if (m_blendshapeRulesMap) {
-// 		for (auto it = m_blendshapeRulesMap->find(id); it != m_blendshapeRulesMap->end(); it++) {
-// 			QSharedPointer<BlendshapeRule> rule = it.value();
-// 			rule->setKey(bsKey);
-// 		}
-// 	}
-// }
-// void BlendshapeRulesWidget::handleBlendshapeComparisonTypeChanged(ComparisonType compType, QString id)
-// {
-// 	if (m_blendshapeRulesMap) {
-// 		for (auto it = m_blendshapeRulesMap->find(id); it != m_blendshapeRulesMap->end(); it++) {
-// 			QSharedPointer<BlendshapeRule> rule = it.value();
-// 			rule->setComparisonType(compType);
-// 		}
-// 	}
-// }
-// void BlendshapeRulesWidget::handleBlendshapeRuleValueChanged(double value, QString id)
-// {
-// 	if (m_blendshapeRulesMap) {
-// 		for (auto it = m_blendshapeRulesMap->find(id); it != m_blendshapeRulesMap->end(); it++) {
-// 			QSharedPointer<BlendshapeRule> rule = it.value();
-// 			rule->setCompareValue(value);
-// 		}
-// 	}
-// }
