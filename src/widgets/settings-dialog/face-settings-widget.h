@@ -28,8 +28,8 @@ public:
 
 private:
 	Ui::FaceSettingsWidget *m_ui;
-	QMap<PoseImage, QDoubleSpinBox *> faceConfigDoubleSpinBoxes;
-	QMap<PoseImage, QSlider *> faceConfigSliders;
+	QMap<PoseImage, QDoubleSpinBox *> m_faceConfigDoubleSpinBoxes;
+	QMap<PoseImage, QSlider *> m_faceConfigSliders;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();

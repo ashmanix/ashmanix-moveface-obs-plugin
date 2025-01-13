@@ -22,11 +22,11 @@ void FaceSettingsWidget::clearSelection()
 {
 	blockSignals(true);
 
-	for (auto [key, value] : faceConfigDoubleSpinBoxes.asKeyValueRange()) {
+	for (auto [key, value] : m_faceConfigDoubleSpinBoxes.asKeyValueRange()) {
 		value->setValue(0);
 	}
 
-	for (auto [key, value] : faceConfigSliders.asKeyValueRange()) {
+	for (auto [key, value] : m_faceConfigSliders.asKeyValueRange()) {
 		value->setValue(0);
 	}
 
@@ -100,6 +100,7 @@ void FaceSettingsWidget::connectUISignalHandlers()
 void FaceSettingsWidget::setupWidgetUI()
 {
 	m_ui->faceSettingsLabel->setText(obs_module_text("DialogFaceSettingsLabel"));
+	m_ui->faceSettingsLabel->setToolTip(obs_module_text("DialogFaceSettingsLabelToolTip"));
 
 	m_ui->eyesClosedControlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
 	m_ui->eyesHalfOpenControlLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
@@ -122,15 +123,15 @@ void FaceSettingsWidget::setupWidgetUI()
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 
 	// Initialize the mapping between PoseImage enums and QLineEdit pointers
-	faceConfigDoubleSpinBoxes[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSpinBox;
-	faceConfigDoubleSpinBoxes[PoseImage::EYESOPEN] = m_ui->eyesOpenSpinBox;
-	faceConfigDoubleSpinBoxes[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSpinBox;
-	faceConfigDoubleSpinBoxes[PoseImage::TONGUEOUT] = m_ui->tongueOutSpinBox;
+	m_faceConfigDoubleSpinBoxes[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSpinBox;
+	m_faceConfigDoubleSpinBoxes[PoseImage::EYESOPEN] = m_ui->eyesOpenSpinBox;
+	m_faceConfigDoubleSpinBoxes[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSpinBox;
+	m_faceConfigDoubleSpinBoxes[PoseImage::TONGUEOUT] = m_ui->tongueOutSpinBox;
 
-	faceConfigSliders[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSlider;
-	faceConfigSliders[PoseImage::EYESOPEN] = m_ui->eyesOpenSlider;
-	faceConfigSliders[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSlider;
-	faceConfigSliders[PoseImage::TONGUEOUT] = m_ui->tongueOutSlider;
+	m_faceConfigSliders[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSlider;
+	m_faceConfigSliders[PoseImage::EYESOPEN] = m_ui->eyesOpenSlider;
+	m_faceConfigSliders[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSlider;
+	m_faceConfigSliders[PoseImage::TONGUEOUT] = m_ui->tongueOutSlider;
 
 	toggleVisible(false);
 
@@ -139,11 +140,11 @@ void FaceSettingsWidget::setupWidgetUI()
 
 void FaceSettingsWidget::toggleBlockAllUISignals(bool shouldBlock)
 {
-	for (auto [key, value] : faceConfigDoubleSpinBoxes.asKeyValueRange()) {
+	for (auto [key, value] : m_faceConfigDoubleSpinBoxes.asKeyValueRange()) {
 		value->blockSignals(shouldBlock);
 	}
 
-	for (auto [key, value] : faceConfigSliders.asKeyValueRange()) {
+	for (auto [key, value] : m_faceConfigSliders.asKeyValueRange()) {
 		value->blockSignals(shouldBlock);
 	}
 }
@@ -158,7 +159,7 @@ void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinner
 	// Slider value runs between 0 - 1000 so spinbox value is spinnerValue/1000
 	double blendshapeLimit = spinnerValue / 1000;
 
-	if (auto it = faceConfigDoubleSpinBoxes.find(poseEnum); it != faceConfigDoubleSpinBoxes.end()) {
+	if (auto it = m_faceConfigDoubleSpinBoxes.find(poseEnum); it != m_faceConfigDoubleSpinBoxes.end()) {
 		QDoubleSpinBox *dSpinBox = it.value(); // For QMap
 		dSpinBox->blockSignals(true);
 		if (dSpinBox) {
@@ -199,7 +200,7 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 	// Slider value runs between 0 - 1000 so slider value is spinbox value * 1000
 	double sliderValue = spinBoxValue * 1000;
 
-	if (auto it = faceConfigSliders.find(poseEnum); it != faceConfigSliders.end()) {
+	if (auto it = m_faceConfigSliders.find(poseEnum); it != m_faceConfigSliders.end()) {
 		QSlider *slider = it.value(); // For QMap
 		slider->blockSignals(true);
 		if (slider) {

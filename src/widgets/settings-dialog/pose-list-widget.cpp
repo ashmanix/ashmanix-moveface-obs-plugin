@@ -63,7 +63,8 @@ void PoseListWidget::setupListUI()
 	m_ui->movePoseUpToolButton->setToolTip(obs_module_text("DialogMovePoseUpToolTip"));
 	m_ui->movePoseDownToolButton->setToolTip(obs_module_text("DialogMovePoseDownToolTip"));
 
-	m_ui->poseListLabel->setText(obs_module_text("DialogPostListLabel"));
+	m_ui->poseListLabel->setText(obs_module_text("DialogPoseListLabel"));
+	m_ui->poseListLabel->setToolTip(obs_module_text("DialogPoseListLabelToolTip"));
 
 	m_poseListModel = new QStandardItemModel(this);
 	m_ui->poseListView->setModel(m_poseListModel);

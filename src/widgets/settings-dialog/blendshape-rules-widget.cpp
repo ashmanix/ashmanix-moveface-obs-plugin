@@ -92,6 +92,8 @@ void BlendshapeRulesWidget::connectBlendshapeRuleSignalHandlers(SingleBlendshape
 void BlendshapeRulesWidget::setupWidgetUI()
 {
 	m_ui->blenshapeRulesLabel->setText(obs_module_text("DialogBlendshapeRulesLabel"));
+	m_ui->blenshapeRulesLabel->setToolTip(obs_module_text("DialogBlendshapeRulesLabelToolTip"));
+	
 	m_ui->addBlenshapeRuleToolButton->setToolTip(obs_module_text("DialogAddBlendshapeRuleTooltip"));
 
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));

@@ -130,6 +130,8 @@ void ImageFilesWidget::connectUISignalHandlers()
 void ImageFilesWidget::setupWidgetUI()
 {
 	m_ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
+	m_ui->poseImageLabel->setToolTip(obs_module_text("DialogPoseImageLabelToolTip"));
+
 	m_ui->bodyUrlLabel->setText(obs_module_text("DialogBodyLabel"));
 	m_ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
 	m_ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
