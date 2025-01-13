@@ -23,7 +23,7 @@ public:
 	Pose(const Pose &other);
 	Pose &operator=(const Pose &other);
 
-	~Pose();
+	~Pose() = default;
 
 	QSharedPointer<Pose> clone() const;
 	bool shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const;

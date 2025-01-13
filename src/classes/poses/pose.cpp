@@ -43,8 +43,6 @@ Pose &Pose::operator=(const Pose &other)
 	return *this;
 }
 
-Pose::~Pose() = default;
-
 QSharedPointer<Pose> Pose::clone() const
 {
 	QSharedPointer<Pose> clonedPose(new Pose(*this)); // Utilizes the copy constructor
