@@ -10,25 +10,29 @@
 #include <obs-frontend-api.h>
 
 #include "plugin-support.h"
+#include "settings-widget-interface.h"
 #include "../../utils/utils.h"
+#include "../../classes/poses/pose.h"
 #include "../../classes/poses/pose-image.h"
 #include "../../classes/poses/pose-image-data.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_ImageFilesWidget.h"
 
-class ImageFilesWidget : public QWidget {
+class ImageFilesWidget : public QWidget, public SettingsWidgetInterface {
 	Q_OBJECT
 public:
-	explicit ImageFilesWidget(QWidget *parent = nullptr, QSharedPointer<TrackerData> tData = nullptr);
+	explicit ImageFilesWidget(QWidget *parent = nullptr, QSharedPointer<Pose> pose = nullptr);
 	~ImageFilesWidget() override;
 
-	void clearSelection();
-	void toggleVisible(bool isVisible);
+	void clearSelection() override;
+	void toggleVisible(bool isVisible) override;
 	QMap<PoseImage, QLineEdit *> getposeLineEditsMap() const;
 	void updateStyledUIComponents();
+	void setData(QSharedPointer<Pose> in_pose = nullptr) override;
 
 private:
-	Ui::ImageFilesWidget *m_ui;
+	Ui::ImageFilesWidget *m_ui = nullptr;
+	QSharedPointer<Pose> m_pose = nullptr;
 	QMap<PoseImage, QLineEdit *> m_poseImageLineEdits;
 
 	void setupWidgetUI();

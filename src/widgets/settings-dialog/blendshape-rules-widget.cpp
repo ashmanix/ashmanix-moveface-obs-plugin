@@ -21,7 +21,7 @@ BlendshapeRulesWidget::~BlendshapeRulesWidget()
 	delete m_ui;
 }
 
-void BlendshapeRulesWidget::clearAll()
+void BlendshapeRulesWidget::clearSelection()
 {
 	blockSignals(true);
 	// Clear widget list
@@ -47,7 +47,7 @@ void BlendshapeRulesWidget::toggleVisible(bool isVisible)
 
 void BlendshapeRulesWidget::setData(QSharedPointer<Pose> in_pose)
 {
-	clearAll();
+	clearSelection();
 	m_pose = in_pose;
 	if (!m_pose)
 		return obs_log(LOG_WARNING, "No pose data found when loading blendshape rules!");
@@ -58,7 +58,7 @@ void BlendshapeRulesWidget::setData(QSharedPointer<Pose> in_pose)
 	if (!bsList->isEmpty()) {
 		for (auto i = bsList->begin(), end = bsList->end(); i != end; i++) {
 			auto rule = *i;
-			obs_log(LOG_INFO, "Adding rule: %s", rule->getID().toStdString().c_str());
+			// obs_log(LOG_INFO, "Adding rule: %s", rule->getID().toStdString().c_str());
 			addBlendshapeRule(rule);
 		}
 	}

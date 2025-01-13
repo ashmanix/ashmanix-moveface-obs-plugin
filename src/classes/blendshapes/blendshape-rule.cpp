@@ -81,11 +81,11 @@ bool BlendshapeRule::evaluate(const Blendshape &blendShape) const
 QString BlendshapeRule::comparisonTypeToString(ComparisonType key)
 {
 	// Define a static QHash to ensure it's initialized only once
-	static const QHash<ComparisonType, QString> comparisonTypeMap = {{ComparisonType::EQ, "EQ"},
-									 {ComparisonType::LT, "LT"},
-									 {ComparisonType::LTEQ, "LTEQ"},
-									 {ComparisonType::GT, "GT"},
-									 {ComparisonType::GTEQ, "GTEQ"}};
+	static const QHash<ComparisonType, QString> comparisonTypeMap = {{ComparisonType::EQ, "=="},
+									 {ComparisonType::LT, "<"},
+									 {ComparisonType::LTEQ, "<="},
+									 {ComparisonType::GT, ">"},
+									 {ComparisonType::GTEQ, ">="}};
 
 	// Attempt to find the key in the map
 	if (auto it = comparisonTypeMap.find(key); it != comparisonTypeMap.end()) {

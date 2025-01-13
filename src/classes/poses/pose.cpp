@@ -275,10 +275,6 @@ Pose Pose::fromJson(const QJsonObject &obj)
 				static_cast<BlendshapeKey>(ruleObj["key"].toInt()),
 				static_cast<ComparisonType>(ruleObj["compareType"].toInt()),
 				ruleObj["compareValue"].toDouble());
-			// rule.setID(static_cast<QString>(ruleObj["id"].toString()));
-			// rule.setKey(static_cast<BlendshapeKey>(ruleObj["key"].toInt()));
-			// rule.setComparisonType(static_cast<ComparisonType>(ruleObj["compareType"].toInt()));
-			// rule.setCompareValue(ruleObj["compareValue"].toDouble());
 			pose.addBlendShapeRule(rule);
 		}
 	}

@@ -46,9 +46,12 @@ private:
 	Ui::FaceTrackerDialog *m_ui;
 	MainWidgetDock *m_mainWidget;
 	PoseListWidget *m_poseListWidget;
-	ImageFilesWidget *m_imageFilesWidget;
-	FaceSettingsWidget *m_faceSettingsWidget;
-	BlendshapeRulesWidget *m_blendshapeRulesWidget;
+	ImageFilesWidget *m_imageFilesWidget = new ImageFilesWidget(this);
+	FaceSettingsWidget *m_faceSettingsWidget = new FaceSettingsWidget(this);
+	BlendshapeRulesWidget *m_blendshapeRulesWidget = new BlendshapeRulesWidget(this);
+
+	QList<SettingsWidgetInterface *> m_trackingWidgetList = {m_imageFilesWidget, m_faceSettingsWidget,
+								 m_blendshapeRulesWidget};
 
 	QSharedPointer<TrackerData> m_trackerData;
 	bool m_isError = false;

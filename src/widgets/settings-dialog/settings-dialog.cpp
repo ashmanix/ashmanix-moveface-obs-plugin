@@ -8,9 +8,6 @@ SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tDat
 	m_trackerData = tData;
 	m_mainWidget = mWidget;
 	m_poseListWidget = new PoseListWidget(this, m_trackerData);
-	m_imageFilesWidget = new ImageFilesWidget(this);
-	m_faceSettingsWidget = new FaceSettingsWidget(this);
-	m_blendshapeRulesWidget = new BlendshapeRulesWidget(this);
 
 	setTitle();
 
@@ -471,9 +468,9 @@ void SettingsDialog::clearScene()
 
 void SettingsDialog::clearCurrentPoseConfig()
 {
-	m_imageFilesWidget->clearSelection();
-	m_faceSettingsWidget->clearSelection();
-	m_blendshapeRulesWidget->clearAll();
+	for (SettingsWidgetInterface *widget : m_trackingWidgetList)
+		widget->clearSelection();
+
 	clearScene();
 }
 
@@ -491,50 +488,42 @@ void SettingsDialog::loadSelectedPoseConfig()
 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 	clearCurrentPoseConfig();
 	clearScene();
-	m_imageFilesWidget->toggleVisible(true);
-	m_faceSettingsWidget->setData(selectedPose);
-	m_faceSettingsWidget->toggleVisible(true);
-	m_blendshapeRulesWidget->setData(selectedPose);
-	m_blendshapeRulesWidget->toggleVisible(true);
+
+	for (SettingsWidgetInterface *widget : m_trackingWidgetList) {
+		widget->toggleVisible(true);
+		widget->setData(selectedPose);
+	}
 
 	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
 		auto poseEnum = static_cast<PoseImage>(i);
-		QMap<PoseImage, QLineEdit *> poseImageLineEdits = m_imageFilesWidget->getposeLineEditsMap();
-		auto it = poseImageLineEdits.find(poseEnum);
-		if (it != poseImageLineEdits.end()) {
-			QLineEdit *lineEdit = it.value();
-			QString fileName = selectedPose->getPoseImageData(poseEnum)->getImageUrl();
-			if (lineEdit) {
-				lineEdit->setText(fileName);
-			}
+		QString fileName = selectedPose->getPoseImageData(poseEnum)->getImageUrl();
 
-			if (fileName.isEmpty())
-				return;
+		if (fileName.isEmpty())
+			continue;
 
-			if (!FileExists(fileName)) {
-				obs_log(LOG_WARNING, QString("Image file: %1 not found when loading pose!")
-							     .arg(fileName)
-							     .toStdString()
-							     .c_str());
-				break;
-			}
+		if (!FileExists(fileName)) {
+			obs_log(LOG_WARNING, QString("Image file: %1 not found when loading pose!")
+						     .arg(fileName)
+						     .toStdString()
+						     .c_str());
+			continue;
+		}
 
-			PoseImageData *imageData = selectedPose->getPoseImageData(poseEnum);
+		PoseImageData *imageData = selectedPose->getPoseImageData(poseEnum);
 
-			switch (poseEnum) {
-			case PoseImage::BODY:
-				addImageToScene(imageData, true);
-				break;
-			case PoseImage::MOUTHCLOSED:
-				addImageToScene(imageData, true);
-				break;
-			case PoseImage::EYESOPEN:
-				addImageToScene(imageData, true);
-				break;
+		switch (poseEnum) {
+		case PoseImage::BODY:
+			addImageToScene(imageData, true);
+			break;
+		case PoseImage::MOUTHCLOSED:
+			addImageToScene(imageData, true);
+			break;
+		case PoseImage::EYESOPEN:
+			addImageToScene(imageData, true);
+			break;
 
-			default:
-				break;
-			}
+		default:
+			break;
 		}
 	}
 }
@@ -549,9 +538,10 @@ void SettingsDialog::resetPoseUITab()
 	m_previouslySelectedPoseIndex = -1;
 	clearCurrentPoseConfig();
 	m_poseListWidget->clearSelection();
-	m_imageFilesWidget->toggleVisible(false);
-	m_faceSettingsWidget->toggleVisible(false);
-	m_blendshapeRulesWidget->toggleVisible(false);
+
+	for (SettingsWidgetInterface *widget : m_trackingWidgetList) {
+		widget->toggleVisible(false);
+	}
 }
 
 void SettingsDialog::centerSceneOnItems()
@@ -659,13 +649,13 @@ void SettingsDialog::handleSetImageUrl(PoseImage poseEnum, QString fileName)
 	if (selectedRow == -1)
 		return;
 
+	// obs_log(LOG_INFO, "Pose: %s", poseImageToString(poseEnum).toStdString().c_str());
+
 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 
 	auto imageIndex = static_cast<int>(poseEnum);
 
 	formChangeDetected();
-
-	selectedPose->getPoseImageAt(imageIndex)->setImageUrl(fileName);
 
 	if (selectedPose->getPoseImageAt(imageIndex)->getPixmapItem()) {
 		selectedPose->getPoseImageAt(imageIndex)->clearPixmapItem();
@@ -680,7 +670,7 @@ void SettingsDialog::handleSetImageUrl(PoseImage poseEnum, QString fileName)
 	}
 
 	selectedPose->getPoseImageAt(imageIndex)
-		->setPixmapItem(QSharedPointer<MovablePixmapItem>(new MovablePixmapItem(pixmap)));
+		->setPixmapItem(QSharedPointer<MovablePixmapItem>(new MovablePixmapItem(pixmap, this, poseEnum)));
 
 	switch (poseEnum) {
 	case PoseImage::BODY:
@@ -705,7 +695,7 @@ void SettingsDialog::handleClearImageUrl(int imageIndex)
 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 	PoseImageData *poseData = selectedPose->getPoseImageAt(imageIndex);
 
-	poseData->setImageUrl(QString());
+	// poseData->setImageUrl(QString());
 	if (poseData->getPixmapItem()) {
 		poseData->clearPixmapItem();
 	}
@@ -899,8 +889,9 @@ void SettingsDialog::handleImageMove(qreal x, qreal y, qreal z, PoseImage pImage
 		// Optionally, mark the form as changed
 		formChangeDetected();
 		// Log the update
-		obs_log(LOG_INFO, QString("Updated Pose %1: x=%2, y=%3, z=%4")
+		obs_log(LOG_INFO, QString("Updated Pose %1: Type: %2 x=%3, y=%4, z=%5")
 					  .arg(selectedPose->getPoseId())
+					  .arg(poseImageToString(pImageType))
 					  .arg(x)
 					  .arg(y)
 					  .arg(z)
@@ -910,36 +901,3 @@ void SettingsDialog::handleImageMove(qreal x, qreal y, qreal z, PoseImage pImage
 
 	formChangeDetected();
 }
-
-// void SettingsDialog::handleBlendshapelimitChange(PoseImage poseEnum, double value)
-// {
-// 	obs_log(LOG_INFO, "Pose: %s, value: %f", poseImageToString(poseEnum).toStdString().c_str(), value);
-
-// 	int selectedRow = getSelectedRow();
-// 	if (selectedRow == -1)
-// 		return;
-
-// 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
-
-// 	switch (poseEnum) {
-// 	case PoseImage::EYESHALFOPEN:
-// 		selectedPose->setEyesHalfOpenLimit(value);
-// 		formChangeDetected();
-// 		break;
-// 	case PoseImage::EYESOPEN:
-// 		selectedPose->setEyesOpenLimit(value);
-// 		formChangeDetected();
-// 		break;
-// 	case PoseImage::MOUTHOPEN:
-// 		selectedPose->setMouthOpenLimit(value);
-// 		formChangeDetected();
-// 		break;
-// 	case PoseImage::TONGUEOUT:
-// 		selectedPose->setTongueOutLimit(value);
-// 		formChangeDetected();
-// 		break;
-
-// 	default:
-// 		break;
-// 	}
-// }

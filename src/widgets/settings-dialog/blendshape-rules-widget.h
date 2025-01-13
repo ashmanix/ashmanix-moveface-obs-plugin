@@ -13,21 +13,22 @@
 #include <obs-frontend-api.h>
 
 #include "plugin-support.h"
+#include "settings-widget-interface.h"
 #include "single-blendshape-rule-widget.h"
 #include "../../utils/utils.h"
 #include "../../classes/poses/pose.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_BlendshapeRulesWidget.h"
 
-class BlendshapeRulesWidget : public QWidget {
+class BlendshapeRulesWidget : public QWidget, public SettingsWidgetInterface {
 	Q_OBJECT
 public:
 	explicit BlendshapeRulesWidget(QWidget *parent = nullptr, QSharedPointer<Pose> pose = nullptr);
 	~BlendshapeRulesWidget();
 
-	void clearAll();
-	void toggleVisible(bool isVisible);
-	void setData(QSharedPointer<Pose> in_pose);
+	void clearSelection() override;
+	void toggleVisible(bool isVisible) override;
+	void setData(QSharedPointer<Pose> in_pose) override;
 	void updateStyledUIComponents();
 
 private:
@@ -47,10 +48,6 @@ signals:
 private slots:
 	void handleAddButtonClicked();
 	void handleBlendshapeRuleDeleteButtonClicked(QString id);
-
-	// void handleBlendshapeKeyChanged(BlendshapeKey bsKey, QString id);
-	// void handleBlendshapeComparisonTypeChanged(ComparisonType compType, QString id);
-	// void handleBlendshapeRuleValueChanged(double value, QString id);
 };
 
 #endif // BLENDSHAPERULESWIDGET_H

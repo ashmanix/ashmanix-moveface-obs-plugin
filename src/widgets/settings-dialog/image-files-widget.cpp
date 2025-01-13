@@ -1,12 +1,15 @@
 #include "image-files-widget.h"
 #include <obs-module.h>
 
-ImageFilesWidget::ImageFilesWidget(QWidget *parent, QSharedPointer<TrackerData> tData)
+ImageFilesWidget::ImageFilesWidget(QWidget *parent, QSharedPointer<Pose> pose)
 	: QWidget(parent),
-	  m_ui(new Ui::ImageFilesWidget)
+	  m_ui(new Ui::ImageFilesWidget),
+	  m_pose(pose)
 {
-	UNUSED_PARAMETER(tData);
 	m_ui->setupUi(this);
+
+	if (pose)
+		setData(pose);
 
 	setupWidgetUI();
 
@@ -27,7 +30,6 @@ void ImageFilesWidget::clearSelection()
 			}
 		}
 	}
-	toggleVisible(false);
 }
 
 void ImageFilesWidget::toggleVisible(bool isVisible)
@@ -86,6 +88,29 @@ void ImageFilesWidget::updateStyledUIComponents()
 						      "}");
 	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
+}
+
+void ImageFilesWidget::setData(QSharedPointer<Pose> in_pose)
+{
+	clearSelection();
+
+	if (in_pose)
+		m_pose = in_pose;
+
+	if (!m_pose)
+		return obs_log(LOG_WARNING, "No pose data found when loading face settings!");
+
+	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
+		auto poseEnum = static_cast<PoseImage>(i);
+		auto it = m_poseImageLineEdits.find(poseEnum);
+		if (it != m_poseImageLineEdits.end()) {
+			QLineEdit *lineEdit = it.value();
+			QString fileName = m_pose->getPoseImageData(poseEnum)->getImageUrl();
+			if (lineEdit) {
+				lineEdit->setText(fileName);
+			}
+		}
+	}
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -204,6 +229,10 @@ void ImageFilesWidget::handleImageUrlButtonClicked(PoseImage poseEnum)
 					     .c_str());
 		return;
 	}
+
+	auto imageIndex = static_cast<int>(poseEnum);
+	m_pose->getPoseImageAt(imageIndex)->setImageUrl(fileName);
+
 	emit imageUrlSet(poseEnum, fileName);
 }
 
@@ -216,10 +245,13 @@ void ImageFilesWidget::handleClearImageUrlButtonClicked(PoseImage poseEnum)
 	if (imageIndex < 0)
 		return;
 
-	if (imageIndex >= 0 && imageIndex < static_cast<int>(m_poseImageLineEdits.size())) {
+	if (m_pose && imageIndex < static_cast<int>(m_poseImageLineEdits.size())) {
 		m_poseImageLineEdits[poseEnum]->setText(QString());
+		PoseImageData *poseData = m_pose->getPoseImageAt(imageIndex);
+		poseData->setImageUrl(QString());
 	} else {
 		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
 	}
+
 	emit imageUrlCleared(imageIndex);
 }

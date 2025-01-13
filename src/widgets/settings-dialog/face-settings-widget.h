@@ -10,20 +10,21 @@
 #include <obs-frontend-api.h>
 
 #include "plugin-support.h"
+#include "settings-widget-interface.h"
 #include "../../classes/poses/pose-image.h"
 #include "../../classes/poses/pose.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_FaceSettingsWidget.h"
 
-class FaceSettingsWidget : public QWidget {
+class FaceSettingsWidget : public QWidget, public SettingsWidgetInterface {
 	Q_OBJECT
 public:
 	explicit FaceSettingsWidget(QWidget *parent, QSharedPointer<Pose> poseData = nullptr);
 	~FaceSettingsWidget() override;
 
-	void clearSelection();
-	void toggleVisible(bool isVisible);
-	void setData(QSharedPointer<Pose> poseData = nullptr);
+	void clearSelection() override;
+	void toggleVisible(bool isVisible) override;
+	void setData(QSharedPointer<Pose> poseData = nullptr) override;
 	void updateStyledUIComponents();
 
 private:
