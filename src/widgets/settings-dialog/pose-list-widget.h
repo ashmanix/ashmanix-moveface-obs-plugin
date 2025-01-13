@@ -26,9 +26,9 @@ public:
 	void clearSelection();
 
 private:
-	Ui::PoseListView *ui;
-	QStandardItemModel *poseListModel = nullptr;
-	bool isMovingPoseListRows = false;
+	Ui::PoseListView *m_ui;
+	QStandardItemModel *m_poseListModel = nullptr;
+	bool m_isMovingPoseListRows = false;
 
 	void connectUISignalHandlers();
 	void setupListUI();

@@ -46,14 +46,14 @@ public:
 
 private:
 	Ui::FaceTracker *ui = nullptr;
-	SettingsDialog *settingsDialogUi = nullptr;
+	QSharedPointer<SettingsDialog> m_settingsDialogUi = nullptr;
 
-	QString title;
-	bool isConnected;
-	QSharedPointer<TrackerData> trackerData;
-	MainWidgetDock *mainDockWidget = nullptr;
+	QString m_title;
+	bool m_isConnected;
+	QSharedPointer<TrackerData> m_trackerData = nullptr;
+	MainWidgetDock *m_mainDockWidget = nullptr;
 
-	NetworkTracking *networkTracking = nullptr;
+	NetworkTracking *m_networkTracking = nullptr;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();

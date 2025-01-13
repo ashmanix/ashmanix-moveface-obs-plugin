@@ -31,7 +31,7 @@ protected:
 private:
 	bool m_panning = false;
 	QPoint m_lastPanPoint;
-	double zoomScaleFactor = 1.15;
+	double m_zoomScaleFactor = 1.15;
 };
 
 #endif // AVATARGRAPHICSVIEW_H

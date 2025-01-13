@@ -3,10 +3,10 @@
 
 FaceSettingsWidget::FaceSettingsWidget(QWidget *parent, QSharedPointer<Pose> poseData)
 	: QWidget(parent),
-	  ui(new Ui::FaceSettingsWidget)
+	  m_ui(new Ui::FaceSettingsWidget)
 {
 	UNUSED_PARAMETER(poseData);
-	ui->setupUi(this);
+	m_ui->setupUi(this);
 
 	setupWidgetUI();
 
@@ -36,11 +36,11 @@ void FaceSettingsWidget::clearSelection()
 void FaceSettingsWidget::toggleVisible(bool isVisible)
 {
 	if (isVisible) {
-		ui->faceConfigWidget->setVisible(true);
-		ui->noConfigLabel->setVisible(false);
+		m_ui->faceConfigWidget->setVisible(true);
+		m_ui->noConfigLabel->setVisible(false);
 	} else {
-		ui->faceConfigWidget->setVisible(false);
-		ui->noConfigLabel->setVisible(true);
+		m_ui->faceConfigWidget->setVisible(false);
+		m_ui->noConfigLabel->setVisible(true);
 	}
 }
 
@@ -48,92 +48,93 @@ void FaceSettingsWidget::setData(QSharedPointer<Pose> poseData)
 {
 	toggleBlockAllUISignals(true);
 
-	ui->eyesHalfOpenSpinBox->setValue(poseData->getEyesHalfOpenLimit());
-	ui->eyesHalfOpenSlider->setValue(poseData->getEyesHalfOpenLimit() * 1000);
+	m_ui->eyesHalfOpenSpinBox->setValue(poseData->getEyesHalfOpenLimit());
+	m_ui->eyesHalfOpenSlider->setValue(poseData->getEyesHalfOpenLimit() * 1000);
 
-	ui->eyesOpenSpinBox->setValue(poseData->getEyesOpenLimit());
-	ui->eyesOpenSlider->setValue(poseData->getEyesOpenLimit() * 1000);
+	m_ui->eyesOpenSpinBox->setValue(poseData->getEyesOpenLimit());
+	m_ui->eyesOpenSlider->setValue(poseData->getEyesOpenLimit() * 1000);
 
-	ui->mouthOpenSpinBox->setValue(poseData->getMouthOpenLimit());
-	ui->mouthOpenSlider->setValue(poseData->getMouthOpenLimit() * 1000);
+	m_ui->mouthOpenSpinBox->setValue(poseData->getMouthOpenLimit());
+	m_ui->mouthOpenSlider->setValue(poseData->getMouthOpenLimit() * 1000);
 
-	ui->tongueOutSpinBox->setValue(poseData->getTongueOutLimit());
-	ui->tongueOutSlider->setValue(poseData->getTongueOutLimit() * 1000);
+	m_ui->tongueOutSpinBox->setValue(poseData->getTongueOutLimit());
+	m_ui->tongueOutSlider->setValue(poseData->getTongueOutLimit() * 1000);
 
 	toggleBlockAllUISignals(false);
+}
+
+void FaceSettingsWidget::updateStyledUIComponents()
+{
+	m_ui->faceSettingsScrollArea->setStyleSheet("QScrollArea {"
+						    "background-color: transparent;"
+						    "}"
+						    "#trackingScrollAreaWidgetContents {"
+						    "background-color: transparent;"
+						    "}");
+	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void FaceSettingsWidget::connectUISignalHandlers()
 {
-	QObject::connect(ui->eyesHalfOpenSlider, &QSlider::valueChanged, this,
+	QObject::connect(m_ui->eyesHalfOpenSlider, &QSlider::valueChanged, this,
 			 [this](double value) { handleSliderMovement(PoseImage::EYESHALFOPEN, value); });
-	QObject::connect(ui->eyesOpenSlider, &QSlider::valueChanged, this,
+	QObject::connect(m_ui->eyesOpenSlider, &QSlider::valueChanged, this,
 			 [this](double value) { handleSliderMovement(PoseImage::EYESOPEN, value); });
-	QObject::connect(ui->mouthOpenSlider, &QSlider::valueChanged, this,
+	QObject::connect(m_ui->mouthOpenSlider, &QSlider::valueChanged, this,
 			 [this](double value) { handleSliderMovement(PoseImage::MOUTHOPEN, value); });
-	QObject::connect(ui->tongueOutSlider, &QSlider::valueChanged, this,
+	QObject::connect(m_ui->tongueOutSlider, &QSlider::valueChanged, this,
 			 [this](double value) { handleSliderMovement(PoseImage::TONGUEOUT, value); });
 
-	QObject::connect(ui->eyesHalfOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
+	QObject::connect(m_ui->eyesHalfOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
 			 [this](double value) { handleSpinBoxChange(PoseImage::EYESHALFOPEN, value); });
-	QObject::connect(ui->eyesOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
+	QObject::connect(m_ui->eyesOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
 			 [this](double value) { handleSpinBoxChange(PoseImage::EYESOPEN, value); });
-	QObject::connect(ui->mouthOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
+	QObject::connect(m_ui->mouthOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
 			 [this](double value) { handleSpinBoxChange(PoseImage::MOUTHOPEN, value); });
-	QObject::connect(ui->tongueOutSpinBox, &QDoubleSpinBox::valueChanged, this,
+	QObject::connect(m_ui->tongueOutSpinBox, &QDoubleSpinBox::valueChanged, this,
 			 [this](double value) { handleSpinBoxChange(PoseImage::TONGUEOUT, value); });
 }
 
 void FaceSettingsWidget::setupWidgetUI()
 {
-	ui->faceSettingsLabel->setText(obs_module_text("DialogFaceSettingsLabel"));
+	m_ui->faceSettingsLabel->setText(obs_module_text("DialogFaceSettingsLabel"));
 
-	ui->eyesClosedControlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
-	ui->eyesHalfOpenControlLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
-	ui->eyesHalfOpen2ControlLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
-	ui->eyesOpenControlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
-	ui->mouthClosedControlLabel->setText(obs_module_text("DialogMouthClosedLabel"));
-	ui->mouthOpenControlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
-	ui->tongueOutControlLabel->setText(obs_module_text("DialogTongueInLabel"));
-	ui->tongueInControlLabel->setText(obs_module_text("DialogTongueOutLabel"));
+	m_ui->eyesClosedControlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
+	m_ui->eyesHalfOpenControlLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
+	m_ui->eyesHalfOpen2ControlLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
+	m_ui->eyesOpenControlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
+	m_ui->mouthClosedControlLabel->setText(obs_module_text("DialogMouthClosedLabel"));
+	m_ui->mouthOpenControlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
+	m_ui->tongueOutControlLabel->setText(obs_module_text("DialogTongueInLabel"));
+	m_ui->tongueInControlLabel->setText(obs_module_text("DialogTongueOutLabel"));
 
-	ui->eyesClosedControlLabel->setToolTip(obs_module_text("DialogEyesClosedLabel"));
-	ui->eyesHalfOpenControlLabel->setToolTip(obs_module_text("DialogEyesHalfOpenLabel"));
-	ui->eyesHalfOpen2ControlLabel->setToolTip(obs_module_text("DialogEyesHalfOpenLabel"));
-	ui->eyesOpenControlLabel->setToolTip(obs_module_text("DialogEyesOpenLabel"));
-	ui->mouthClosedControlLabel->setToolTip(obs_module_text("DialogMouthClosedLabel"));
-	ui->mouthOpenControlLabel->setToolTip(obs_module_text("DialogMouthOpenLabel"));
-	ui->tongueOutControlLabel->setToolTip(obs_module_text("DialogTongueInLabel"));
-	ui->tongueInControlLabel->setToolTip(obs_module_text("DialogTongueOutLabel"));
+	m_ui->eyesClosedControlLabel->setToolTip(obs_module_text("DialogEyesClosedLabel"));
+	m_ui->eyesHalfOpenControlLabel->setToolTip(obs_module_text("DialogEyesHalfOpenLabel"));
+	m_ui->eyesHalfOpen2ControlLabel->setToolTip(obs_module_text("DialogEyesHalfOpenLabel"));
+	m_ui->eyesOpenControlLabel->setToolTip(obs_module_text("DialogEyesOpenLabel"));
+	m_ui->mouthClosedControlLabel->setToolTip(obs_module_text("DialogMouthClosedLabel"));
+	m_ui->mouthOpenControlLabel->setToolTip(obs_module_text("DialogMouthOpenLabel"));
+	m_ui->tongueOutControlLabel->setToolTip(obs_module_text("DialogTongueInLabel"));
+	m_ui->tongueInControlLabel->setToolTip(obs_module_text("DialogTongueOutLabel"));
+
+	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 
 	// Initialize the mapping between PoseImage enums and QLineEdit pointers
-	faceConfigDoubleSpinBoxes[PoseImage::EYESHALFOPEN] = ui->eyesHalfOpenSpinBox;
-	faceConfigDoubleSpinBoxes[PoseImage::EYESOPEN] = ui->eyesOpenSpinBox;
-	faceConfigDoubleSpinBoxes[PoseImage::MOUTHOPEN] = ui->mouthOpenSpinBox;
-	faceConfigDoubleSpinBoxes[PoseImage::TONGUEOUT] = ui->tongueOutSpinBox;
+	faceConfigDoubleSpinBoxes[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSpinBox;
+	faceConfigDoubleSpinBoxes[PoseImage::EYESOPEN] = m_ui->eyesOpenSpinBox;
+	faceConfigDoubleSpinBoxes[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSpinBox;
+	faceConfigDoubleSpinBoxes[PoseImage::TONGUEOUT] = m_ui->tongueOutSpinBox;
 
-	faceConfigSliders[PoseImage::EYESHALFOPEN] = ui->eyesHalfOpenSlider;
-	faceConfigSliders[PoseImage::EYESOPEN] = ui->eyesOpenSlider;
-	faceConfigSliders[PoseImage::MOUTHOPEN] = ui->mouthOpenSlider;
-	faceConfigSliders[PoseImage::TONGUEOUT] = ui->tongueOutSlider;
+	faceConfigSliders[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSlider;
+	faceConfigSliders[PoseImage::EYESOPEN] = m_ui->eyesOpenSlider;
+	faceConfigSliders[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSlider;
+	faceConfigSliders[PoseImage::TONGUEOUT] = m_ui->tongueOutSlider;
 
 	toggleVisible(false);
 
 	updateStyledUIComponents();
-}
-
-void FaceSettingsWidget::updateStyledUIComponents()
-{
-	ui->faceSettingsScrollArea->setStyleSheet("QScrollArea {"
-						  "background-color: transparent;"
-						  "}"
-						  "#trackingScrollAreaWidgetContents {"
-						  "background-color: transparent;"
-						  "}");
-	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
-	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 }
 
 void FaceSettingsWidget::toggleBlockAllUISignals(bool shouldBlock)
@@ -165,25 +166,25 @@ void FaceSettingsWidget::handleSliderMovement(PoseImage poseEnum, double spinner
 			emit blendshapeLimitChanged(poseEnum, blendshapeLimit);
 		}
 		// Eyes open value cannot be less than eyes half open value
-		if (poseEnum == PoseImage::EYESHALFOPEN && (ui->eyesOpenSlider->value() < spinnerValue)) {
-			ui->eyesOpenSlider->blockSignals(true);
-			ui->eyesOpenSpinBox->blockSignals(true);
+		if (poseEnum == PoseImage::EYESHALFOPEN && (m_ui->eyesOpenSlider->value() < spinnerValue)) {
+			m_ui->eyesOpenSlider->blockSignals(true);
+			m_ui->eyesOpenSpinBox->blockSignals(true);
 
-			ui->eyesOpenSlider->setValue(spinnerValue);
-			ui->eyesOpenSpinBox->setValue(blendshapeLimit);
+			m_ui->eyesOpenSlider->setValue(spinnerValue);
+			m_ui->eyesOpenSpinBox->setValue(blendshapeLimit);
 
-			ui->eyesOpenSlider->blockSignals(false);
-			ui->eyesOpenSpinBox->blockSignals(false);
+			m_ui->eyesOpenSlider->blockSignals(false);
+			m_ui->eyesOpenSpinBox->blockSignals(false);
 			emit blendshapeLimitChanged(PoseImage::EYESOPEN, blendshapeLimit);
-		} else if (poseEnum == PoseImage::EYESOPEN && (ui->eyesHalfOpenSlider->value() > spinnerValue)) {
-			ui->eyesHalfOpenSlider->blockSignals(true);
-			ui->eyesHalfOpenSpinBox->blockSignals(true);
+		} else if (poseEnum == PoseImage::EYESOPEN && (m_ui->eyesHalfOpenSlider->value() > spinnerValue)) {
+			m_ui->eyesHalfOpenSlider->blockSignals(true);
+			m_ui->eyesHalfOpenSpinBox->blockSignals(true);
 
-			ui->eyesHalfOpenSlider->setValue(spinnerValue);
-			ui->eyesHalfOpenSpinBox->setValue(blendshapeLimit);
+			m_ui->eyesHalfOpenSlider->setValue(spinnerValue);
+			m_ui->eyesHalfOpenSpinBox->setValue(blendshapeLimit);
 
-			ui->eyesHalfOpenSlider->blockSignals(false);
-			ui->eyesHalfOpenSpinBox->blockSignals(false);
+			m_ui->eyesHalfOpenSlider->blockSignals(false);
+			m_ui->eyesHalfOpenSpinBox->blockSignals(false);
 			emit blendshapeLimitChanged(PoseImage::EYESHALFOPEN, blendshapeLimit);
 		}
 		dSpinBox->blockSignals(false);
@@ -206,25 +207,25 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 			emit blendshapeLimitChanged(poseEnum, spinBoxValue);
 		}
 		// Eyes open value cannot be less than eyes half open value
-		if (poseEnum == PoseImage::EYESHALFOPEN && (ui->eyesOpenSlider->value() < spinBoxValue)) {
-			ui->eyesOpenSlider->blockSignals(true);
-			ui->eyesOpenSpinBox->blockSignals(true);
+		if (poseEnum == PoseImage::EYESHALFOPEN && (m_ui->eyesOpenSlider->value() < spinBoxValue)) {
+			m_ui->eyesOpenSlider->blockSignals(true);
+			m_ui->eyesOpenSpinBox->blockSignals(true);
 
-			ui->eyesOpenSlider->setValue(sliderValue);
-			ui->eyesOpenSpinBox->setValue(spinBoxValue);
+			m_ui->eyesOpenSlider->setValue(sliderValue);
+			m_ui->eyesOpenSpinBox->setValue(spinBoxValue);
 
-			ui->eyesOpenSlider->blockSignals(false);
-			ui->eyesOpenSpinBox->blockSignals(false);
+			m_ui->eyesOpenSlider->blockSignals(false);
+			m_ui->eyesOpenSpinBox->blockSignals(false);
 			emit blendshapeLimitChanged(PoseImage::EYESOPEN, spinBoxValue);
-		} else if (poseEnum == PoseImage::EYESOPEN && (ui->eyesHalfOpenSlider->value() > spinBoxValue)) {
-			ui->eyesHalfOpenSlider->blockSignals(true);
-			ui->eyesHalfOpenSpinBox->blockSignals(true);
+		} else if (poseEnum == PoseImage::EYESOPEN && (m_ui->eyesHalfOpenSlider->value() > spinBoxValue)) {
+			m_ui->eyesHalfOpenSlider->blockSignals(true);
+			m_ui->eyesHalfOpenSpinBox->blockSignals(true);
 
-			ui->eyesHalfOpenSlider->setValue(sliderValue);
-			ui->eyesHalfOpenSpinBox->setValue(spinBoxValue);
+			m_ui->eyesHalfOpenSlider->setValue(sliderValue);
+			m_ui->eyesHalfOpenSpinBox->setValue(spinBoxValue);
 
-			ui->eyesHalfOpenSlider->blockSignals(false);
-			ui->eyesHalfOpenSpinBox->blockSignals(false);
+			m_ui->eyesHalfOpenSlider->blockSignals(false);
+			m_ui->eyesHalfOpenSpinBox->blockSignals(false);
 			emit blendshapeLimitChanged(PoseImage::EYESHALFOPEN, spinBoxValue);
 		}
 		slider->blockSignals(false);

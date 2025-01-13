@@ -315,7 +315,7 @@
              <number>0</number>
             </property>
             <item>
-             <layout class="QVBoxLayout" name="poseVerticalLayout" stretch="">
+             <layout class="QVBoxLayout" name="poseVerticalLayout">
               <property name="spacing">
                <number>5</number>
               </property>
@@ -470,7 +470,7 @@
              </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="settingsVerticalLayout" stretch="">
+             <layout class="QVBoxLayout" name="settingsVerticalLayout">
               <property name="spacing">
                <number>5</number>
               </property>
@@ -494,7 +494,7 @@
       <item>
        <widget class="QDialogButtonBox" name="dialogButtonBox">
         <property name="focusPolicy">
-         <enum>Qt::TabFocus</enum>
+         <enum>Qt::NoFocus</enum>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

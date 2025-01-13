@@ -3,18 +3,18 @@
 QJsonObject Blendshape::toJson() const
 {
 	QJsonObject obj;
-	obj["k"] = blendshapeKeyToString(key);
-	obj["v"] = value;
+	obj["k"] = blendshapeKeyToString(m_key);
+	obj["v"] = m_value;
 	return obj;
 }
 
 Blendshape Blendshape::fromJson(const QJsonObject &obj)
 {
 	Blendshape bs;
-	bs.key = blendshapeKeyFromString(obj["k"].toString());
-	if (bs.key == BlendshapeKey::UNKNOWN)
+	bs.m_key = blendshapeKeyFromString(obj["k"].toString());
+	if (bs.m_key == BlendshapeKey::UNKNOWN)
 		return {};
 
-	bs.value = obj["v"].toDouble();
+	bs.m_value = obj["v"].toDouble();
 	return bs;
 }

@@ -1,38 +1,48 @@
 #include "single-blendshape-rule-widget.h"
 #include <obs-module.h>
 
-SingleBlendshapeRuleWidget::SingleBlendshapeRuleWidget(QWidget *parent, QSharedPointer<BlendshapeRule> bsRule,
-						       int index)
+SingleBlendshapeRuleWidget::SingleBlendshapeRuleWidget(QWidget *parent, QSharedPointer<BlendshapeRule> bsRule)
 	: QWidget(parent),
-	  ui(new Ui::SingleBlendshapeRuleUI),
-	  m_index(index)
+	  m_ui(new Ui::SingleBlendshapeRuleUI)
 {
-	ui->setupUi(this);
+	m_ui->setupUi(this);
+	m_blendshapeRule = bsRule;
 
 	setupWidgetUI();
 
-	connectUISignalHandlers();
+	if (m_blendshapeRule) {
+		setData();
+	} else {
+		obs_log(LOG_ERROR, "No rule data found when creating single rule widget!");
+	}
 
-	if (bsRule)
-		setData(bsRule);
+	connectUISignalHandlers();
 }
 
 SingleBlendshapeRuleWidget::~SingleBlendshapeRuleWidget() {}
 
+QString SingleBlendshapeRuleWidget::getID() const
+{
+	return m_blendshapeRule->getID();
+}
+
 void SingleBlendshapeRuleWidget::clearSelection()
 {
-	ui->blendshapeNameComboBox->setCurrentIndex(-1);
-	ui->comparisonTypeComboBox->setCurrentIndex(-1);
-	ui->blendshapeValueSpinBox->setValue(0.0);
+	m_ui->blendshapeNameComboBox->setCurrentIndex(0);
+	m_ui->comparisonTypeComboBox->setCurrentIndex(0);
+	m_ui->blendshapeValueSpinBox->setValue(0.0);
 }
 
 void SingleBlendshapeRuleWidget::setData(QSharedPointer<BlendshapeRule> bsRule)
 {
+	if (bsRule)
+		m_blendshapeRule = bsRule;
+
 	toggleBlockAllUISignals(true);
 
-	ui->blendshapeNameComboBox->setCurrentIndex(static_cast<int>(bsRule->key));
-	ui->comparisonTypeComboBox->setCurrentIndex(static_cast<int>(bsRule->compareType));
-	ui->blendshapeValueSpinBox->setValue(bsRule->compareValue);
+	m_ui->blendshapeNameComboBox->setCurrentIndex(static_cast<int>(m_blendshapeRule->getKey()));
+	m_ui->comparisonTypeComboBox->setCurrentIndex(static_cast<int>(m_blendshapeRule->getComparisonType()));
+	m_ui->blendshapeValueSpinBox->setValue(m_blendshapeRule->getCompareValue());
 
 	toggleBlockAllUISignals(false);
 }
@@ -44,7 +54,7 @@ void SingleBlendshapeRuleWidget::updateStyledUIComponents()
 	QString trashIcon = QDir::fromNativeSeparators(baseUrl + "trash.svg");
 	if (QFileInfo::exists(trashIcon)) {
 		QIcon searchIcon(trashIcon);
-		ui->deleteToolButton->setIcon(searchIcon);
+		m_ui->deleteToolButton->setIcon(searchIcon);
 	}
 }
 
@@ -52,26 +62,26 @@ void SingleBlendshapeRuleWidget::updateStyledUIComponents()
 
 void SingleBlendshapeRuleWidget::connectUISignalHandlers()
 {
-	QObject::connect(ui->blendshapeNameComboBox, &QComboBox::currentIndexChanged, this,
+	QObject::connect(m_ui->blendshapeNameComboBox, &QComboBox::currentIndexChanged, this,
 			 &SingleBlendshapeRuleWidget::handleBlendshapeSelection);
-	QObject::connect(ui->comparisonTypeComboBox, &QComboBox::currentIndexChanged, this,
+	QObject::connect(m_ui->comparisonTypeComboBox, &QComboBox::currentIndexChanged, this,
 			 &SingleBlendshapeRuleWidget::handleComparisonTypeSelection);
-	QObject::connect(ui->blendshapeValueSpinBox, &QDoubleSpinBox::valueChanged, this,
-			 [this](double value) { emit blendshapeRuleValueChanged(value, m_index); });
-	QObject::connect(ui->deleteToolButton, &QToolButton::clicked, this,
-			 [this]() { emit removeBlendshapeRule(m_index); });
+	QObject::connect(m_ui->blendshapeValueSpinBox, &QDoubleSpinBox::valueChanged, this,
+			 &SingleBlendshapeRuleWidget::handleValueChanged);
+	QObject::connect(m_ui->deleteToolButton, &QToolButton::clicked, this,
+			 [this]() { emit removeBlendshapeRule(m_blendshapeRule->getID()); });
 }
 
 void SingleBlendshapeRuleWidget::setupWidgetUI()
 {
-	ui->deleteToolButton->setToolTip(obs_module_text("DialogDeleteBlendshapeRuleTooltip"));
+	m_ui->deleteToolButton->setToolTip(obs_module_text("DialogDeleteBlendshapeRuleTooltip"));
 
 	for (auto i = 0; i < static_cast<int>(BlendshapeKey::COUNT) - 1; ++i) {
-		ui->blendshapeNameComboBox->addItem(blendshapeKeyToString(static_cast<BlendshapeKey>(i)));
+		m_ui->blendshapeNameComboBox->addItem(blendshapeKeyToString(static_cast<BlendshapeKey>(i)));
 	}
 
 	for (auto i = 0; i < static_cast<int>(ComparisonType::COUNT); ++i) {
-		ui->comparisonTypeComboBox->addItem(
+		m_ui->comparisonTypeComboBox->addItem(
 			BlendshapeRule::comparisonTypeToString(static_cast<ComparisonType>(i)));
 	}
 
@@ -80,9 +90,9 @@ void SingleBlendshapeRuleWidget::setupWidgetUI()
 
 void SingleBlendshapeRuleWidget::toggleBlockAllUISignals(bool shouldBlock)
 {
-	ui->blendshapeNameComboBox->blockSignals(shouldBlock);
-	ui->comparisonTypeComboBox->blockSignals(shouldBlock);
-	ui->blendshapeValueSpinBox->blockSignals(shouldBlock);
+	m_ui->blendshapeNameComboBox->blockSignals(shouldBlock);
+	m_ui->comparisonTypeComboBox->blockSignals(shouldBlock);
+	m_ui->blendshapeValueSpinBox->blockSignals(shouldBlock);
 }
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------
@@ -90,11 +100,19 @@ void SingleBlendshapeRuleWidget::toggleBlockAllUISignals(bool shouldBlock)
 void SingleBlendshapeRuleWidget::handleBlendshapeSelection(int bsKeyIndex)
 {
 	BlendshapeKey bsKey = static_cast<BlendshapeKey>(bsKeyIndex);
-	emit blendshapeKeyChanged(bsKey, m_index);
+	m_blendshapeRule->setKey(bsKey);
+	emit change();
 }
 
 void SingleBlendshapeRuleWidget::handleComparisonTypeSelection(int compareKeyIndex)
 {
 	ComparisonType compareKey = static_cast<ComparisonType>(compareKeyIndex);
-	emit blendshapeComparisonTypeChanged(compareKey, m_index);
+	m_blendshapeRule->setComparisonType(compareKey);
+	emit change();
+}
+
+void SingleBlendshapeRuleWidget::handleValueChanged(double value)
+{
+	m_blendshapeRule->setCompareValue(value);
+	emit change();
 }

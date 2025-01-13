@@ -1,13 +1,13 @@
 #include "main-widget-dock.h"
 #include "./widgets/face-tracker.h"
 
-MainWidgetDock::MainWidgetDock(QWidget *parent) : OBSDock(parent), ui(new Ui::MainWidget)
+MainWidgetDock::MainWidgetDock(QWidget *parent) : OBSDock(parent), m_ui(new Ui::MainWidget)
 {
 	// Register custom type for signals and slots
 	qRegisterMetaType<obs_data_t *>("obs_data_t*");
 
-	ui->setupUi(this);
-	trackerListLayout = ui->trackerListLayout;
+	m_ui->setupUi(this);
+	trackerListLayout = m_ui->trackerListLayout;
 
 	setupCountdownWidgetUI();
 
@@ -24,10 +24,10 @@ MainWidgetDock::~MainWidgetDock()
 
 void MainWidgetDock::configureWebSocketConnection()
 {
-	vendor = obs_websocket_register_vendor(VENDORNAME);
+	m_vendor = obs_websocket_register_vendor(VENDORNAME);
 
-	if (!vendor) {
-		obs_log(LOG_ERROR, "Error registering vendor to websocket!");
+	if (!m_vendor) {
+		obs_log(LOG_ERROR, "Error registering m_vendor to websocket!");
 		return;
 	}
 }
@@ -37,7 +37,7 @@ Result MainWidgetDock::validateNewTrackerID(QString id)
 	if (id.isEmpty())
 		return {false, obs_module_text("DialogTrackerIdUpdateError")};
 
-	bool duplicateCheck = trackerWidgetMap.value(id, nullptr) != nullptr ? true : false;
+	bool duplicateCheck = m_trackerWidgetMap.value(id, nullptr) != nullptr ? true : false;
 	if (duplicateCheck)
 		return {false, obs_module_text("DialogTrackerDuplicateIdError")};
 
@@ -46,7 +46,7 @@ Result MainWidgetDock::validateNewTrackerID(QString id)
 
 Result MainWidgetDock::updateTrackerList(QString oldId, QString newId)
 {
-	FaceTracker *foundTracker = trackerWidgetMap.take(oldId);
+	FaceTracker *foundTracker = m_trackerWidgetMap.take(oldId);
 	Result result = {false, ""};
 
 	if (!foundTracker) {
@@ -54,7 +54,7 @@ Result MainWidgetDock::updateTrackerList(QString oldId, QString newId)
 		result = {false, obs_module_text("DialogTrackerIdUpdateError")};
 	} else {
 		foundTracker->setTrackerID(newId);
-		trackerWidgetMap.insert(newId, foundTracker);
+		m_trackerWidgetMap.insert(newId, foundTracker);
 		result = {true, ""};
 	}
 	return result;
@@ -62,8 +62,8 @@ Result MainWidgetDock::updateTrackerList(QString oldId, QString newId)
 
 void MainWidgetDock::setupCountdownWidgetUI()
 {
-	ui->addTrackerButton->setEnabled(true);
-	ui->addTrackerButton->setToolTip(obs_module_text("AddTrackerButtonToolTip"));
+	m_ui->addTrackerButton->setEnabled(true);
+	m_ui->addTrackerButton->setToolTip(obs_module_text("AddTrackerButtonToolTip"));
 
 	this->setStyleSheet("#dialogMainWidget QDialogButtonBox QPushButton {"
 			    "   width: auto;"
@@ -79,7 +79,7 @@ void MainWidgetDock::setupCountdownWidgetUI()
 
 void MainWidgetDock::connectUISignalHandlers()
 {
-	QObject::connect(ui->addTrackerButton, &QPushButton::clicked, this, &MainWidgetDock::addTrackerButtonClicked);
+	QObject::connect(m_ui->addTrackerButton, &QPushButton::clicked, this, &MainWidgetDock::addTrackerButtonClicked);
 }
 
 void MainWidgetDock::connectTrackerSignalHandlers(FaceTracker *faceTracker)
@@ -92,7 +92,7 @@ void MainWidgetDock::saveSettings()
 	obs_data_t *settings = obs_data_create();
 	obs_data_array_t *obsDataArray = obs_data_array_create();
 
-	QVBoxLayout *mainLayout = ui->trackerListLayout;
+	QVBoxLayout *mainLayout = m_ui->trackerListLayout;
 
 	for (int i = 0; i < mainLayout->count(); ++i) {
 		QLayoutItem *item = mainLayout->itemAt(i);
@@ -112,7 +112,7 @@ void MainWidgetDock::saveSettings()
 	obs_data_set_array(settings, "tracker_widgets", obsDataArray);
 
 	// ----------------------------------- Save Hotkeys -----------------------------------
-	saveHotkey(settings, addTrackerHotkeyId, addTrackerHotkeyName);
+	saveHotkey(settings, m_addTrackerHotkeyId, ADDTRACKERHOTKEYNAME);
 	// ------------------------------------------------------------------------------------
 
 	char *file = obs_module_config_path(CONFIG);
@@ -131,7 +131,7 @@ void MainWidgetDock::saveSettings()
 
 int MainWidgetDock::getNumberOfTimers()
 {
-	return static_cast<int>(trackerWidgetMap.size());
+	return static_cast<int>(m_trackerWidgetMap.size());
 }
 
 void MainWidgetDock::obsFrontendEventHandler(enum obs_frontend_event event, void *private_data)
@@ -154,10 +154,10 @@ void MainWidgetDock::obsFrontendEventHandler(enum obs_frontend_event event, void
 
 void MainWidgetDock::updateWidgetStyles(MainWidgetDock *trackerWidgetDock)
 {
-	int trackerWidgetCount = trackerWidgetDock->ui->trackerListLayout->count();
+	int trackerWidgetCount = trackerWidgetDock->m_ui->trackerListLayout->count();
 	for (int i = 0; i < trackerWidgetCount; i++) {
 		FaceTracker *trackerWidget =
-			static_cast<FaceTracker *>(trackerWidgetDock->ui->trackerListLayout->itemAt(i)->widget());
+			static_cast<FaceTracker *>(trackerWidgetDock->m_ui->trackerListLayout->itemAt(i)->widget());
 		if (trackerWidget) {
 			trackerWidget->updateWidgetStyles();
 		}
@@ -167,21 +167,21 @@ void MainWidgetDock::updateWidgetStyles(MainWidgetDock *trackerWidgetDock)
 void MainWidgetDock::registerAllHotkeys(obs_data_t *savedData)
 {
 	loadHotkey(
-		addTrackerHotkeyId, addTrackerHotkeyName, obs_module_text("AddTrackerHotkeyDescription"),
-		[this]() { ui->addTrackerButton->click(); }, "Add Timer Hotkey Pressed", savedData);
+		m_addTrackerHotkeyId, ADDTRACKERHOTKEYNAME, obs_module_text("AddTrackerHotkeyDescription"),
+		[this]() { m_ui->addTrackerButton->click(); }, "Add Timer Hotkey Pressed", savedData);
 }
 
 void MainWidgetDock::unregisterAllHotkeys()
 {
-	if (addTrackerHotkeyId)
-		obs_hotkey_unregister(addTrackerHotkeyId);
+	if (m_addTrackerHotkeyId)
+		obs_hotkey_unregister(m_addTrackerHotkeyId);
 }
 
 void MainWidgetDock::addTracker(obs_data_t *savedData)
 {
 	FaceTracker *newFaceTracker = new FaceTracker(this, savedData, this);
 
-	trackerWidgetMap.insert(newFaceTracker->getTrackerID(), newFaceTracker);
+	m_trackerWidgetMap.insert(newFaceTracker->getTrackerID(), newFaceTracker);
 	connectTrackerSignalHandlers(newFaceTracker);
 
 	trackerListLayout->addWidget(newFaceTracker);
@@ -229,11 +229,11 @@ void MainWidgetDock::addTrackerButtonClicked()
 
 void MainWidgetDock::removeTrackerButtonClicked(QString id)
 {
-	FaceTracker *itemToBeRemoved = trackerWidgetMap.value(id, nullptr);
+	FaceTracker *itemToBeRemoved = m_trackerWidgetMap.value(id, nullptr);
 
 	if (itemToBeRemoved) {
 		itemToBeRemoved->deleteLater();
-		trackerWidgetMap.remove(id);
+		m_trackerWidgetMap.remove(id);
 		obs_log(LOG_INFO, (QString("Tracker %1 deleted").arg(id)).toStdString().c_str());
 	}
 

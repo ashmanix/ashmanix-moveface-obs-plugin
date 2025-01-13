@@ -24,15 +24,15 @@ public:
 	void clearSelection();
 	void toggleVisible(bool isVisible);
 	void setData(QSharedPointer<Pose> poseData);
+	void updateStyledUIComponents();
 
 private:
-	Ui::FaceSettingsWidget *ui;
+	Ui::FaceSettingsWidget *m_ui;
 	QMap<PoseImage, QDoubleSpinBox *> faceConfigDoubleSpinBoxes;
 	QMap<PoseImage, QSlider *> faceConfigSliders;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();
-	void updateStyledUIComponents();
 	void toggleBlockAllUISignals(bool shouldBlock);
 
 signals:

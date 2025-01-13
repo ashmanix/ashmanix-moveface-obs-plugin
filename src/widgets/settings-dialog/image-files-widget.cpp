@@ -3,10 +3,10 @@
 
 ImageFilesWidget::ImageFilesWidget(QWidget *parent, QSharedPointer<TrackerData> tData)
 	: QWidget(parent),
-	  ui(new Ui::ImageFilesWidget)
+	  m_ui(new Ui::ImageFilesWidget)
 {
 	UNUSED_PARAMETER(tData);
-	ui->setupUi(this);
+	m_ui->setupUi(this);
 
 	setupWidgetUI();
 
@@ -19,8 +19,8 @@ void ImageFilesWidget::clearSelection()
 {
 	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
 		PoseImage poseEnum = static_cast<PoseImage>(i);
-		auto it = poseImageLineEdits.find(poseEnum);
-		if (it != poseImageLineEdits.end()) {
+		auto it = m_poseImageLineEdits.find(poseEnum);
+		if (it != m_poseImageLineEdits.end()) {
 			QLineEdit *lineEdit = it.value(); // For QMap
 			if (lineEdit) {
 				lineEdit->clear();
@@ -33,17 +33,17 @@ void ImageFilesWidget::clearSelection()
 void ImageFilesWidget::toggleVisible(bool isVisible)
 {
 	if (isVisible) {
-		ui->imageConfigWidget->setVisible(true);
-		ui->noConfigLabel->setVisible(false);
+		m_ui->imageConfigWidget->setVisible(true);
+		m_ui->noConfigLabel->setVisible(false);
 	} else {
-		ui->imageConfigWidget->setVisible(false);
-		ui->noConfigLabel->setVisible(true);
+		m_ui->imageConfigWidget->setVisible(false);
+		m_ui->noConfigLabel->setVisible(true);
 	}
 }
 
 QMap<PoseImage, QLineEdit *> ImageFilesWidget::getposeLineEditsMap() const
 {
-	return poseImageLineEdits;
+	return m_poseImageLineEdits;
 }
 
 void ImageFilesWidget::updateStyledUIComponents()
@@ -54,121 +54,121 @@ void ImageFilesWidget::updateStyledUIComponents()
 	if (QFileInfo::exists(searchIconPath)) {
 		QIcon searchIcon(searchIconPath);
 
-		ui->bodyUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesHalfOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->eyesClosedUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthClosedUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthOpenUrlBrowseToolButton->setIcon(searchIcon);
-		ui->mouthSmileUrlBrowseToolButton->setIcon(searchIcon);
-		ui->tongueOutUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->bodyUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->eyesOpenUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->eyesHalfOpenUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->eyesClosedUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->mouthClosedUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->mouthOpenUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->mouthSmileUrlBrowseToolButton->setIcon(searchIcon);
+		m_ui->tongueOutUrlBrowseToolButton->setIcon(searchIcon);
 	}
 
 	QString entryClearIconPath = QDir::fromNativeSeparators(baseUrl + "entry-clear.svg");
 	if (QFileInfo::exists(entryClearIconPath)) {
 		QIcon entryClearIcon(entryClearIconPath);
 
-		ui->bodyUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesHalfOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->eyesClosedUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthClosedUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthOpenUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->mouthSmileUrlDeleteToolButton->setIcon(entryClearIcon);
-		ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->bodyUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->eyesOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->eyesHalfOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->eyesClosedUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->mouthClosedUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->mouthOpenUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->mouthSmileUrlDeleteToolButton->setIcon(entryClearIcon);
+		m_ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
 	}
 
-	ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
-						    "background-color: transparent;"
-						    "}"
-						    "#trackingScrollAreaWidgetContents {"
-						    "background-color: transparent;"
-						    "}");
-	ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
-	ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
+	m_ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
+						      "background-color: transparent;"
+						      "}"
+						      "#trackingScrollAreaWidgetContents {"
+						      "background-color: transparent;"
+						      "}");
+	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
+	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void ImageFilesWidget::connectUISignalHandlers()
 {
-	QObject::connect(ui->bodyUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->bodyUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::BODY); });
-	QObject::connect(ui->eyesOpenUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->eyesOpenUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::EYESOPEN); });
-	QObject::connect(ui->eyesHalfOpenUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->eyesHalfOpenUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::EYESHALFOPEN); });
-	QObject::connect(ui->eyesClosedUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->eyesClosedUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::EYESCLOSED); });
-	QObject::connect(ui->mouthClosedUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->mouthClosedUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::MOUTHCLOSED); });
-	QObject::connect(ui->mouthOpenUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->mouthOpenUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::MOUTHOPEN); });
-	QObject::connect(ui->mouthSmileUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->mouthSmileUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::MOUTHSMILE); });
-	QObject::connect(ui->tongueOutUrlBrowseToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->tongueOutUrlBrowseToolButton, &QToolButton::clicked, this,
 			 [this]() { handleImageUrlButtonClicked(PoseImage::TONGUEOUT); });
 
-	QObject::connect(ui->bodyUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->bodyUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::BODY); });
-	QObject::connect(ui->eyesOpenUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->eyesOpenUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::EYESOPEN); });
-	QObject::connect(ui->eyesHalfOpenUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->eyesHalfOpenUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::EYESHALFOPEN); });
-	QObject::connect(ui->eyesClosedUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->eyesClosedUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::EYESCLOSED); });
-	QObject::connect(ui->mouthClosedUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->mouthClosedUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::MOUTHCLOSED); });
-	QObject::connect(ui->mouthOpenUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->mouthOpenUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::MOUTHOPEN); });
-	QObject::connect(ui->mouthSmileUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->mouthSmileUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::MOUTHSMILE); });
-	QObject::connect(ui->tongueOutUrlDeleteToolButton, &QToolButton::clicked, this,
+	QObject::connect(m_ui->tongueOutUrlDeleteToolButton, &QToolButton::clicked, this,
 			 [this]() { handleClearImageUrlButtonClicked(PoseImage::TONGUEOUT); });
 }
 
 void ImageFilesWidget::setupWidgetUI()
 {
-	ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
-	ui->bodyUrlLabel->setText(obs_module_text("DialogBodyLabel"));
-	ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
-	ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
-	ui->eyesClosedUrlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
-	ui->mouthClosedUrlLabel->setText(obs_module_text("DialogMouthClosedLabel"));
-	ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
-	ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileLabel"));
-	ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutLabel"));
+	m_ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
+	m_ui->bodyUrlLabel->setText(obs_module_text("DialogBodyLabel"));
+	m_ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
+	m_ui->eyesHalfOpenUrLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));
+	m_ui->eyesClosedUrlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
+	m_ui->mouthClosedUrlLabel->setText(obs_module_text("DialogMouthClosedLabel"));
+	m_ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
+	m_ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileLabel"));
+	m_ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutLabel"));
 
-	ui->bodyUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->eyesOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->eyesHalfOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->eyesClosedUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->mouthClosedUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->mouthOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->mouthSmileUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
-	ui->tongueOutUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->bodyUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->eyesOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->eyesHalfOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->eyesClosedUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->mouthClosedUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->mouthOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->mouthSmileUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->tongueOutUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
 
-	ui->bodyUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->eyesOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->eyesHalfOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->eyesClosedUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->mouthClosedUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->mouthOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->mouthSmileUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
-	ui->tongueOutUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
+	m_ui->bodyUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->eyesOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->eyesHalfOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->eyesClosedUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->mouthClosedUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->mouthOpenUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->mouthSmileUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlClearButtonToolTip"));
+	m_ui->tongueOutUrlDeleteToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
 
 	// Initialize the mapping between PoseImage enums and QLineEdit pointers
-	poseImageLineEdits[PoseImage::BODY] = ui->bodyUrlLineEdit;
-	poseImageLineEdits[PoseImage::EYESOPEN] = ui->eyesOpenUrlLineEdit;
-	poseImageLineEdits[PoseImage::EYESHALFOPEN] = ui->eyesHalfOpenUrlEdit;
-	poseImageLineEdits[PoseImage::EYESCLOSED] = ui->eyesClosedUrlLineEdit;
-	poseImageLineEdits[PoseImage::MOUTHCLOSED] = ui->mouthClosedUrlLineEdit;
-	poseImageLineEdits[PoseImage::MOUTHOPEN] = ui->mouthOpenUrlLineEdit;
-	poseImageLineEdits[PoseImage::MOUTHSMILE] = ui->mouthSmileUrlLineEdit;
-	poseImageLineEdits[PoseImage::TONGUEOUT] = ui->tongueOutUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::BODY] = m_ui->bodyUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::EYESOPEN] = m_ui->eyesOpenUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenUrlEdit;
+	m_poseImageLineEdits[PoseImage::EYESCLOSED] = m_ui->eyesClosedUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::MOUTHCLOSED] = m_ui->mouthClosedUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::MOUTHOPEN] = m_ui->mouthOpenUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::MOUTHSMILE] = m_ui->mouthSmileUrlLineEdit;
+	m_poseImageLineEdits[PoseImage::TONGUEOUT] = m_ui->tongueOutUrlLineEdit;
 
-	ui->imageConfigWidget->setVisible(false);
-	ui->noConfigLabel->setVisible(true);
+	m_ui->imageConfigWidget->setVisible(false);
+	m_ui->noConfigLabel->setVisible(true);
 
 	updateStyledUIComponents();
 }
@@ -192,7 +192,7 @@ void ImageFilesWidget::handleImageUrlButtonClicked(PoseImage poseEnum)
 		return;
 	}
 
-	QLineEdit *lineEdit = poseImageLineEdits.value(poseEnum, nullptr);
+	QLineEdit *lineEdit = m_poseImageLineEdits.value(poseEnum, nullptr);
 	if (lineEdit) {
 		lineEdit->setText(fileName);
 	} else {
@@ -214,8 +214,8 @@ void ImageFilesWidget::handleClearImageUrlButtonClicked(PoseImage poseEnum)
 	if (imageIndex < 0)
 		return;
 
-	if (imageIndex >= 0 && imageIndex < static_cast<int>(poseImageLineEdits.size())) {
-		poseImageLineEdits[poseEnum]->setText(QString());
+	if (imageIndex >= 0 && imageIndex < static_cast<int>(m_poseImageLineEdits.size())) {
+		m_poseImageLineEdits[poseEnum]->setText(QString());
 	} else {
 		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
 	}

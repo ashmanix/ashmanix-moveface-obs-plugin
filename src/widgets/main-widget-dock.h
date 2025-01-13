@@ -33,17 +33,17 @@ public:
 	Result updateTrackerList(QString oldId, QString newId);
 
 private:
-	QMap<QString, FaceTracker *> trackerWidgetMap;
+	QMap<QString, FaceTracker *> m_trackerWidgetMap;
 	QVBoxLayout *trackerListLayout;
-	int addTrackerHotkeyId = -1;
+	int m_addTrackerHotkeyId = -1;
 
-	static inline const char *addTrackerHotkeyName = "Ashmanix_MoveFace_Add_Tracker";
+	static inline const char *ADDTRACKERHOTKEYNAME = "Ashmanix_MoveFace_Add_Tracker";
 
 	static inline const char *VENDORNAME = "ashmanix-moveface-plugin";
 	static inline const char *TRACKERIDKEY = "tracker_id";
 
-	obs_websocket_vendor vendor = nullptr;
-	Ui::MainWidget *ui;
+	obs_websocket_vendor m_vendor = nullptr;
+	Ui::MainWidget *m_ui;
 
 	void setupCountdownWidgetUI();
 	void connectUISignalHandlers();

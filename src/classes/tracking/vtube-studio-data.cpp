@@ -138,7 +138,7 @@ VTubeStudioData VTubeStudioData::fromJson(const QJsonObject &obj)
 	for (const auto item : blendShapesArray) {
 		if (item.isObject()) {
 			Blendshape bsToAdd = Blendshape::fromJson(item.toObject());
-			trackingData.addBlendshape(bsToAdd.key, bsToAdd);
+			trackingData.addBlendshape(bsToAdd.m_key, bsToAdd);
 		}
 	}
 

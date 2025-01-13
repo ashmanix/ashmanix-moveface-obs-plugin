@@ -19,10 +19,10 @@ void AvatarGraphicsView::wheelEvent(QWheelEvent *event)
 	// Check the scroll direction
 	if (event->angleDelta().y() > 0) {
 		// Zoom in
-		scale(zoomScaleFactor, zoomScaleFactor);
+		scale(m_zoomScaleFactor, m_zoomScaleFactor);
 	} else {
 		// Zoom out
-		scale(1.0 / zoomScaleFactor, 1.0 / zoomScaleFactor);
+		scale(1.0 / m_zoomScaleFactor, 1.0 / m_zoomScaleFactor);
 	}
 	event->accept();
 }

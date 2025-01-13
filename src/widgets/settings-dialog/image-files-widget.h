@@ -28,8 +28,8 @@ public:
 	void updateStyledUIComponents();
 
 private:
-	Ui::ImageFilesWidget *ui;
-	QMap<PoseImage, QLineEdit *> poseImageLineEdits;
+	Ui::ImageFilesWidget *m_ui;
+	QMap<PoseImage, QLineEdit *> m_poseImageLineEdits;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();

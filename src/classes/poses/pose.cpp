@@ -102,6 +102,19 @@ Vector3 Pose::getMouthPosition() const
 	return m_mouthPosition;
 }
 
+QMap<QString, QSharedPointer<BlendshapeRule>> *Pose::getBlendshapeList()
+{
+	return &m_blendShapesRuleList;
+}
+
+QSharedPointer<BlendshapeRule> Pose::getBlendshapeRule(QString id)
+{
+	if (auto it = m_blendShapesRuleList.find(id); it != m_blendShapesRuleList.end()) {
+		return it.value();
+	}
+	return nullptr;
+}
+
 void Pose::setEyesHalfOpenLimit(double newLimit)
 {
 	m_eyesHalfOpenLimit = newLimit;
@@ -140,25 +153,27 @@ void Pose::setPoseId(QString newId)
 	m_poseId = newId;
 }
 
-bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const
+bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendshapes) const
 {
-	return std::any_of(m_blendShapesRuleList.begin(), m_blendShapesRuleList.end(), [&](const auto &rule) -> bool {
-		if (blendShapes.contains(rule.key)) {
-			const Blendshape &bs = blendShapes.value(rule.key);
-			return rule.evaluate(bs);
+	for (auto i = m_blendShapesRuleList.begin(), end = m_blendShapesRuleList.end(); i != end; i++) {
+		auto rule = i.value();
+		if (blendshapes.contains(rule->getKey())) {
+			const Blendshape &bs = blendshapes.value(rule->getKey());
+			if (rule->evaluate(bs))
+				return true;
 		}
-		return false;
-	});
+	}
+	return false;
 }
 
-void Pose::addBlendShapeRule(BlendshapeRule rule)
+void Pose::addBlendShapeRule(QSharedPointer<BlendshapeRule> rule)
 {
-	m_blendShapesRuleList.push_back(rule);
+	m_blendShapesRuleList.insert(rule->getID(), rule);
 }
 
-void Pose::removeBlendShapeRule(int index)
+void Pose::removeBlendShapeRule(QString id)
 {
-	UNUSED_PARAMETER(index);
+	m_blendShapesRuleList.remove(id);
 }
 
 PoseImageData *Pose::getPoseImageData(PoseImage pose)
@@ -204,9 +219,10 @@ QJsonObject Pose::toJson() const
 	QJsonArray rulesArray;
 	for (const auto &rule : m_blendShapesRuleList) {
 		QJsonObject ruleObj;
-		ruleObj["key"] = static_cast<int>(rule.key); // or store as string if you prefer
-		ruleObj["compareType"] = static_cast<int>(rule.compareType);
-		ruleObj["compareValue"] = rule.compareValue;
+		ruleObj["id"] = rule->getID();                     // or store as string if you prefer
+		ruleObj["key"] = static_cast<int>(rule->getKey()); // or store as string if you prefer
+		ruleObj["compareType"] = static_cast<int>(rule->getComparisonType());
+		ruleObj["compareValue"] = rule->getCompareValue();
 		rulesArray.append(ruleObj);
 	}
 	obj["blendShapesRuleList"] = rulesArray;
@@ -254,10 +270,15 @@ Pose Pose::fromJson(const QJsonObject &obj)
 	for (auto ruleValue : rulesArray) {
 		if (ruleValue.isObject()) {
 			QJsonObject ruleObj = ruleValue.toObject();
-			BlendshapeRule rule;
-			rule.key = static_cast<BlendshapeKey>(ruleObj["key"].toInt());
-			rule.compareType = static_cast<ComparisonType>(ruleObj["compareType"].toInt());
-			rule.compareValue = ruleObj["compareValue"].toDouble();
+			QSharedPointer<BlendshapeRule> rule = QSharedPointer<BlendshapeRule>::create(
+				static_cast<QString>(ruleObj["id"].toString()),
+				static_cast<BlendshapeKey>(ruleObj["key"].toInt()),
+				static_cast<ComparisonType>(ruleObj["compareType"].toInt()),
+				ruleObj["compareValue"].toDouble());
+			// rule.setID(static_cast<QString>(ruleObj["id"].toString()));
+			// rule.setKey(static_cast<BlendshapeKey>(ruleObj["key"].toInt()));
+			// rule.setComparisonType(static_cast<ComparisonType>(ruleObj["compareType"].toInt()));
+			// rule.setCompareValue(ruleObj["compareValue"].toDouble());
 			pose.addBlendShapeRule(rule);
 		}
 	}

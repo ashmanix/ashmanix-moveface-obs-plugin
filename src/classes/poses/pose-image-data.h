@@ -33,8 +33,8 @@ public:
 	void clearPixmapItem();
 
 private:
-	QString m_imageUrl;
-	QSharedPointer<MovablePixmapItem> m_pixmapItem;
+	QString m_imageUrl = "";
+	QSharedPointer<MovablePixmapItem> m_pixmapItem = nullptr;
 };
 
 #endif // POSEIMAGEDATA_H

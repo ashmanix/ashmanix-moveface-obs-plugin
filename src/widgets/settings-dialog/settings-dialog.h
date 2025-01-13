@@ -29,6 +29,7 @@
 #include "pose-list-widget.h"
 #include "image-files-widget.h"
 #include "face-settings-widget.h"
+#include "blendshape-rules-widget.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_FaceTrackerDialog.h"
 
@@ -42,20 +43,21 @@ public:
 	void updateStyledUIComponents();
 
 private:
-	Ui::FaceTrackerDialog *ui;
-	MainWidgetDock *mainWidget;
-	PoseListWidget *poseListWidget;
-	ImageFilesWidget *imageFilesWidget;
-	FaceSettingsWidget *faceSettingsWidget;
+	Ui::FaceTrackerDialog *m_ui;
+	MainWidgetDock *m_mainWidget;
+	PoseListWidget *m_poseListWidget;
+	ImageFilesWidget *m_imageFilesWidget;
+	FaceSettingsWidget *m_faceSettingsWidget;
+	BlendshapeRulesWidget *m_blendshapeRulesWidget;
 
-	QSharedPointer<TrackerData> trackerData;
-	bool isError = false;
-	QString formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
+	QSharedPointer<TrackerData> m_trackerData;
+	bool m_isError = false;
+	QString m_formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
-	QList<QSharedPointer<Pose>> settingsPoseList;
-	QGraphicsScene *avatarPreviewScene = nullptr;
-	int previouslySelectedPoseIndex = -1;
-	bool isMovingPoseListRows = false;
+	QList<QSharedPointer<Pose>> m_settingsPoseList;
+	QSharedPointer<QGraphicsScene> m_avatarPreviewScene = nullptr;
+	int m_previouslySelectedPoseIndex = -1;
+	bool m_isMovingPoseListRows = false;
 
 	void connectUISignalHandlers();
 	void connectObsSignalHandlers();

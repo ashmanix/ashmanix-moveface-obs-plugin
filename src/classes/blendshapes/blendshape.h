@@ -6,8 +6,8 @@
 
 class Blendshape {
 public:
-	BlendshapeKey key;
-	double value;
+	BlendshapeKey m_key;
+	double m_value;
 
 	QJsonObject toJson() const;
 	static Blendshape fromJson(const QJsonObject &obj);

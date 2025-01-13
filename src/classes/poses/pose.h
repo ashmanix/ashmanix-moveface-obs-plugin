@@ -41,6 +41,9 @@ public:
 	Vector3 getEyesPosition() const;
 	Vector3 getMouthPosition() const;
 
+	QMap<QString, QSharedPointer<BlendshapeRule>> *getBlendshapeList();
+	QSharedPointer<BlendshapeRule> getBlendshapeRule(QString id);
+
 	void setBodyPosition(Vector3 newPosition);
 	void setEyesPosition(Vector3 newPosition);
 	void setMouthPosition(Vector3 newPosition);
@@ -52,8 +55,8 @@ public:
 
 	void setPoseId(QString newId);
 
-	void addBlendShapeRule(BlendshapeRule rule);
-	void removeBlendShapeRule(int index);
+	void addBlendShapeRule(QSharedPointer<BlendshapeRule> rule);
+	void removeBlendShapeRule(QString id);
 
 	PoseImageData *getPoseImageAt(size_t index);
 	PoseImageData *getPoseImageData(PoseImage pose);
@@ -71,9 +74,9 @@ private:
 	double m_mouthOpenLimit = 0.5;
 	double m_tongueOutLimit = 0.7;
 
-	std::vector<BlendshapeRule> m_blendShapesRuleList;
+	QMap<QString, QSharedPointer<BlendshapeRule>> m_blendShapesRuleList;
 
-	std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> m_poseImages;
+	std::array<PoseImageData, static_cast<size_t>(PoseImage::COUNT)> m_poseImages = {};
 };
 
 #endif // POSE_H
