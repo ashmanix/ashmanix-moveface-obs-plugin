@@ -27,7 +27,7 @@ public:
 	void clearSelection() override;
 	void toggleVisible(bool isVisible) override;
 	QMap<PoseImage, QLineEdit *> getposeLineEditsMap() const;
-	void updateStyledUIComponents();
+	void updateStyledUIComponents() override;
 	void setData(QSharedPointer<Pose> in_pose = nullptr) override;
 
 private:

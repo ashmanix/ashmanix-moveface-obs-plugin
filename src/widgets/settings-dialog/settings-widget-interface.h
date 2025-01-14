@@ -13,6 +13,7 @@ public:
 	virtual void setData(QSharedPointer<Pose> pose) = 0;
 	virtual void clearSelection() = 0;
 	virtual void toggleVisible(bool isVisible) = 0;
+	virtual void updateStyledUIComponents() = 0;
 };
 
 #endif // SETTINGSWIDGETINTERFACE_H

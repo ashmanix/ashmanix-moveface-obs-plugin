@@ -30,6 +30,7 @@
 #include "image-files-widget.h"
 #include "face-settings-widget.h"
 #include "blendshape-rules-widget.h"
+#include "pose-display-widget.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../ui/settings-dialog/ui_FaceTrackerDialog.h"
 
@@ -49,16 +50,16 @@ private:
 	ImageFilesWidget *m_imageFilesWidget = new ImageFilesWidget(this);
 	FaceSettingsWidget *m_faceSettingsWidget = new FaceSettingsWidget(this);
 	BlendshapeRulesWidget *m_blendshapeRulesWidget = new BlendshapeRulesWidget(this);
+	PoseDisplayWidget *m_poseDisplayWidget = new PoseDisplayWidget(this);
 
 	QList<SettingsWidgetInterface *> m_trackingWidgetList = {m_imageFilesWidget, m_faceSettingsWidget,
-								 m_blendshapeRulesWidget};
+								 m_blendshapeRulesWidget, m_poseDisplayWidget};
 
 	QSharedPointer<TrackerData> m_trackerData;
 	bool m_isError = false;
 	QString m_formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
 	QList<QSharedPointer<Pose>> m_settingsPoseList;
-	QSharedPointer<QGraphicsScene> m_avatarPreviewScene = nullptr;
 	int m_previouslySelectedPoseIndex = -1;
 	bool m_isMovingPoseListRows = false;
 
@@ -77,13 +78,10 @@ private:
 	static void obsSourceRenamed(void *param, calldata_t *calldata);
 	static int checkIfImageSourceType(obs_source_t *source);
 
-	void addImageToScene(PoseImageData *imageData, bool useImagePos = false, bool clearScene = false);
-	void clearScene();
 	void clearCurrentPoseConfig();
 	void loadSelectedPoseConfig();
 	int getSelectedRow();
 	void resetPoseUITab();
-	void centerSceneOnItems();
 
 protected:
 	void showEvent(QShowEvent *event) override;
@@ -101,20 +99,12 @@ private slots:
 	void okButtonClicked();
 
 	void syncPoseListToModel();
-	void handleSetImageUrl(PoseImage poseEnum, QString fileName);
-	void handleClearImageUrl(int imageIndex);
 
 	void onPoseSelected(int rowIndex);
 	void onPoseRowsInserted(QMap<int, QString> rowMap);
 	void onPoseRowsRemoved(QList<int> rowsList);
 	void onPoseDataChanged(QMap<int, QString> rowMap);
 	void onPoseRowMoved(int sourceRow, int targetRow);
-
-	void handleCenterViewButtonClick();
-	void handleMoveImageUpClick();
-	void handleMoveImageDownClick();
-	void handleImageZoomClick(bool isZoomOut = false);
-	void handleImageMove(qreal x, qreal y, qreal z, PoseImage pImageType);
 };
 
 #endif // SETTINGSDIALOG_H

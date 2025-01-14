@@ -304,7 +304,7 @@
            <number>5</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="configHorizontalLayout" stretch="10,9,10">
+           <layout class="QHBoxLayout" name="configHorizontalLayout" stretch="10,8,10">
             <property name="spacing">
              <number>5</number>
             </property>
@@ -328,146 +328,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QFrame" name="imageFrame">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::Panel</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_8">
-               <item>
-                <widget class="AvatarGraphicsView" name="avatarGraphicsView">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>200</height>
-                  </size>
-                 </property>
-                 <property name="autoFillBackground">
-                  <bool>false</bool>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true"/>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::StyledPanel</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Sunken</enum>
-                 </property>
-                 <property name="lineWidth">
-                  <number>1</number>
-                 </property>
-                 <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAsNeeded</enum>
-                 </property>
-                 <property name="horizontalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAsNeeded</enum>
-                 </property>
-                 <property name="sizeAdjustPolicy">
-                  <enum>QAbstractScrollArea::AdjustToContents</enum>
-                 </property>
-                 <property name="backgroundBrush">
-                  <brush brushstyle="NoBrush">
-                   <color alpha="255">
-                    <red>0</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </property>
-                 <property name="sceneRect">
-                  <rectf>
-                   <x>0.000000000000000</x>
-                   <y>0.000000000000000</y>
-                   <width>3000.000000000000000</width>
-                   <height>5000.000000000000000</height>
-                  </rectf>
-                 </property>
-                 <property name="dragMode">
-                  <enum>QGraphicsView::ScrollHandDrag</enum>
-                 </property>
-                 <property name="transformationAnchor">
-                  <enum>QGraphicsView::AnchorUnderMouse</enum>
-                 </property>
-                 <property name="rubberBandSelectionMode">
-                  <enum>Qt::IntersectsItemShape</enum>
-                 </property>
-                 <property name="class" stdset="0">
-                  <string>bg-base</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_3">
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QToolButton" name="zoomInToolButton">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="zoomOutToolButton">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="centerOnImagesToolButton">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="moveImageUpLevelToolButton">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="moveImageDownLevelToolButton">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
+             <layout class="QVBoxLayout" name="poseDisplayVerticalLayout"/>
             </item>
             <item>
              <layout class="QVBoxLayout" name="settingsVerticalLayout">
@@ -509,13 +370,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>AvatarGraphicsView</class>
-   <extends>QGraphicsView</extends>
-   <header>widgets/settings-dialog/avatar-graphics-view.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

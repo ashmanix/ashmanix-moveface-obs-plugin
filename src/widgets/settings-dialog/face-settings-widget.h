@@ -25,7 +25,7 @@ public:
 	void clearSelection() override;
 	void toggleVisible(bool isVisible) override;
 	void setData(QSharedPointer<Pose> poseData = nullptr) override;
-	void updateStyledUIComponents();
+	void updateStyledUIComponents() override;
 
 private:
 	Ui::FaceSettingsWidget *m_ui;
