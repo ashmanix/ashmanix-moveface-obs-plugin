@@ -370,14 +370,14 @@ void PoseDisplayWidget::handleImageMove(qreal x, qreal y, qreal z, PoseImage pIm
 	}
 
 	// Log the update
-	obs_log(LOG_INFO, QString("Updated Pose %1: Type: %2 x=%3, y=%4, z=%5")
-				  .arg(m_pose->getPoseId())
-				  .arg(poseImageToString(pImageType))
-				  .arg(x)
-				  .arg(y)
-				  .arg(z)
-				  .toStdString()
-				  .c_str());
+	// obs_log(LOG_INFO, QString("Updated Pose %1: Type: %2 x=%3, y=%4, z=%5")
+	// 			  .arg(m_pose->getPoseId())
+	// 			  .arg(poseImageToString(pImageType))
+	// 			  .arg(x)
+	// 			  .arg(y)
+	// 			  .arg(z)
+	// 			  .toStdString()
+	// 			  .c_str());
 
 	emit poseImagesChanged();
 }

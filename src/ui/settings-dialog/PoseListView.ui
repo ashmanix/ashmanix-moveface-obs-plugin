@@ -52,6 +52,9 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
+        <property name="margin">
+         <number>10</number>
+        </property>
        </widget>
       </item>
       <item>

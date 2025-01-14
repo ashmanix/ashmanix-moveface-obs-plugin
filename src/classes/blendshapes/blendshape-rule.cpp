@@ -7,7 +7,7 @@ BlendshapeRule::BlendshapeRule(QString id, BlendshapeKey key, ComparisonType cTy
 	  m_compareType(cType),
 	  m_compareValue(value)
 {
-	if (m_id.isEmpty() == 0) {
+	if (m_id.isEmpty()) {
 		// Get a unique ID for blendshape rule
 		m_id = generateUniqueID();
 	}

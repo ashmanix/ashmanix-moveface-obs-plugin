@@ -75,6 +75,7 @@ void BlendshapeRulesWidget::updateStyledUIComponents()
 	}
 
 	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
+	m_ui->blenshapeRulesLabel->setStyleSheet("font-weight: bold;");
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -143,13 +144,13 @@ void BlendshapeRulesWidget::handleAddButtonClicked()
 
 void BlendshapeRulesWidget::handleBlendshapeRuleDeleteButtonClicked(QString id)
 {
+	obs_log(LOG_INFO, "Trying to delete rule: %s", id.toStdString().c_str());
 	SingleBlendshapeRuleWidget *itemToBeRemoved = m_blendshapeRulesWidgetMap.value(id, nullptr);
 
 	if (itemToBeRemoved) {
-		itemToBeRemoved->deleteLater();
-
 		m_blendshapeRulesWidgetMap.remove(id);
 		m_pose->removeBlendShapeRule(id);
+		itemToBeRemoved->deleteLater();
 
 		emit blendshapeRuleChanged();
 		obs_log(LOG_INFO, (QString("Blendshape rule %1 deleted").arg(id)).toStdString().c_str());

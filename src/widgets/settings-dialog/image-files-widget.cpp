@@ -88,6 +88,8 @@ void ImageFilesWidget::updateStyledUIComponents()
 						      "}");
 	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
+
+	m_ui->poseImageLabel->setStyleSheet("font-weight: bold");
 }
 
 void ImageFilesWidget::setData(QSharedPointer<Pose> in_pose)
@@ -165,6 +167,15 @@ void ImageFilesWidget::setupWidgetUI()
 	m_ui->mouthOpenUrlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
 	m_ui->mouthSmileUrlLabel->setText(obs_module_text("DialogMouthSmileLabel"));
 	m_ui->tongueOutUrlLabel->setText(obs_module_text("DialogTongueOutLabel"));
+
+	m_ui->bodyUrlLabel->setToolTip(obs_module_text("DialogBodyLabel"));
+	m_ui->eyesOpenUrlLabel->setToolTip(obs_module_text("DialogEyesOpenLabel"));
+	m_ui->eyesHalfOpenUrLabel->setToolTip(obs_module_text("DialogEyesHalfOpenLabel"));
+	m_ui->eyesClosedUrlLabel->setToolTip(obs_module_text("DialogEyesClosedLabel"));
+	m_ui->mouthClosedUrlLabel->setToolTip(obs_module_text("DialogMouthClosedLabel"));
+	m_ui->mouthOpenUrlLabel->setToolTip(obs_module_text("DialogMouthOpenLabel"));
+	m_ui->mouthSmileUrlLabel->setToolTip(obs_module_text("DialogMouthSmileLabel"));
+	m_ui->tongueOutUrlLabel->setToolTip(obs_module_text("DialogTongueOutLabel"));
 
 	m_ui->bodyUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));
 	m_ui->eyesOpenUrlBrowseToolButton->setToolTip(obs_module_text("DialogImageUrlBrowseButtonToolTip"));

@@ -120,6 +120,7 @@ void PoseListWidget::updateStyledUIComponents()
 					  "   padding-top: 5px;"
 					  "   padding-bottom: 5px;"
 					  "}");
+	m_ui->poseListLabel->setStyleSheet("font-weight: bold;");
 }
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------

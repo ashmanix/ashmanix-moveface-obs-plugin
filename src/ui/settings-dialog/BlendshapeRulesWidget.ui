@@ -55,6 +55,9 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
+        <property name="margin">
+         <number>10</number>
+        </property>
        </widget>
       </item>
       <item>
@@ -77,7 +80,7 @@
            <x>0</x>
            <y>0</y>
            <width>918</width>
-           <height>649</height>
+           <height>629</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -116,8 +119,11 @@
              </property>
              <item>
               <layout class="QVBoxLayout" name="blendshapeRulesVerticalLayout">
+               <property name="spacing">
+                <number>5</number>
+               </property>
                <property name="bottomMargin">
-                <number>20</number>
+                <number>0</number>
                </property>
               </layout>
              </item>

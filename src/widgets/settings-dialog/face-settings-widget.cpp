@@ -80,6 +80,7 @@ void FaceSettingsWidget::updateStyledUIComponents()
 						    "background-color: transparent;"
 						    "}");
 	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
+	m_ui->faceSettingsLabel->setStyleSheet("font-weight: bold;");
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
