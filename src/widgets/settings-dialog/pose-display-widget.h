@@ -21,7 +21,7 @@ public:
 	~PoseDisplayWidget() override;
 
 	void clearSelection() override;
-	void toggleVisible(bool isVisible) override final { UNUSED_PARAMETER(isVisible); };
+	void toggleVisible(bool isVisible) final { UNUSED_PARAMETER(isVisible); };
 	void setData(QSharedPointer<Pose> poseData = nullptr) override;
 	void updateStyledUIComponents() override;
 	void addImageToScene(PoseImageData *imageData, bool useImagePos = false, bool clearScene = false);
@@ -34,8 +34,6 @@ private:
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();
-	// void toggleBlockAllUISignals(bool shouldBlock);
-	// void imageMoved(PoseImage poseEnum, double value);
 	void centerSceneOnItems();
 
 signals:

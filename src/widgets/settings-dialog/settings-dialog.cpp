@@ -365,8 +365,6 @@ void SettingsDialog::clearCurrentPoseConfig()
 {
 	for (SettingsWidgetInterface *widget : m_trackingWidgetList)
 		widget->clearSelection();
-
-	// clearScene();
 }
 
 void SettingsDialog::loadSelectedPoseConfig()

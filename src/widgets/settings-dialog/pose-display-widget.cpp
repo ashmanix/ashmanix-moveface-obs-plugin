@@ -30,17 +30,6 @@ void PoseDisplayWidget::clearSelection()
 	}
 }
 
-// void PoseDisplayWidget::toggleVisible(bool isVisible)
-// {
-// 	if (isVisible) {
-// 		m_ui->imageConfigWidget->setVisible(true);
-// 		m_ui->noConfigLabel->setVisible(false);
-// 	} else {
-// 		m_ui->imageConfigWidget->setVisible(false);
-// 		m_ui->noConfigLabel->setVisible(true);
-// 	}
-// }
-
 void PoseDisplayWidget::updateStyledUIComponents()
 {
 	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
@@ -294,8 +283,6 @@ void PoseDisplayWidget::clearAllImages(PoseImage poseEnum)
 	} else {
 		obs_log(LOG_WARNING, "Invalid PoseImage enum value.");
 	}
-
-	// emit poseImagesChanged();
 }
 
 void PoseDisplayWidget::handleCenterViewButtonClick()
