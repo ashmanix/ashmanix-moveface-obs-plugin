@@ -29,7 +29,7 @@ public:
 	void clearSelection() override;
 	void toggleVisible(bool isVisible) override;
 	void setData(QSharedPointer<Pose> in_pose) override;
-	void updateStyledUIComponents();
+	void updateStyledUIComponents() override;
 
 private:
 	Ui::BlendshapeRulesWidget *m_ui;

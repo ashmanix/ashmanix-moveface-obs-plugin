@@ -57,46 +57,9 @@ void SettingsDialog::setFormDetails(QSharedPointer<TrackerData> settingsDialogDa
 
 void SettingsDialog::updateStyledUIComponents()
 {
-	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
-						       : getDataFolderPath() + "/icons/light/";
-
-	QString plusIconPath = QDir::fromNativeSeparators(baseUrl + "plus.svg");
-	if (QFileInfo::exists(plusIconPath)) {
-		QIcon plusIcon(plusIconPath);
-
-		m_ui->zoomInToolButton->setIcon(plusIcon);
+	for (SettingsWidgetInterface *widget : m_trackingWidgetList) {
+		widget->updateStyledUIComponents();
 	}
-
-	QString minusIconPath = QDir::fromNativeSeparators(baseUrl + "minus.svg");
-	if (QFileInfo::exists(minusIconPath)) {
-		QIcon minusIcon(minusIconPath);
-
-		m_ui->zoomOutToolButton->setIcon(minusIcon);
-	}
-
-	QString upIconPath = QDir::fromNativeSeparators(baseUrl + "up.svg");
-	if (QFileInfo::exists(upIconPath)) {
-		QIcon upIcon(upIconPath);
-		m_ui->moveImageUpLevelToolButton->setIcon(upIcon);
-	}
-
-	QString downIconPath = QDir::fromNativeSeparators(baseUrl + "down.svg");
-	if (QFileInfo::exists(downIconPath)) {
-		QIcon downIcon(downIconPath);
-		m_ui->moveImageDownLevelToolButton->setIcon(downIcon);
-	}
-
-	QString centerIconPath = QDir::fromNativeSeparators(baseUrl + "center.svg");
-	if (QFileInfo::exists(centerIconPath)) {
-		QIcon centerIcon(centerIconPath);
-		m_ui->centerOnImagesToolButton->setIcon(centerIcon);
-	}
-
-	m_ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
-
-	m_imageFilesWidget->updateStyledUIComponents();
-	m_faceSettingsWidget->updateStyledUIComponents();
-	m_blendshapeRulesWidget->updateStyledUIComponents();
 }
 
 void SettingsDialog::connectUISignalHandlers()
@@ -118,22 +81,14 @@ void SettingsDialog::connectUISignalHandlers()
 	QObject::connect(m_ui->dialogButtonBox, &QDialogButtonBox::rejected, this,
 			 &SettingsDialog::cancelButtonClicked);
 
-	QObject::connect(m_imageFilesWidget, &ImageFilesWidget::imageUrlSet, this, &SettingsDialog::handleSetImageUrl);
-	QObject::connect(m_imageFilesWidget, &ImageFilesWidget::imageUrlCleared, this,
-			 &SettingsDialog::handleClearImageUrl);
+	QObject::connect(m_imageFilesWidget, &ImageFilesWidget::imageUrlSet, m_poseDisplayWidget,
+			 &PoseDisplayWidget::handleSetImageUrl);
+	QObject::connect(m_imageFilesWidget, &ImageFilesWidget::imageUrlCleared, m_poseDisplayWidget,
+			 &PoseDisplayWidget::handleClearImageUrl);
 	QObject::connect(m_imageFilesWidget, &ImageFilesWidget::raiseWindow, this, &SettingsDialog::handleRaisedWindow);
 
-	QObject::connect(m_ui->centerOnImagesToolButton, &QToolButton::clicked, this,
-			 &SettingsDialog::handleCenterViewButtonClick);
-	QObject::connect(m_ui->moveImageUpLevelToolButton, &QToolButton::clicked, this,
-			 &SettingsDialog::handleMoveImageUpClick);
-	QObject::connect(m_ui->moveImageDownLevelToolButton, &QToolButton::clicked, this,
-			 &SettingsDialog::handleMoveImageDownClick);
-
-	QObject::connect(m_ui->zoomInToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageZoomClick(false); });
-	QObject::connect(m_ui->zoomOutToolButton, &QToolButton::clicked, this,
-			 [this]() { handleImageZoomClick(true); });
+	QObject::connect(m_poseDisplayWidget, &PoseDisplayWidget::poseImagesChanged, this,
+			 &SettingsDialog::formChangeDetected);
 
 	QObject::connect(m_poseListWidget, &PoseListWidget::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
 	QObject::connect(m_poseListWidget, &PoseListWidget::rowsRemoved, this, &SettingsDialog::onPoseRowsRemoved);
@@ -214,13 +169,7 @@ void SettingsDialog::setupDialogUI(QSharedPointer<TrackerData> settingsDialogDat
 	m_ui->poseVerticalLayout->addWidget(m_imageFilesWidget);
 	m_ui->settingsVerticalLayout->addWidget(m_faceSettingsWidget);
 	m_ui->settingsVerticalLayout->addWidget(m_blendshapeRulesWidget);
-
-	m_ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
-	m_ui->moveImageUpLevelToolButton->setToolTip(obs_module_text("DialogMoveImageUpLevelToolTip"));
-	m_ui->moveImageDownLevelToolButton->setToolTip(obs_module_text("DialogMoveImageDownLevelToolTip"));
-	m_ui->centerOnImagesToolButton->setToolTip(obs_module_text("DialogCenterViewOnImagesToolTip"));
-	m_ui->zoomOutToolButton->setToolTip(obs_module_text("DialogZoomOutToolTip"));
-	m_ui->zoomInToolButton->setToolTip(obs_module_text("DialogZoomInToolTip"));
+	m_ui->poseDisplayVerticalLayout->addWidget(m_poseDisplayWidget);
 
 	updateStyledUIComponents();
 
@@ -412,66 +361,12 @@ int SettingsDialog::checkIfImageSourceType(obs_source_t *source)
 	return false;
 }
 
-void SettingsDialog::addImageToScene(PoseImageData *imageData, bool useImagePos, bool clearScene)
-{
-	if (!m_avatarPreviewScene || clearScene) {
-		QGraphicsView *view = m_ui->avatarGraphicsView;
-		m_avatarPreviewScene = QSharedPointer<QGraphicsScene>::create(this);
-
-		m_avatarPreviewScene->setSceneRect(0, 0, 3000, 5000);
-		view->scale(0.1, 0.1);
-
-		view->setScene(m_avatarPreviewScene.data());
-		view->setRenderHint(QPainter::Antialiasing);
-		// Create a QGraphicsView to visualize the scene
-		view->setDragMode(QGraphicsView::ScrollHandDrag);
-	}
-
-	if (imageData->getPixmapItem() == nullptr)
-		return obs_log(LOG_ERROR, QString("Image data for file: %1 not found!")
-						  .arg(imageData->getImageUrl())
-						  .toStdString()
-						  .c_str());
-
-	if (!useImagePos) {
-		// Place image in center of scene
-		QRectF sceneRect = m_avatarPreviewScene->sceneRect();
-		qreal centerX = sceneRect.width() / 2;
-		qreal centerY = sceneRect.height() / 2;
-
-		auto *imagePixmap = static_cast<QGraphicsPixmapItem *>(imageData->getPixmapItem().data());
-
-		qreal imagePixmapX = centerX - imagePixmap->pixmap().width() / 2;
-		qreal imagePixmapY = centerY - imagePixmap->pixmap().height() / 2;
-
-		imageData->setImagePosition(imagePixmapX, imagePixmapY);
-	}
-	m_avatarPreviewScene->addItem(imageData->getPixmapItem().data());
-
-	QObject::connect(imageData->getPixmapItem().data(), &MovablePixmapItem::positionChanged, this,
-			 &SettingsDialog::handleImageMove);
-
-	centerSceneOnItems();
-}
-
-void SettingsDialog::clearScene()
-{
-	if (m_avatarPreviewScene) {
-		QList<QGraphicsItem *> items = m_avatarPreviewScene->items();
-		for (QGraphicsItem *item : items) {
-			if (dynamic_cast<MovablePixmapItem *>(item)) {
-				m_avatarPreviewScene->removeItem(item);
-			}
-		}
-	}
-}
-
 void SettingsDialog::clearCurrentPoseConfig()
 {
 	for (SettingsWidgetInterface *widget : m_trackingWidgetList)
 		widget->clearSelection();
 
-	clearScene();
+	// clearScene();
 }
 
 void SettingsDialog::loadSelectedPoseConfig()
@@ -487,44 +382,10 @@ void SettingsDialog::loadSelectedPoseConfig()
 
 	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
 	clearCurrentPoseConfig();
-	clearScene();
 
 	for (SettingsWidgetInterface *widget : m_trackingWidgetList) {
-		widget->toggleVisible(true);
 		widget->setData(selectedPose);
-	}
-
-	for (size_t i = 0; i < static_cast<size_t>(PoseImage::COUNT); ++i) {
-		auto poseEnum = static_cast<PoseImage>(i);
-		QString fileName = selectedPose->getPoseImageData(poseEnum)->getImageUrl();
-
-		if (fileName.isEmpty())
-			continue;
-
-		if (!FileExists(fileName)) {
-			obs_log(LOG_WARNING, QString("Image file: %1 not found when loading pose!")
-						     .arg(fileName)
-						     .toStdString()
-						     .c_str());
-			continue;
-		}
-
-		PoseImageData *imageData = selectedPose->getPoseImageData(poseEnum);
-
-		switch (poseEnum) {
-		case PoseImage::BODY:
-			addImageToScene(imageData, true);
-			break;
-		case PoseImage::MOUTHCLOSED:
-			addImageToScene(imageData, true);
-			break;
-		case PoseImage::EYESOPEN:
-			addImageToScene(imageData, true);
-			break;
-
-		default:
-			break;
-		}
+		widget->toggleVisible(true);
 	}
 }
 
@@ -542,25 +403,6 @@ void SettingsDialog::resetPoseUITab()
 	for (SettingsWidgetInterface *widget : m_trackingWidgetList) {
 		widget->toggleVisible(false);
 	}
-}
-
-void SettingsDialog::centerSceneOnItems()
-{
-	if (!m_avatarPreviewScene)
-		return;
-
-	if (m_avatarPreviewScene->items().isEmpty()) {
-		return; // No items to center on
-	}
-
-	// Calculate the bounding rectangle of all items
-	QRectF boundingRect = m_avatarPreviewScene->itemsBoundingRect();
-
-	// Center the view on the center of the bounding rectangle
-	m_ui->avatarGraphicsView->centerOn(boundingRect.center());
-
-	QRectF paddedRect = boundingRect.adjusted(-10, -10, 10, 10);
-	m_ui->avatarGraphicsView->fitInView(paddedRect, Qt::KeepAspectRatio);
 }
 
 //  ------------------------------------------------ Protected ------------------------------------------------
@@ -641,61 +483,6 @@ void SettingsDialog::syncPoseListToModel()
 	}
 	// Reenable signal
 	QObject::connect(m_poseListWidget, &PoseListWidget::rowsInserted, this, &SettingsDialog::onPoseRowsInserted);
-}
-
-void SettingsDialog::handleSetImageUrl(PoseImage poseEnum, QString fileName)
-{
-	int selectedRow = getSelectedRow();
-	if (selectedRow == -1)
-		return;
-
-	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
-
-	auto imageIndex = static_cast<int>(poseEnum);
-
-	formChangeDetected();
-
-	if (selectedPose->getPoseImageAt(imageIndex)->getPixmapItem()) {
-		selectedPose->getPoseImageAt(imageIndex)->clearPixmapItem();
-	}
-
-	QPixmap pixmap(fileName);
-	if (pixmap.isNull()) {
-		obs_log(LOG_WARNING,
-			QString("Failed to load pixmap from file: %1").arg(fileName).toStdString().c_str());
-		selectedPose->getPoseImageAt(imageIndex)->clearPixmapItem();
-		return;
-	}
-
-	selectedPose->getPoseImageAt(imageIndex)
-		->setPixmapItem(QSharedPointer<MovablePixmapItem>(new MovablePixmapItem(pixmap, this, poseEnum)));
-
-	switch (poseEnum) {
-	case PoseImage::BODY:
-	case PoseImage::MOUTHCLOSED:
-	case PoseImage::EYESOPEN:
-		addImageToScene(selectedPose->getPoseImageData(poseEnum));
-		break;
-
-	default:
-		break;
-	}
-}
-
-void SettingsDialog::handleClearImageUrl(int imageIndex)
-{
-	int selectedRow = getSelectedRow();
-	if (selectedRow == -1)
-		return;
-
-	formChangeDetected();
-
-	QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
-	PoseImageData *poseData = selectedPose->getPoseImageAt(imageIndex);
-
-	if (poseData->getPixmapItem()) {
-		poseData->clearPixmapItem();
-	}
 }
 
 void SettingsDialog::onPoseSelected(int rowIndex)
@@ -793,108 +580,5 @@ void SettingsDialog::onPoseRowMoved(int sourceRow, int targetRow)
 	}
 
 	loadSelectedPoseConfig();
-	formChangeDetected();
-}
-
-void SettingsDialog::handleCenterViewButtonClick()
-{
-	centerSceneOnItems();
-}
-
-void SettingsDialog::handleMoveImageUpClick()
-{
-	if (!m_avatarPreviewScene)
-		return;
-
-	if (m_avatarPreviewScene->items().isEmpty() || m_avatarPreviewScene->selectedItems().isEmpty()) {
-		return;
-	}
-
-	qreal maxZIndex = 0;
-	for (QGraphicsItem *item : m_avatarPreviewScene->items()) {
-		maxZIndex = std::max(maxZIndex, item->zValue());
-	}
-
-	int itemsAtMaxZ = 0;
-	for (QGraphicsItem *item : m_avatarPreviewScene->items()) {
-		if (item->zValue() == maxZIndex)
-			itemsAtMaxZ++;
-	}
-
-	obs_log(LOG_INFO, "Max Z Level: %d", static_cast<int>(maxZIndex));
-
-	for (QGraphicsItem *item : m_avatarPreviewScene->selectedItems()) {
-		qreal itemZValue = item->zValue();
-		if (itemZValue < maxZIndex || (itemZValue == maxZIndex && itemsAtMaxZ > 1)) {
-			item->setZValue(item->zValue() + 1);
-		}
-		obs_log(LOG_INFO, "New Z Level: %d", static_cast<int>(item->zValue()));
-	}
-}
-
-void SettingsDialog::handleMoveImageDownClick()
-{
-	if (!m_avatarPreviewScene)
-		return;
-
-	if (m_avatarPreviewScene->items().isEmpty() || m_avatarPreviewScene->selectedItems().isEmpty()) {
-		return;
-	}
-	for (QGraphicsItem *item : m_avatarPreviewScene->selectedItems()) {
-		qreal zIndex = item->zValue();
-		if (zIndex != 0) {
-			item->setZValue(item->zValue() - 1);
-		}
-		obs_log(LOG_INFO, "New Z Level: %d", static_cast<int>(item->zValue()));
-	}
-}
-
-void SettingsDialog::handleImageZoomClick(bool isZoomOut)
-{
-	double zoomScaleFactor = 1.15;
-
-	if (isZoomOut) {
-		m_ui->avatarGraphicsView->scale(1.0 / zoomScaleFactor, 1.0 / zoomScaleFactor);
-	} else {
-		m_ui->avatarGraphicsView->scale(zoomScaleFactor, zoomScaleFactor);
-	}
-}
-
-void SettingsDialog::handleImageMove(qreal x, qreal y, qreal z, PoseImage pImageType)
-{
-	int selectedRow = getSelectedRow();
-
-	obs_log(LOG_INFO, QString("Updated Pose %1: x=%2, y=%3, z=%4").arg(x).arg(y).arg(z).toStdString().c_str());
-
-	if (selectedRow != -1) {
-		QSharedPointer<Pose> selectedPose = m_settingsPoseList[selectedRow];
-		switch (pImageType) {
-		case PoseImage::BODY:
-			selectedPose->setBodyPosition({x, y, z});
-			/* code */
-			break;
-		case PoseImage::MOUTHCLOSED:
-			selectedPose->setMouthPosition({x, y, z});
-			break;
-		case PoseImage::EYESOPEN:
-			selectedPose->setEyesPosition({x, y, z});
-			break;
-
-		default:
-			break;
-		}
-		// Optionally, mark the form as changed
-		formChangeDetected();
-		// Log the update
-		obs_log(LOG_INFO, QString("Updated Pose %1: Type: %2 x=%3, y=%4, z=%5")
-					  .arg(selectedPose->getPoseId())
-					  .arg(poseImageToString(pImageType))
-					  .arg(x)
-					  .arg(y)
-					  .arg(z)
-					  .toStdString()
-					  .c_str());
-	}
-
 	formChangeDetected();
 }
