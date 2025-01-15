@@ -71,8 +71,6 @@ void FaceSettingsWidget::setData(QSharedPointer<Pose> in_pose)
 	toggleBlockAllUISignals(false);
 }
 
-void FaceSettingsWidget::updateStyledUIComponents() {};
-
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void FaceSettingsWidget::connectUISignalHandlers()
