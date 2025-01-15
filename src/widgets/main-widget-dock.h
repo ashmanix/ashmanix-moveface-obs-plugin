@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QMetaType>
 #include <QPushButton>
+#include <QDir>
 
 #include <util/platform.h>
 #include <obs.h>

@@ -66,8 +66,6 @@ void PoseDisplayWidget::updateStyledUIComponents()
 		QIcon centerIcon(centerIconPath);
 		m_ui->centerOnImagesToolButton->setIcon(centerIcon);
 	}
-
-	m_ui->avatarGraphicsView->setStyleSheet("background-color: rgb(0, 0, 0);");
 }
 
 void PoseDisplayWidget::addImageToScene(PoseImageData *imageData, bool useImagePos, bool clearScene)

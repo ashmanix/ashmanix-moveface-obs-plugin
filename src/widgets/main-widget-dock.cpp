@@ -65,16 +65,7 @@ void MainWidgetDock::setupCountdownWidgetUI()
 	m_ui->addTrackerButton->setEnabled(true);
 	m_ui->addTrackerButton->setToolTip(obs_module_text("AddTrackerButtonToolTip"));
 
-	this->setStyleSheet("#dialogMainWidget QDialogButtonBox QPushButton {"
-			    "   width: auto;"
-			    "   height: auto;"
-			    "   padding: 4px 8px;"
-			    "   margin: 0;"
-			    "}"
-			    "#mainTrackerWidget {"
-			    "   border-left: none;"
-			    "   border-right: none;"
-			    "}");
+	this->setStyleSheet(getStyleSheetDataFromFilePath("main-styles.qss"));
 }
 
 void MainWidgetDock::connectUISignalHandlers()

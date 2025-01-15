@@ -71,17 +71,7 @@ void FaceSettingsWidget::setData(QSharedPointer<Pose> in_pose)
 	toggleBlockAllUISignals(false);
 }
 
-void FaceSettingsWidget::updateStyledUIComponents()
-{
-	m_ui->faceSettingsScrollArea->setStyleSheet("QScrollArea {"
-						    "background-color: transparent;"
-						    "}"
-						    "#trackingScrollAreaWidgetContents {"
-						    "background-color: transparent;"
-						    "}");
-	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
-	m_ui->faceSettingsLabel->setStyleSheet("font-weight: bold;");
-}
+void FaceSettingsWidget::updateStyledUIComponents() {};
 
 //  ------------------------------------------------- Private --------------------------------------------------
 
@@ -108,8 +98,8 @@ void FaceSettingsWidget::connectUISignalHandlers()
 
 void FaceSettingsWidget::setupWidgetUI()
 {
-	m_ui->faceSettingsLabel->setText(obs_module_text("DialogFaceSettingsLabel"));
-	m_ui->faceSettingsLabel->setToolTip(obs_module_text("DialogFaceSettingsLabelToolTip"));
+	m_ui->titleLabel->setText(obs_module_text("DialogFaceSettingsLabel"));
+	m_ui->titleLabel->setToolTip(obs_module_text("DialogFaceSettingsLabelToolTip"));
 
 	m_ui->eyesClosedControlLabel->setText(obs_module_text("DialogEyesClosedLabel"));
 	m_ui->eyesHalfOpenControlLabel->setText(obs_module_text("DialogEyesHalfOpenLabel"));

@@ -63,8 +63,8 @@ void PoseListWidget::setupListUI()
 	m_ui->movePoseUpToolButton->setToolTip(obs_module_text("DialogMovePoseUpToolTip"));
 	m_ui->movePoseDownToolButton->setToolTip(obs_module_text("DialogMovePoseDownToolTip"));
 
-	m_ui->poseListLabel->setText(obs_module_text("DialogPoseListLabel"));
-	m_ui->poseListLabel->setToolTip(obs_module_text("DialogPoseListLabelToolTip"));
+	m_ui->titleLabel->setText(obs_module_text("DialogPoseListLabel"));
+	m_ui->titleLabel->setToolTip(obs_module_text("DialogPoseListLabelToolTip"));
 
 	m_poseListModel = new QStandardItemModel(this);
 	m_ui->poseListView->setModel(m_poseListModel);
@@ -115,12 +115,6 @@ void PoseListWidget::updateStyledUIComponents()
 	if (QFileInfo::exists(centerIconPath)) {
 		QIcon centerIcon(centerIconPath);
 	}
-
-	m_ui->poseListView->setStyleSheet("QListView::item {"
-					  "   padding-top: 5px;"
-					  "   padding-bottom: 5px;"
-					  "}");
-	m_ui->poseListLabel->setStyleSheet("font-weight: bold;");
 }
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------

@@ -1,0 +1,36 @@
+#dialogMainWidget QDialogButtonBox QPushButton {
+    width: auto;
+    height: auto;
+    /* padding: 4px 8px; */
+    margin: 0;
+}
+
+#mainTrackerWidget {
+    border-left: none;
+    border-right: none;
+    background: red;
+}
+
+QLabel#noConfigLabel {
+    font-size: 20pt;
+    padding-bottom: 40px;
+}
+
+QToolButton::menu-indicator {
+    image: none;
+    width: 0px;
+    height: 0px;
+}
+
+QLabel#titleLabel {
+    font-weight: bold;
+}
+
+QLabel#errorLabel {
+    color: rgb(192, 0, 0);
+    border-radius: 6px;
+}
+
+AvatarGraphicsView#avatarGraphicsView {
+    background-color: rgb(0, 0, 0);
+}

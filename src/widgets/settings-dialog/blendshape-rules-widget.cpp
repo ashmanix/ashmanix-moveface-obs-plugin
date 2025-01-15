@@ -73,9 +73,6 @@ void BlendshapeRulesWidget::updateStyledUIComponents()
 		QIcon plusIcon(plusIconUrl);
 		m_ui->addBlenshapeRuleToolButton->setIcon(plusIcon);
 	}
-
-	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
-	m_ui->blenshapeRulesLabel->setStyleSheet("font-weight: bold;");
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -96,8 +93,8 @@ void BlendshapeRulesWidget::connectBlendshapeRuleSignalHandlers(SingleBlendshape
 
 void BlendshapeRulesWidget::setupWidgetUI()
 {
-	m_ui->blenshapeRulesLabel->setText(obs_module_text("DialogBlendshapeRulesLabel"));
-	m_ui->blenshapeRulesLabel->setToolTip(obs_module_text("DialogBlendshapeRulesLabelToolTip"));
+	m_ui->titleLabel->setText(obs_module_text("DialogBlendshapeRulesLabel"));
+	m_ui->titleLabel->setToolTip(obs_module_text("DialogBlendshapeRulesLabelToolTip"));
 
 	m_ui->addBlenshapeRuleToolButton->setToolTip(obs_module_text("DialogAddBlendshapeRuleTooltip"));
 

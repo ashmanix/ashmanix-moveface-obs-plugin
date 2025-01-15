@@ -61,3 +61,18 @@ QString getDataFolderPath()
 	bfree(file);
 	return filePath;
 }
+
+QString getStyleSheetDataFromFilePath(QString fileName)
+{
+	QString baseUrl = getDataFolderPath() + "/styles/";
+
+	QString styleSheetPath = QDir::fromNativeSeparators(baseUrl + fileName);
+	QFile stylsheetFile(styleSheetPath);
+	stylsheetFile.open(QFile::ReadOnly);
+	QString styleSheetData = QLatin1String(stylsheetFile.readAll());
+	if (styleSheetData.isEmpty()) {
+		obs_log(LOG_ERROR, "Stylesheet is empty or failed to load.");
+	}
+	obs_log(LOG_INFO, "File path: %s", styleSheetPath.toStdString().c_str());
+	return styleSheetData;
+}

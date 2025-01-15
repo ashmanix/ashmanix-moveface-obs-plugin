@@ -111,16 +111,7 @@ void FaceTracker::setupWidgetUI()
 	ui->menuToolButton->setEnabled(true);
 	ui->menuToolButton->setToolTip(obs_module_text("TrackerSettingsButtonToolTip"));
 
-	ui->menuToolButton->setStyleSheet("QToolButton::menu-indicator {"
-					  "    image: none;"
-					  "    width: 0px;"
-					  "    height: 0px;"
-					  "}");
 	ui->errorLabel->setVisible(false);
-	ui->errorLabel->setStyleSheet("QLabel { "
-				      "  color:  rgb(192, 0, 0); "
-				      "  border-radius: 6px; "
-				      "}");
 
 	ui->mainWidgetFrame->setProperty("class", "bg-base");
 
@@ -279,13 +270,6 @@ void FaceTracker::settingsActionSelected()
 		m_settingsDialogUi = QSharedPointer<SettingsDialog>::create(this, m_trackerData, m_mainDockWidget);
 		QObject::connect(m_settingsDialogUi.data(), &SettingsDialog::settingsUpdated, this,
 				 &FaceTracker::updateTrackerDataFromDialog);
-
-		m_settingsDialogUi->setStyleSheet("QPushButton {"
-						  "   width: auto;"
-						  "   height: auto;"
-						  "   padding: 4px 8px;"
-						  "   margin: 0;"
-						  "}");
 	}
 	if (m_settingsDialogUi->isVisible()) {
 		m_settingsDialogUi->raise();

@@ -42,7 +42,7 @@
        <number>12</number>
       </property>
       <item>
-       <widget class="QLabel" name="faceSettingsLabel">
+       <widget class="QLabel" name="titleLabel">
         <property name="text">
          <string>face settings</string>
         </property>

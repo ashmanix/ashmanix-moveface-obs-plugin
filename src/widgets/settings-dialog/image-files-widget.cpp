@@ -80,16 +80,7 @@ void ImageFilesWidget::updateStyledUIComponents()
 		m_ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
 	}
 
-	m_ui->trackingDialogScrollArea->setStyleSheet("QScrollArea {"
-						      "background-color: transparent;"
-						      "}"
-						      "#trackingScrollAreaWidgetContents {"
-						      "background-color: transparent;"
-						      "}");
-	m_ui->noConfigLabel->setStyleSheet("font-size: 20pt; padding-bottom: 40px;");
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
-
-	m_ui->poseImageLabel->setStyleSheet("font-weight: bold");
 }
 
 void ImageFilesWidget::setData(QSharedPointer<Pose> in_pose)
@@ -156,8 +147,8 @@ void ImageFilesWidget::connectUISignalHandlers()
 
 void ImageFilesWidget::setupWidgetUI()
 {
-	m_ui->poseImageLabel->setText(obs_module_text("DialogPoseImageLabel"));
-	m_ui->poseImageLabel->setToolTip(obs_module_text("DialogPoseImageLabelToolTip"));
+	m_ui->titleLabel->setText(obs_module_text("DialogPoseImageLabel"));
+	m_ui->titleLabel->setToolTip(obs_module_text("DialogPoseImageLabelToolTip"));
 
 	m_ui->bodyUrlLabel->setText(obs_module_text("DialogBodyLabel"));
 	m_ui->eyesOpenUrlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
