@@ -40,7 +40,7 @@ private slots:
 	void processReceivedTrackingData();
 
 private:
-	QTimer *networkTrackingDataRequestTimer = nullptr;
+	QSharedPointer<QTimer> networkTrackingDataRequestTimer = nullptr;
 	const int MAXERRORCOUNT = 3;
 	int networkErrorCount = 0;
 

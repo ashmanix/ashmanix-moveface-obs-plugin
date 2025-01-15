@@ -87,9 +87,6 @@ void NetworkTracking::processReceivedTrackingData()
 
 		udpSocket->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
 
-		// obs_log(LOG_INFO,  (QString("Received datagram from %1 : %1").arg(sender.toString(), senderPort)).toStdString().c_str());
-		// obs_log(LOG_INFO, (QString("Data: %1").arg(datagram)).toStdString().c_str());
-
 		QJsonParseError parseError;
 		QJsonDocument jsonDocument = QJsonDocument::fromJson(datagram.data(), &parseError);
 
@@ -150,8 +147,8 @@ void NetworkTracking::setSendPeriodicData()
 	// We send out the signal periodically as required by vTubeStudio to continue
 	// receiving tracking data
 	if (!networkTrackingDataRequestTimer) {
-		networkTrackingDataRequestTimer = new QTimer();
-		QObject::connect(networkTrackingDataRequestTimer, &QTimer::timeout, this,
+		networkTrackingDataRequestTimer = QSharedPointer<QTimer>::create();
+		QObject::connect(networkTrackingDataRequestTimer.data(), &QTimer::timeout, this,
 				 [this]() { requestTrackingData(destPort, destIpAddress); });
 	}
 	//Reset timer
