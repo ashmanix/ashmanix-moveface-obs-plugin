@@ -18,6 +18,13 @@
 !README.md
 !macos-build-and-run-locally.sh
 
+# Tests
+!/tests/
+!/tests/CMakeLists.txt
+!/tests/unit/
+/tests/build
+/tests/Testing
+
 # Exclude lock files
 *.lock.json
 
