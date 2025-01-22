@@ -16,6 +16,7 @@ Pose::Pose(const Pose &other)
 	  m_eyesHalfOpenLimit(other.m_eyesHalfOpenLimit),
 	  m_eyesOpenLimit(other.m_eyesOpenLimit),
 	  m_mouthOpenLimit(other.m_mouthOpenLimit),
+	  m_smileLimit(other.m_smileLimit),
 	  m_tongueOutLimit(other.m_tongueOutLimit),
 	  m_blendShapesRuleList(other.m_blendShapesRuleList)
 {
@@ -37,6 +38,7 @@ Pose &Pose::operator=(const Pose &other)
 	m_eyesHalfOpenLimit = other.m_eyesHalfOpenLimit;
 	m_eyesOpenLimit = other.m_eyesOpenLimit;
 	m_mouthOpenLimit = other.m_mouthOpenLimit;
+	m_smileLimit = other.m_smileLimit;
 	m_tongueOutLimit = other.m_tongueOutLimit;
 	m_blendShapesRuleList = other.m_blendShapesRuleList;
 
@@ -84,6 +86,11 @@ double Pose::getMouthOpenLimit() const
 	return m_mouthOpenLimit;
 }
 
+double Pose::getSmileLimit() const
+{
+	return m_smileLimit;
+}
+
 double Pose::getTongueOutLimit() const
 {
 	return m_tongueOutLimit;
@@ -128,6 +135,11 @@ void Pose::setEyesOpenLimit(double newLimit)
 void Pose::setMouthOpenLimit(double newLimit)
 {
 	m_mouthOpenLimit = newLimit;
+}
+
+void Pose::setSmileLimit(double newLimit)
+{
+	m_smileLimit = newLimit;
 }
 
 void Pose::setTongueOutLimit(double newLimit)
@@ -209,6 +221,7 @@ QJsonObject Pose::toJson() const
 	obj["eyesHalfOpenLimit"] = m_eyesHalfOpenLimit;
 	obj["eyesOpenLimit"] = m_eyesOpenLimit;
 	obj["mouthOpenLimit"] = m_mouthOpenLimit;
+	obj["smileLimit"] = m_smileLimit;
 	obj["tongueOutLimit"] = m_tongueOutLimit;
 
 	obj["bodyPosition"] = m_bodyPosition.toJson();
@@ -253,6 +266,9 @@ Pose Pose::fromJson(const QJsonObject &obj)
 
 	double mouthOpenLimitObj = obj["mouthOpenLimit"].toDouble();
 	pose.m_mouthOpenLimit = mouthOpenLimitObj;
+
+	double smileLimitObj = obj["smileLimit"].toDouble();
+	pose.m_smileLimit = smileLimitObj;
 
 	double tongueOutLimitObj = obj["tongueOutLimit"].toDouble();
 	pose.m_tongueOutLimit = tongueOutLimitObj;

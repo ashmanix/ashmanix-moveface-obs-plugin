@@ -22,7 +22,7 @@
 #include "../classes/tracking/vtube-studio-data.h"
 #include "../classes/tracking/tracker-data.h"
 #include "./comms/network-tracking.h"
-#include "../classes/poses/pixmap-item.h"
+#include "../classes/poses/movable-pixmap-item.h"
 #include "../ui/ui_FaceTracker.h"
 
 // Forward declarations

@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "../../classes/poses/pixmap-item.h"
+#include "../../classes/poses/movable-pixmap-item.h"
 #include "../../classes/blendshapes/blendshape-key.h"
 #include "../../utils/utils.h"
 #include "../../classes/poses/pose-image-data.h"

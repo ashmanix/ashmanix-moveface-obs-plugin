@@ -80,6 +80,62 @@ void ImageFilesWidget::updateStyledUIComponents()
 		m_ui->tongueOutUrlDeleteToolButton->setIcon(entryClearIcon);
 	}
 
+	QString bodyIconPath = QDir::fromNativeSeparators(baseUrl + "body.svg");
+	if (QFileInfo::exists(bodyIconPath)) {
+		QIcon bodyIcon(bodyIconPath);
+		QPixmap bodyIconPixmap = bodyIcon.pixmap(16, 16);
+		m_ui->bodyUrlLabel->setPixmap(bodyIconPixmap);
+	}
+
+	QString eyeOpenIconPath = QDir::fromNativeSeparators(baseUrl + "eye-open.svg");
+	if (QFileInfo::exists(eyeOpenIconPath)) {
+		QIcon eyeOpenIcon(eyeOpenIconPath);
+		QPixmap eyeOpenIconPixmap = eyeOpenIcon.pixmap(16, 16);
+		m_ui->eyesOpenUrlLabel->setPixmap(eyeOpenIconPixmap);
+	}
+
+	QString eyeHalfOpenIconPath = QDir::fromNativeSeparators(baseUrl + "eye-half-open.svg");
+	if (QFileInfo::exists(eyeHalfOpenIconPath)) {
+		QIcon eyeHalfOpenIcon(eyeHalfOpenIconPath);
+		QPixmap eyeHalfOpenIconPixmap = eyeHalfOpenIcon.pixmap(16, 16);
+		m_ui->eyesHalfOpenUrLabel->setPixmap(eyeHalfOpenIconPixmap);
+	}
+
+	QString eyeClosedIconPath = QDir::fromNativeSeparators(baseUrl + "eye-closed.svg");
+	if (QFileInfo::exists(eyeClosedIconPath)) {
+		QIcon eyeClosedIcon(eyeClosedIconPath);
+		QPixmap eyeClosedIconPixmap = eyeClosedIcon.pixmap(16, 16);
+		m_ui->eyesClosedUrlLabel->setPixmap(eyeClosedIconPixmap);
+	}
+
+	QString mouthOpenIconPath = QDir::fromNativeSeparators(baseUrl + "mouth-open.svg");
+	if (QFileInfo::exists(mouthOpenIconPath)) {
+		QIcon mouthOpenIcon(mouthOpenIconPath);
+		QPixmap mouthOpenIconPixmap = mouthOpenIcon.pixmap(16, 16);
+		m_ui->mouthOpenUrlLabel->setPixmap(mouthOpenIconPixmap);
+	}
+
+	QString mouthClosedIconPath = QDir::fromNativeSeparators(baseUrl + "mouth-closed.svg");
+	if (QFileInfo::exists(mouthClosedIconPath)) {
+		QIcon mouthClosedIcon(mouthClosedIconPath);
+		QPixmap mouthClosedIconPixmap = mouthClosedIcon.pixmap(16, 16);
+		m_ui->mouthClosedUrlLabel->setPixmap(mouthClosedIconPixmap);
+	}
+
+	QString mouthSmileIconPath = QDir::fromNativeSeparators(baseUrl + "smile.svg");
+	if (QFileInfo::exists(mouthSmileIconPath)) {
+		QIcon mouthSmileIcon(mouthSmileIconPath);
+		QPixmap mouthSmileIconPixmap = mouthSmileIcon.pixmap(16, 16);
+		m_ui->mouthSmileUrlLabel->setPixmap(mouthSmileIconPixmap);
+	}
+
+	QString tongueOutIconPath = QDir::fromNativeSeparators(baseUrl + "tongue-out.svg");
+	if (QFileInfo::exists(tongueOutIconPath)) {
+		QIcon tongueOutIcon(tongueOutIconPath);
+		QPixmap tongueOutIconPixmap = tongueOutIcon.pixmap(16, 16);
+		m_ui->tongueOutUrlLabel->setPixmap(tongueOutIconPixmap);
+	}
+
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 }
 

@@ -65,10 +65,71 @@ void FaceSettingsWidget::setData(QSharedPointer<Pose> in_pose)
 	m_ui->mouthOpenSpinBox->setValue(m_pose->getMouthOpenLimit());
 	m_ui->mouthOpenSlider->setValue(m_pose->getMouthOpenLimit() * 1000);
 
+	m_ui->smileSpinBox->setValue(m_pose->getSmileLimit());
+	m_ui->smileSlider->setValue(m_pose->getSmileLimit() * 1000);
+
 	m_ui->tongueOutSpinBox->setValue(m_pose->getTongueOutLimit());
 	m_ui->tongueOutSlider->setValue(m_pose->getTongueOutLimit() * 1000);
 
 	toggleBlockAllUISignals(false);
+}
+
+void FaceSettingsWidget::updateStyledUIComponents()
+{
+	QString baseUrl = obs_frontend_is_theme_dark() ? getDataFolderPath() + "/icons/dark/"
+						       : getDataFolderPath() + "/icons/light/";
+
+	QString eyeClosedIconPath = QDir::fromNativeSeparators(baseUrl + "eye-closed.svg");
+	if (QFileInfo::exists(eyeClosedIconPath)) {
+		QIcon eyeClosedIcon(eyeClosedIconPath);
+		QPixmap eyeClosedIconPixmap = eyeClosedIcon.pixmap(16, 16);
+		m_ui->eyesClosedControlLabel->setPixmap(eyeClosedIconPixmap);
+	}
+
+	QString eyeHalfOpenIconPath = QDir::fromNativeSeparators(baseUrl + "eye-half-open.svg");
+	if (QFileInfo::exists(eyeHalfOpenIconPath)) {
+		QIcon eyeHalfOpenIcon(eyeHalfOpenIconPath);
+		QPixmap eyeHalfOpenIconPixmap = eyeHalfOpenIcon.pixmap(16, 16);
+		m_ui->eyesHalfOpenControlLabel->setPixmap(eyeHalfOpenIconPixmap);
+		m_ui->eyesHalfOpen2ControlLabel->setPixmap(eyeHalfOpenIconPixmap);
+	}
+
+	QString eyeOpenIconPath = QDir::fromNativeSeparators(baseUrl + "eye-open.svg");
+	if (QFileInfo::exists(eyeOpenIconPath)) {
+		QIcon eyeOpenIcon(eyeOpenIconPath);
+		QPixmap eyeOpenIconPixmap = eyeOpenIcon.pixmap(16, 16);
+		m_ui->eyesOpenControlLabel->setPixmap(eyeOpenIconPixmap);
+	}
+
+	QString mouthOpenIconPath = QDir::fromNativeSeparators(baseUrl + "mouth-open.svg");
+	if (QFileInfo::exists(mouthOpenIconPath)) {
+		QIcon mouthOpenIcon(mouthOpenIconPath);
+		QPixmap mouthOpenIconPixmap = mouthOpenIcon.pixmap(16, 16);
+		m_ui->mouthOpenControlLabel->setPixmap(mouthOpenIconPixmap);
+	}
+
+	QString mouthClosedIconPath = QDir::fromNativeSeparators(baseUrl + "mouth-closed.svg");
+	if (QFileInfo::exists(mouthClosedIconPath)) {
+		QIcon mouthClosedIcon(mouthClosedIconPath);
+		QPixmap mouthClosedIconPixmap = mouthClosedIcon.pixmap(16, 16);
+		m_ui->mouthClosedControlLabel->setPixmap(mouthClosedIconPixmap);
+		m_ui->noSmileControlLabel->setPixmap(mouthClosedIconPixmap);
+		m_ui->tongueInControlLabel->setPixmap(mouthClosedIconPixmap);
+	}
+
+	QString smileIconPath = QDir::fromNativeSeparators(baseUrl + "smile.svg");
+	if (QFileInfo::exists(smileIconPath)) {
+		QIcon smileIcon(smileIconPath);
+		QPixmap smileIconPixmap = smileIcon.pixmap(16, 16);
+		m_ui->smileControlLabel->setPixmap(smileIconPixmap);
+	}
+
+	QString tongueOutIconPath = QDir::fromNativeSeparators(baseUrl + "tongue-out.svg");
+	if (QFileInfo::exists(tongueOutIconPath)) {
+		QIcon tongueOutIcon(tongueOutIconPath);
+		QPixmap tongueOutIconPixmap = tongueOutIcon.pixmap(16, 16);
+		m_ui->tongueOutControlLabel->setPixmap(tongueOutIconPixmap);
+	}
 }
 
 //  ------------------------------------------------- Private --------------------------------------------------
@@ -81,6 +142,8 @@ void FaceSettingsWidget::connectUISignalHandlers()
 			 [this](double value) { handleSliderMovement(PoseImage::EYESOPEN, value); });
 	QObject::connect(m_ui->mouthOpenSlider, &QSlider::valueChanged, this,
 			 [this](double value) { handleSliderMovement(PoseImage::MOUTHOPEN, value); });
+	QObject::connect(m_ui->smileSlider, &QSlider::valueChanged, this,
+			 [this](double value) { handleSliderMovement(PoseImage::MOUTHSMILE, value); });
 	QObject::connect(m_ui->tongueOutSlider, &QSlider::valueChanged, this,
 			 [this](double value) { handleSliderMovement(PoseImage::TONGUEOUT, value); });
 
@@ -90,6 +153,8 @@ void FaceSettingsWidget::connectUISignalHandlers()
 			 [this](double value) { handleSpinBoxChange(PoseImage::EYESOPEN, value); });
 	QObject::connect(m_ui->mouthOpenSpinBox, &QDoubleSpinBox::valueChanged, this,
 			 [this](double value) { handleSpinBoxChange(PoseImage::MOUTHOPEN, value); });
+	QObject::connect(m_ui->smileSpinBox, &QDoubleSpinBox::valueChanged, this,
+			 [this](double value) { handleSpinBoxChange(PoseImage::MOUTHSMILE, value); });
 	QObject::connect(m_ui->tongueOutSpinBox, &QDoubleSpinBox::valueChanged, this,
 			 [this](double value) { handleSpinBoxChange(PoseImage::TONGUEOUT, value); });
 }
@@ -105,6 +170,8 @@ void FaceSettingsWidget::setupWidgetUI()
 	m_ui->eyesOpenControlLabel->setText(obs_module_text("DialogEyesOpenLabel"));
 	m_ui->mouthClosedControlLabel->setText(obs_module_text("DialogMouthClosedLabel"));
 	m_ui->mouthOpenControlLabel->setText(obs_module_text("DialogMouthOpenLabel"));
+	m_ui->noSmileControlLabel->setText(obs_module_text("DialogNoSmileLabel"));
+	m_ui->smileControlLabel->setText(obs_module_text("DialogSmileLabel"));
 	m_ui->tongueOutControlLabel->setText(obs_module_text("DialogTongueInLabel"));
 	m_ui->tongueInControlLabel->setText(obs_module_text("DialogTongueOutLabel"));
 
@@ -114,8 +181,10 @@ void FaceSettingsWidget::setupWidgetUI()
 	m_ui->eyesOpenControlLabel->setToolTip(obs_module_text("DialogEyesOpenLabel"));
 	m_ui->mouthClosedControlLabel->setToolTip(obs_module_text("DialogMouthClosedLabel"));
 	m_ui->mouthOpenControlLabel->setToolTip(obs_module_text("DialogMouthOpenLabel"));
-	m_ui->tongueOutControlLabel->setToolTip(obs_module_text("DialogTongueInLabel"));
-	m_ui->tongueInControlLabel->setToolTip(obs_module_text("DialogTongueOutLabel"));
+	m_ui->noSmileControlLabel->setToolTip(obs_module_text("DialogNoSmileLabel"));
+	m_ui->smileControlLabel->setToolTip(obs_module_text("DialogSmileLabel"));
+	m_ui->tongueOutControlLabel->setToolTip(obs_module_text("DialogTongueOutLabel"));
+	m_ui->tongueInControlLabel->setToolTip(obs_module_text("DialogTongueInLabel"));
 
 	m_ui->noConfigLabel->setText(obs_module_text("DialogNoConfigMessage"));
 
@@ -123,11 +192,13 @@ void FaceSettingsWidget::setupWidgetUI()
 	m_faceConfigDoubleSpinBoxes[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSpinBox;
 	m_faceConfigDoubleSpinBoxes[PoseImage::EYESOPEN] = m_ui->eyesOpenSpinBox;
 	m_faceConfigDoubleSpinBoxes[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSpinBox;
+	m_faceConfigDoubleSpinBoxes[PoseImage::MOUTHSMILE] = m_ui->smileSpinBox;
 	m_faceConfigDoubleSpinBoxes[PoseImage::TONGUEOUT] = m_ui->tongueOutSpinBox;
 
 	m_faceConfigSliders[PoseImage::EYESHALFOPEN] = m_ui->eyesHalfOpenSlider;
 	m_faceConfigSliders[PoseImage::EYESOPEN] = m_ui->eyesOpenSlider;
 	m_faceConfigSliders[PoseImage::MOUTHOPEN] = m_ui->mouthOpenSlider;
+	m_faceConfigSliders[PoseImage::MOUTHSMILE] = m_ui->smileSlider;
 	m_faceConfigSliders[PoseImage::TONGUEOUT] = m_ui->tongueOutSlider;
 
 	toggleVisible(false);
@@ -162,6 +233,10 @@ void FaceSettingsWidget::handleBlendshapelimitChange(PoseImage poseEnum, double 
 		break;
 	case PoseImage::MOUTHOPEN:
 		m_pose->setMouthOpenLimit(value);
+		emit blendshapeLimitChanged();
+		break;
+	case PoseImage::MOUTHSMILE:
+		m_pose->setSmileLimit(value);
 		emit blendshapeLimitChanged();
 		break;
 	case PoseImage::TONGUEOUT:

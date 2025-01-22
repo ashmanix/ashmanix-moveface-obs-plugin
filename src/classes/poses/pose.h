@@ -34,6 +34,7 @@ public:
 	double getEyesHalfOpenLimit() const;
 	double getEyesOpenLimit() const;
 	double getMouthOpenLimit() const;
+	double getSmileLimit() const;
 	double getTongueOutLimit() const;
 
 	Vector3 getBodyPosition() const;
@@ -50,6 +51,7 @@ public:
 	void setEyesHalfOpenLimit(double newLimit);
 	void setEyesOpenLimit(double newLimit);
 	void setMouthOpenLimit(double newLimit);
+	void setSmileLimit(double newLimit);
 	void setTongueOutLimit(double newLimit);
 
 	void setPoseId(QString newId);
@@ -71,6 +73,7 @@ private:
 	double m_eyesHalfOpenLimit = 0.4;
 	double m_eyesOpenLimit = 0.7;
 	double m_mouthOpenLimit = 0.5;
+	double m_smileLimit = 0.8;
 	double m_tongueOutLimit = 0.7;
 
 	QMap<QString, QSharedPointer<BlendshapeRule>> m_blendShapesRuleList;

@@ -74,7 +74,6 @@ void TrackerData::setPort(int newPort)
 
 void TrackerData::setIsEnabled(bool isEnabled)
 {
-	obs_log(LOG_INFO, "is enabled: %s", isEnabled ? "true" : "false");
 	m_isEnabled = isEnabled;
 }
 
