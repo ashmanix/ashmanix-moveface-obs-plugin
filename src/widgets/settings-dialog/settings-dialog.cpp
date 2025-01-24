@@ -171,6 +171,9 @@ void SettingsDialog::setupDialogUI(QSharedPointer<TrackerData> settingsDialogDat
 	m_ui->settingsVerticalLayout->addWidget(m_blendshapeRulesWidget);
 	m_ui->poseDisplayVerticalLayout->addWidget(m_poseDisplayWidget);
 
+	m_ui->settingsVerticalLayout->setStretch(0, 6);
+	m_ui->settingsVerticalLayout->setStretch(1, 4);
+
 	updateStyledUIComponents();
 
 	getOBSSourceList();

@@ -64,8 +64,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>1170</width>
-               <height>726</height>
+               <width>221</width>
+               <height>360</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -304,7 +304,7 @@
            <number>5</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="configHorizontalLayout" stretch="10,8,10">
+           <layout class="QHBoxLayout" name="configHorizontalLayout" stretch="10,11,10">
             <property name="spacing">
              <number>5</number>
             </property>
