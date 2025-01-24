@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include "../src/classes/blendshapes/blendshape-key.h"
 
-
 // Include Qt headers
 #include <QString>
 
@@ -69,7 +68,7 @@
 
 //     for (const auto& testCase : testCases) {
 //         QString result = blendshapeKeyToString(testCase.key);
-//         EXPECT_EQ(result, testCase.expectedString) 
+//         EXPECT_EQ(result, testCase.expectedString)
 //             << "Failed for BlendshapeKey: " << static_cast<int>(testCase.key);
 //     }
 // }
@@ -145,7 +144,7 @@
 
 //     for (const auto& testCase : testCases) {
 //         BlendshapeKey result = blendshapeKeyFromString(testCase.str);
-//         EXPECT_EQ(result, testCase.expectedKey) 
+//         EXPECT_EQ(result, testCase.expectedKey)
 //             << "Failed for QString: " << testCase.str.toStdString();
 //     }
 // }
@@ -226,7 +225,7 @@
 //     for (const auto& testCase : testCases) {
 //         QString str = blendshapeKeyToString(testCase.key);
 //         BlendshapeKey key = blendshapeKeyFromString(str);
-//         EXPECT_EQ(key, testCase.key) 
+//         EXPECT_EQ(key, testCase.key)
 //             << "Mismatch in bidirectional mapping for key: " << static_cast<int>(testCase.key);
 //     }
 // }
@@ -293,7 +292,7 @@
 //     for (const auto& testCase : testCases) {
 //         BlendshapeKey key = blendshapeKeyFromString(testCase.str);
 //         QString str = blendshapeKeyToString(key);
-//         EXPECT_EQ(str, testCase.str) 
+//         EXPECT_EQ(str, testCase.str)
 //             << "Mismatch in bidirectional mapping for string: " << testCase.str.toStdString();
 //     }
 // }
