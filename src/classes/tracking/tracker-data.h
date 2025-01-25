@@ -5,6 +5,9 @@
 #include <QList>
 #include <QSharedPointer>
 #include <QJsonDocument>
+#include <QMutex>
+#include <QMutexLocker>
+
 #include <obs.h>
 
 #include "../../plugin-support.h"
@@ -40,6 +43,8 @@ public:
 	void copyListToPoseList(QList<QSharedPointer<Pose>> newList);
 
 private:
+    mutable QMutex m_mutex; // Mutex to protect data
+
 	QString m_trackerId;
 	QString m_selectedImageSource;
 	QString m_destIpAddress = "";

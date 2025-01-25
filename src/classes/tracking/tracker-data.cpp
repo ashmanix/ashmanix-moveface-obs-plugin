@@ -10,80 +10,96 @@ TrackerData::TrackerData(QString trackerId, QString selectedImageSource, QString
 
 QString TrackerData::getTrackerId()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_trackerId;
 }
 
 QString TrackerData::getSelectedImageSource()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_selectedImageSource;
 }
 
 QString TrackerData::getDestinationIpAddress()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_destIpAddress;
 }
 
 int TrackerData::getDestinationPort()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_destPort;
 }
 
 int TrackerData::getPort()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_port;
 }
 
 bool TrackerData::getIsEnabled()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_isEnabled;
 }
 
 QSharedPointer<Pose> TrackerData::getPoseAt(int index)
 {
+	QMutexLocker locker(&m_mutex);
 	return m_poseList[index];
 }
 
 QList<QSharedPointer<Pose>> TrackerData::getPoseList()
 {
+	QMutexLocker locker(&m_mutex);
 	return m_poseList;
 }
 
 void TrackerData::setTrackerId(QString newId)
 {
+	QMutexLocker locker(&m_mutex);
 	m_trackerId = newId;
 }
 
 void TrackerData::setSelectedImageSource(QString newImageSource)
 {
+	QMutexLocker locker(&m_mutex);
 	m_selectedImageSource = newImageSource;
 }
 
 void TrackerData::setDestinationIpAddress(QString newDestIpAddress)
 {
+	QMutexLocker locker(&m_mutex);
 	m_destIpAddress = newDestIpAddress;
 }
 void TrackerData::setDestinationPort(int newDestPort)
 {
+	QMutexLocker locker(&m_mutex);
 	m_destPort = newDestPort;
 }
 
 void TrackerData::setPort(int newPort)
 {
+	QMutexLocker locker(&m_mutex);
 	m_port = newPort;
 }
 
 void TrackerData::setIsEnabled(bool isEnabled)
 {
+	QMutexLocker locker(&m_mutex);
 	m_isEnabled = isEnabled;
 }
 
 void TrackerData::setPoseAt(int index, QSharedPointer<Pose> newPose)
 {
+	QMutexLocker locker(&m_mutex);
 	m_poseList[index] = newPose->clone();
 }
 
 void TrackerData::copyListToPoseList(QList<QSharedPointer<Pose>> newList)
 {
+	QMutexLocker locker(&m_mutex);
 	m_poseList.clear();
 	for (const QSharedPointer<Pose> &posePtr : newList) {
 		if (posePtr) {
@@ -94,7 +110,7 @@ void TrackerData::copyListToPoseList(QList<QSharedPointer<Pose>> newList)
 
 QString TrackerData::poseListToJsonString() const
 {
-
+	QMutexLocker locker(&m_mutex);
 	QJsonObject obj;
 
 	// Convert blendShapesRuleList to a QJsonArray
@@ -115,6 +131,7 @@ QString TrackerData::poseListToJsonString() const
 
 void TrackerData::jsonStringToPoseList(const QString &jsonString)
 {
+	QMutexLocker locker(&m_mutex);
 	QByteArray jsonData = jsonString.toUtf8();
 
 	QJsonParseError parseError;
