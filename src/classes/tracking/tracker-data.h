@@ -20,6 +20,10 @@ public:
 	TrackerData(QString trackerId = "", QString selectedImageSource = "", QString destIpAddress = "");
 	~TrackerData() = default;
 
+    // Implement custom copy constructor and copy assignment
+    TrackerData(const TrackerData& other);
+    TrackerData& operator=(const TrackerData& other);
+
 	QString poseListToJsonString() const;
 	void jsonStringToPoseList(const QString &jsonString);
 
@@ -43,7 +47,7 @@ public:
 	void copyListToPoseList(QList<QSharedPointer<Pose>> newList);
 
 private:
-    mutable QMutex m_mutex; // Mutex to protect data
+	mutable QMutex m_mutex; // Mutex to protect data
 
 	QString m_trackerId;
 	QString m_selectedImageSource;

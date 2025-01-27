@@ -5,9 +5,9 @@
 
 FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock *mDockWidget)
 	: QWidget(parent),
-	  ui(new Ui::FaceTracker)
+	  m_ui(new Ui::FaceTracker)
 {
-	ui->setupUi(this);
+	m_ui->setupUi(this);
 
 	m_mainDockWidget = mDockWidget;
 	m_trackerData = QSharedPointer<TrackerData>::create();
@@ -28,7 +28,11 @@ FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock 
 	connectUISignalHandlers();
 }
 
-FaceTracker::~FaceTracker() {}
+FaceTracker::~FaceTracker()
+{
+	m_trackerWorker->stop();
+	delete m_ui;
+}
 
 QString FaceTracker::getTrackerID()
 {
@@ -40,7 +44,7 @@ void FaceTracker::setTrackerID(const QString &newId)
 	if (!newId.isEmpty()) {
 		m_trackerData->setTrackerId(newId);
 	}
-	ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
+	m_ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
 	this->setProperty("id", m_trackerData->getTrackerId());
 }
 
@@ -104,33 +108,33 @@ void FaceTracker::setupWidgetUI()
 	toolButtonMenu->addAction("Settings", this, &FaceTracker::settingsActionSelected);
 	toolButtonMenu->addSeparator();
 	toolButtonMenu->addAction("Delete", this, &FaceTracker::deleteActionSelected);
-	ui->menuToolButton->setMenu(toolButtonMenu);
-	ui->menuToolButton->setPopupMode(QToolButton::InstantPopup);
-	ui->menuToolButton->setArrowType(Qt::NoArrow);
-	ui->menuToolButton->setText("");
-	ui->menuToolButton->setEnabled(true);
-	ui->menuToolButton->setToolTip(obs_module_text("TrackerSettingsButtonToolTip"));
+	m_ui->menuToolButton->setMenu(toolButtonMenu);
+	m_ui->menuToolButton->setPopupMode(QToolButton::InstantPopup);
+	m_ui->menuToolButton->setArrowType(Qt::NoArrow);
+	m_ui->menuToolButton->setText("");
+	m_ui->menuToolButton->setEnabled(true);
+	m_ui->menuToolButton->setToolTip(obs_module_text("TrackerSettingsButtonToolTip"));
 
-	ui->errorLabel->setVisible(false);
+	m_ui->errorLabel->setVisible(false);
 
-	ui->mainWidgetFrame->setProperty("class", "bg-base");
+	m_ui->mainWidgetFrame->setProperty("class", "bg-base");
 
-	ui->isEnabledCheckBox->setToolTip(obs_module_text("ToggleEnabledTickBoxToolTip"));
+	m_ui->isEnabledCheckBox->setToolTip(obs_module_text("ToggleEnabledTickBoxToolTip"));
 
-	ui->connectionLabel->setFixedSize(12, 12);
+	m_ui->connectionLabel->setFixedSize(12, 12);
 
 	setConnected(false);
 }
 
 void FaceTracker::connectUISignalHandlers()
 {
-	QObject::connect(ui->isEnabledCheckBox, &QCheckBox::stateChanged, this, &FaceTracker::toggleEnabled);
+	QObject::connect(m_ui->isEnabledCheckBox, &QCheckBox::stateChanged, this, &FaceTracker::toggleEnabled);
 }
 
 void FaceTracker::setTrackerData()
 {
-	ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
-	ui->isEnabledCheckBox->setChecked(m_trackerData->getIsEnabled());
+	m_ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
+	m_ui->isEnabledCheckBox->setChecked(m_trackerData->getIsEnabled());
 	loadPoseData();
 }
 
@@ -187,15 +191,15 @@ void FaceTracker::setConnected(bool isConnectedInput)
 	m_isConnected = isConnectedInput;
 
 	if (m_isConnected) {
-		ui->connectionLabel->setStyleSheet("QLabel { "
-						   "  background-color:  rgb(0, 128, 0); "
-						   "  border-radius: 6px; "
-						   "}");
+		m_ui->connectionLabel->setStyleSheet("QLabel { "
+						     "  background-color:  rgb(0, 128, 0); "
+						     "  border-radius: 6px; "
+						     "}");
 	} else {
-		ui->connectionLabel->setStyleSheet("QLabel { "
-						   "  background-color:  rgb(192, 0, 0); "
-						   "  border-radius: 6px; "
-						   "}");
+		m_ui->connectionLabel->setStyleSheet("QLabel { "
+						     "  background-color:  rgb(192, 0, 0); "
+						     "  border-radius: 6px; "
+						     "}");
 	}
 }
 
@@ -203,61 +207,62 @@ void FaceTracker::updateTrackerDataFromDialog(QSharedPointer<TrackerData> newDat
 {
 	if (newData->getDestinationIpAddress() != m_trackerData->getDestinationIpAddress() ||
 	    newData->getDestinationPort() != m_trackerData->getDestinationPort() ||
-	    newData->getPort() != m_trackerData->getPort()) {
+	    newData->getPort() != m_trackerData->getPort() || newData->getPoseList() != m_trackerData->getPoseList()) {
 
 		m_trackerData->setDestinationIpAddress(newData->getDestinationIpAddress());
 		m_trackerData->setDestinationPort(newData->getDestinationPort());
 		m_trackerData->setPort(newData->getPort());
 
+		m_trackerData->copyListToPoseList(newData->getPoseList());
+
 		// Renew connection
-		initiateNetworkTracking();
+		initiateTracking();
 	}
 
 	m_trackerData->setSelectedImageSource(newData->getSelectedImageSource());
-
-	m_trackerData->copyListToPoseList(newData->getPoseList());
-
 	m_mainDockWidget->updateTrackerList(m_trackerData->getTrackerId(), newData->getTrackerId());
 }
 
-void FaceTracker::initiateNetworkTracking()
+void FaceTracker::initiateTracking()
 {
 	if (!m_trackerData->getIsEnabled())
 		return;
 
-	ui->errorLabel->setVisible(false);
-	if (!m_networkTracking) {
-		m_networkTracking = new NetworkTracking(this, m_trackerData->getPort(),
-							m_trackerData->getDestinationIpAddress(),
-							m_trackerData->getDestinationPort());
-		QObject::connect(m_networkTracking, &NetworkTracking::receivedData, this,
-				 &FaceTracker::handleTrackingData);
+	m_ui->errorLabel->setVisible(false);
+	if (!m_trackerWorker) {
+		m_trackerWorker = new TrackerWorker(m_trackerData->getPort(), m_trackerData->getDestinationIpAddress(),
+						    m_trackerData->getDestinationPort(), this);
+		// QObject::connect(m_trackerWorker, &TrackerWorker::receivedData, this,
+		// 		 &FaceTracker::handleTrackingData);
 
-		QObject::connect(m_networkTracking, &NetworkTracking::connectionToggle, this,
-				 &FaceTracker::setConnected);
+		QObject::connect(m_trackerWorker, &TrackerWorker::connectionToggle, this, &FaceTracker::setConnected);
 
-		QObject::connect(m_networkTracking, &NetworkTracking::connectionErrorToggle, this,
+		QObject::connect(m_trackerWorker, &TrackerWorker::errorOccurred, this,
 				 &FaceTracker::toggleConnectionError);
+
+		// Set tracker data for worker
+		m_trackerWorker->start();
 	} else {
-		m_networkTracking->updateConnection(m_trackerData->getPort(), m_trackerData->getDestinationIpAddress(),
-						    m_trackerData->getDestinationPort());
+		m_trackerWorker->updateConnection(m_trackerData->getPort(), m_trackerData->getDestinationIpAddress(),
+						  m_trackerData->getDestinationPort());
 	}
+	m_trackerWorker->updateTrackerData(m_trackerData);
 }
 
 void FaceTracker::enableTimer()
 {
 	m_trackerData->setIsEnabled(true);
-	ui->trackerNameLabel->setEnabled(true);
-	initiateNetworkTracking();
+	m_ui->trackerNameLabel->setEnabled(true);
+	initiateTracking();
 }
 
 void FaceTracker::disableTimer()
 {
 	m_trackerData->setIsEnabled(false);
-	ui->trackerNameLabel->setEnabled(false);
-	if (m_networkTracking) {
-		m_networkTracking->deleteLater();
-		m_networkTracking = nullptr;
+	m_ui->trackerNameLabel->setEnabled(false);
+	if (m_trackerWorker) {
+		m_trackerWorker->finished();
+		m_trackerWorker = nullptr;
 		setConnected(false);
 	}
 }
@@ -306,5 +311,5 @@ void FaceTracker::toggleEnabled(int checkState)
 
 void FaceTracker::toggleConnectionError(bool isError)
 {
-	ui->errorLabel->setVisible(isError);
+	m_ui->errorLabel->setVisible(isError);
 }

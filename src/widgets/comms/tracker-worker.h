@@ -1,42 +1,50 @@
-#ifndef WORKER_H
-#define WORKER_H
+#ifndef TRACKERWORKER_H
+#define TRACKERWORKER_H
 
 #include <QObject>
 #include <QImage>
 #include <QSharedPointer>
 #include <QMutex>
-#include "network-tracking.h" // Ensure this path is correct
-#include "vtube-studio-data.h"  // Include your data class
 
-class Worker : public QObject
+#include "network-tracking.h"
+#include "../../classes/tracking/vtube-studio-data.h"
+#include "../../classes/tracking/tracker-data.h"
+
+
+// The purpose of this tracker worker is to receive data and process pose images
+// on a separate thread to the main UI thread to prevent any lag on the UI
+class TrackerWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit Worker(quint16 port,
+    explicit TrackerWorker(quint16 port,
                     const QString &destIpAddress,
                     quint16 destPort,
                     QObject *parent = nullptr);
-    ~Worker();
+    ~TrackerWorker();
 
 public slots:
-    void start(); // Slot to start the worker
-    void stop();  // Slot to stop the worker
-    void processTrackingData(const VTubeStudioData &data); // Slot to process incoming data
+    void start();
+    void stop();
+    void processTrackingData(const VTubeStudioData &data);
 
     // New slots to update settings
     void updateConnection(quint16 newPort, const QString &newDestIpAddress, quint16 newDestPort);
+    void updateTrackerData(const QSharedPointer<TrackerData> &newTrackerData);
 
 signals:
     void imageReady(const QImage &image); // Signal emitted when image is ready
-    void finished();                       // Signal emitted when worker finishes
-    void errorOccurred(const QString &error); // Signal emitted on error
+    void finished();
+    void errorOccurred(bool isError);
+    void connectionToggle(bool isConnected);
 
 private:
     QSharedPointer<NetworkTracking> networkTracking;
     bool running;
     QMutex m_mutex; // Mutex to protect settings
 
-    // Add any additional private members or helper functions here
+    QSharedPointer<TrackerData> m_trackerData;
+    QSharedPointer<Pose> findAppropriatePose(const VTubeStudioData &data) const;
 };
 
-#endif // WORKER_H
+#endif // TRACKERWORKER_H

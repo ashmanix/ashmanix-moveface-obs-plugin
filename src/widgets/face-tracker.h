@@ -23,6 +23,7 @@
 #include "../classes/tracking/tracker-data.h"
 #include "./comms/network-tracking.h"
 #include "../classes/poses/movable-pixmap-item.h"
+#include "./comms/tracker-worker.h"
 #include "../ui/ui_FaceTracker.h"
 
 // Forward declarations
@@ -45,7 +46,7 @@ public:
 	void updateWidgetStyles();
 
 private:
-	Ui::FaceTracker *ui = nullptr;
+	Ui::FaceTracker *m_ui = nullptr;
 	QSharedPointer<SettingsDialog> m_settingsDialogUi = nullptr;
 
 	QString m_title;
@@ -54,6 +55,7 @@ private:
 	MainWidgetDock *m_mainDockWidget = nullptr;
 
 	NetworkTracking *m_networkTracking = nullptr;
+	TrackerWorker *m_trackerWorker = nullptr;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();
@@ -61,7 +63,7 @@ private:
 	void loadPoseData();
 	void setConnected(bool isConnectedInput);
 	void updateTrackerDataFromDialog(QSharedPointer<TrackerData> newData);
-	void initiateNetworkTracking();
+	void initiateTracking();
 	void enableTimer();
 	void disableTimer();
 

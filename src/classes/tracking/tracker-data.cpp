@@ -8,6 +8,45 @@ TrackerData::TrackerData(QString trackerId, QString selectedImageSource, QString
 {
 }
 
+// Custom copy constructor
+TrackerData::TrackerData(const TrackerData &other)
+{
+	// Lock the source object's mutex to safely copy data
+	QMutexLocker locker(&other.m_mutex);
+
+	// Copy data members
+	this->m_trackerId = other.m_trackerId;
+	this->m_selectedImageSource = other.m_selectedImageSource;
+	this->m_destIpAddress = other.m_destIpAddress;
+	this->m_destPort = other.m_destPort;
+	this->m_port = other.m_port;
+	this->m_isEnabled = other.m_isEnabled;
+	this->m_poseList = other.m_poseList;
+}
+
+// Custom copy assignment operator
+TrackerData &TrackerData::operator=(const TrackerData &other)
+{
+	if (this == &other)
+		return *this; // Handle self-assignment
+
+	// Lock both mutexes to prevent deadlock
+	// Always lock in the same order to avoid deadlocks
+	QMutexLocker lockerThis(&this->m_mutex);
+	QMutexLocker lockerOther(&other.m_mutex);
+
+	// Copy data members
+	this->m_trackerId = other.m_trackerId;
+	this->m_selectedImageSource = other.m_selectedImageSource;
+	this->m_destIpAddress = other.m_destIpAddress;
+	this->m_destPort = other.m_destPort;
+	this->m_port = other.m_port;
+	this->m_isEnabled = other.m_isEnabled;
+	this->m_poseList = other.m_poseList;
+
+	return *this;
+}
+
 QString TrackerData::getTrackerId()
 {
 	QMutexLocker locker(&m_mutex);
