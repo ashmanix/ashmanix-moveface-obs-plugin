@@ -278,7 +278,7 @@
               </widget>
              </item>
              <item row="14" column="0">
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="noSmileZeroLabel">
                <property name="text">
                 <string>0</string>
                </property>
@@ -314,7 +314,7 @@
               </widget>
              </item>
              <item row="14" column="2">
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="smileOneLabel">
                <property name="text">
                 <string>1</string>
                </property>
@@ -406,7 +406,7 @@
               </spacer>
              </item>
              <item row="11" column="2">
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="tongueOutOneLabel">
                <property name="text">
                 <string>1</string>
                </property>
@@ -432,7 +432,7 @@
               </spacer>
              </item>
              <item row="8" column="2">
-              <widget class="QLabel" name="label_3">
+              <widget class="QLabel" name="mouthOpenOneLabel">
                <property name="text">
                 <string>1</string>
                </property>
@@ -482,7 +482,7 @@
               </widget>
              </item>
              <item row="8" column="0">
-              <widget class="QLabel" name="label_2">
+              <widget class="QLabel" name="mouthClosedZeroLabel">
                <property name="text">
                 <string>0</string>
                </property>
@@ -512,7 +512,7 @@
               </widget>
              </item>
              <item row="11" column="0">
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="tongueInZeroLabel">
                <property name="text">
                 <string>0</string>
                </property>
