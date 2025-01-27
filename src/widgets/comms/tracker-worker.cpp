@@ -1,4 +1,5 @@
 #include "tracker-worker.h"
+#include <obs.h>
 #include "plugin-support.h"
 #include "../../classes/poses/pose.h"
 

@@ -10,9 +10,6 @@
 #include "../../classes/tracking/vtube-studio-data.h"
 #include "../../classes/tracking/tracker-data.h"
 
-#include "plugin-support.h"
-#include <obs.h>
-
 // The purpose of this tracker worker is to receive data and process pose images
 // on a separate thread to the main UI thread to prevent any lag on the UI
 class TrackerWorker : public QObject {
