@@ -16,7 +16,7 @@ class TrackerWorker : public QObject {
 	Q_OBJECT
 public:
 	explicit TrackerWorker(quint16 port, const QString &destIpAddress, quint16 destPort, QObject *parent = nullptr);
-	~TrackerWorker();
+	~TrackerWorker() override;
 
 public slots:
 	void start();
@@ -35,7 +35,7 @@ signals:
 
 private:
 	QSharedPointer<NetworkTracking> networkTracking;
-	bool running;
+	bool running = false;
 	QMutex m_mutex; // Mutex to protect settings
 
 	QSharedPointer<TrackerData> m_trackerData;

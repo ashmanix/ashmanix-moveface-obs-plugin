@@ -4,8 +4,7 @@
 #include <obs.h>
 
 TrackerWorker::TrackerWorker(quint16 port, const QString &destIpAddress, quint16 destPort, QObject *parent)
-	: QObject(parent),
-	  running(false)
+	: QObject(parent)
 {
 	// Initialize NetworkTracking without a parent; ownership managed manually
 	networkTracking = QSharedPointer<NetworkTracking>::create(nullptr, port, destIpAddress, destPort);
@@ -13,11 +12,7 @@ TrackerWorker::TrackerWorker(quint16 port, const QString &destIpAddress, quint16
 	// Connect signals from NetworkTracking to Worker slots
 	connect(networkTracking.data(), &NetworkTracking::receivedData, this, &TrackerWorker::processTrackingData);
 
-	connect(networkTracking.data(), &NetworkTracking::connectionErrorToggle, this, [&](bool isError) {
-		if (isError) {
-			emit errorOccurred(isError);
-		}
-	});
+	connect(networkTracking.data(), &NetworkTracking::connectionErrorToggle, this, &TrackerWorker::errorOccurred);
 
 	connect(networkTracking.data(), &NetworkTracking::connectionToggle, this, &TrackerWorker::connectionToggle);
 }

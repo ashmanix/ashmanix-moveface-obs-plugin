@@ -232,8 +232,6 @@ void FaceTracker::initiateTracking()
 	if (!m_trackerWorker) {
 		m_trackerWorker = new TrackerWorker(m_trackerData->getPort(), m_trackerData->getDestinationIpAddress(),
 						    m_trackerData->getDestinationPort(), this);
-		// QObject::connect(m_trackerWorker, &TrackerWorker::receivedData, this,
-		// 		 &FaceTracker::handleTrackingData);
 
 		QObject::connect(m_trackerWorker, &TrackerWorker::connectionToggle, this, &FaceTracker::setConnected);
 

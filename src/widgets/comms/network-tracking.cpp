@@ -9,7 +9,6 @@ NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port, QString in_de
 	  destPort(in_destPort)
 {
 	udpSocket = QSharedPointer<QUdpSocket>::create(this);
-	// startConnection();
 }
 
 NetworkTracking::~NetworkTracking()

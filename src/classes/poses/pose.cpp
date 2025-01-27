@@ -169,7 +169,7 @@ bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendshapes) con
 {
 	// If there are no rules then we automatically return true
 	// to be used by the mnain (resting) pose
-	if (m_blendShapesRuleList.count() == 0)
+	if (m_blendShapesRuleList.isEmpty())
 		return true;
 
 	for (auto i = m_blendShapesRuleList.begin(), end = m_blendShapesRuleList.end(); i != end; i++) {
