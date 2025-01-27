@@ -20,9 +20,9 @@ public:
 	TrackerData(QString trackerId = "", QString selectedImageSource = "", QString destIpAddress = "");
 	~TrackerData() = default;
 
-    // Implement custom copy constructor and copy assignment
-    TrackerData(const TrackerData& other);
-    TrackerData& operator=(const TrackerData& other);
+	// Implement custom copy constructor and copy assignment
+	TrackerData(const TrackerData &other);
+	TrackerData &operator=(const TrackerData &other);
 
 	QString poseListToJsonString() const;
 	void jsonStringToPoseList(const QString &jsonString);

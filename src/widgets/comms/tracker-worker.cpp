@@ -64,13 +64,13 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 		return;
 	}
 
-    QSharedPointer<Pose> selectedPose = findAppropriatePose(data);
-    if (!selectedPose) {
-        obs_log(LOG_WARNING, "No suitable pose found for the received tracking data.");
-        return;
-    }
+	QSharedPointer<Pose> selectedPose = findAppropriatePose(data);
+	if (!selectedPose) {
+		obs_log(LOG_WARNING, "No suitable pose found for the received tracking data.");
+		return;
+	}
 
-    obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
+	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
 
 	// Perform data processing and image composition
 	// Example placeholder for image composition logic
@@ -105,23 +105,23 @@ void TrackerWorker::updateConnection(quint16 newPort, const QString &newDestIpAd
 
 void TrackerWorker::updateTrackerData(const QSharedPointer<TrackerData> &newTrackerData)
 {
-    QMutexLocker locker(&m_mutex);
-    if (newTrackerData) {
-        m_trackerData = newTrackerData;
-        obs_log(LOG_INFO, "TrackerData has been updated in TrackerWorker.");
-    } else {
-        emit errorOccurred("Received null TrackerData.");
-    }
+	QMutexLocker locker(&m_mutex);
+	if (newTrackerData) {
+		m_trackerData = newTrackerData;
+		obs_log(LOG_INFO, "TrackerData has been updated in TrackerWorker.");
+	} else {
+		emit errorOccurred("Received null TrackerData.");
+	}
 }
 
 // ---------------------------------- Private -------------------------------------
 
 QSharedPointer<Pose> TrackerWorker::findAppropriatePose(const VTubeStudioData &data) const
 {
-    for (const QSharedPointer<Pose> &pose : m_trackerData->getPoseList()) {
-        if (pose && pose->shouldUsePose(data.getBlendshapes())) {
-            return pose;
-        }
-    }
-    return QSharedPointer<Pose>();
+	for (const QSharedPointer<Pose> &pose : m_trackerData->getPoseList()) {
+		if (pose && pose->shouldUsePose(data.getBlendshapes())) {
+			return pose;
+		}
+	}
+	return QSharedPointer<Pose>();
 }
