@@ -13,6 +13,9 @@
 
 #include "../../classes/tracking/vtube-studio-data.h"
 
+#include "plugin-support.h"
+#include <obs.h>
+
 class NetworkTracking : public QWidget {
 	Q_OBJECT
 

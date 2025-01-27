@@ -1,7 +1,6 @@
 #include "tracker-worker.h"
 #include "plugin-support.h"
 #include "../../classes/poses/pose.h"
-#include <obs.h>
 
 TrackerWorker::TrackerWorker(quint16 port, const QString &destIpAddress, quint16 destPort, QObject *parent)
 	: QObject(parent)

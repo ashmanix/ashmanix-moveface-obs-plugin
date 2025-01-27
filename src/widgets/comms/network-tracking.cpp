@@ -1,6 +1,4 @@
 #include "network-tracking.h"
-#include "plugin-support.h"
-#include <obs.h>
 
 NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port, QString in_destIpAddress, quint16 in_destPort)
 	: QWidget(parent),
