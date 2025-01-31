@@ -67,18 +67,13 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 
 	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
 
-	// Perform data processing and image composition
-	// Example placeholder for image composition logic
-	QImage composedImage(800, 600, QImage::Format_ARGB32);
-	composedImage.fill(Qt::transparent); // Start with a transparent image
+	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
+	Blendshape mouthOpenBlendshape = bsMap.value(BlendshapeKey::JAWOPEN);
+	Blendshape eyeBlinkBlendshape = bsMap.value(BlendshapeKey::EYEBLINK_L);
+	Blendshape mouthSmileBlendshape = bsMap.value(BlendshapeKey::MOUTHSMILE_L);
 
-	// TODO: Implement your actual image composition using 'data'
-	// For demonstration, we'll just fill it with a solid color based on data
-	if (data.getFaceFound()) {
-		composedImage.fill(Qt::green);
-	} else {
-		composedImage.fill(Qt::red);
-	}
+	QImage composedImage = selectedPose->getPoseImageWithTracking(
+		eyeBlinkBlendshape.m_value, mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
 
 	obs_log(LOG_INFO, "Data received!");
 

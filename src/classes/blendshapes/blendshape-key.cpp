@@ -53,8 +53,7 @@ QString blendshapeKeyToString(BlendshapeKey key)
 		{BlendshapeKey::HEADROLLLEFT, "headRollLeft"},
 		{BlendshapeKey::HEADROLLRIGHT, "headRollRight"},
 		{BlendshapeKey::EYEBLINKLEFT, "EyeBlinkLeft"},
-		{BlendshapeKey::EYEBLINKRIGHT, "EyeBlinkRight"}
-		// Add all other mappings here
+		{BlendshapeKey::EYEBLINKRIGHT, "EyeBlinkRight"} // Add all other mappings here
 	};
 
 	// Attempt to find the key in the map

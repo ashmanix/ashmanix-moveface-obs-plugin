@@ -100,10 +100,12 @@ Vector3 Pose::getBodyPosition() const
 {
 	return m_bodyPosition;
 }
+
 Vector3 Pose::getEyesPosition() const
 {
 	return m_eyesPosition;
 }
+
 Vector3 Pose::getMouthPosition() const
 {
 	return m_mouthPosition;
@@ -151,10 +153,12 @@ void Pose::setBodyPosition(Vector3 newPosition)
 {
 	m_bodyPosition = newPosition;
 }
+
 void Pose::setEyesPosition(Vector3 newPosition)
 {
 	m_eyesPosition = newPosition;
 }
+
 void Pose::setMouthPosition(Vector3 newPosition)
 {
 	m_mouthPosition = newPosition;
@@ -181,6 +185,93 @@ bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendshapes) con
 		}
 	}
 	return false;
+}
+
+QImage Pose::getPoseImageWithTracking(double in_eyeOpenPos = 0.0, double in_mouthOpenPos = 0.0,
+				      double in_mouthSmilePos = 0.0)
+{
+	PoseImageData *bodyImageData = getPoseImageData(PoseImage::BODY);
+	if (!bodyImageData || !bodyImageData->getPixmapItem()) {
+		obs_log(LOG_WARNING, "Body image data is invalid.");
+		return QImage();
+	}
+
+	PoseImage selectedEye = PoseImage::EYESCLOSED;
+	if (in_eyeOpenPos > m_eyesOpenLimit) {
+		selectedEye = PoseImage::EYESOPEN;
+	} else if (in_eyeOpenPos > m_eyesHalfOpenLimit) {
+		selectedEye = PoseImage::EYESHALFOPEN;
+	}
+
+	PoseImageData *eyeImageData = getPoseImageData(selectedEye);
+	if (!eyeImageData || !eyeImageData->getPixmapItem()) {
+		eyeImageData = getPoseImageData(PoseImage::EYESCLOSED);
+		if (!eyeImageData || !eyeImageData->getPixmapItem()) {
+			obs_log(LOG_WARNING, "Eye image data is invalid.");
+		}
+	}
+
+	PoseImage selectedMouth = PoseImage::MOUTHCLOSED;
+	if (in_mouthSmilePos > m_smileLimit) {
+		selectedMouth = PoseImage::MOUTHSMILE;
+	} else if (in_mouthOpenPos > m_mouthOpenLimit) {
+		selectedMouth = PoseImage::MOUTHOPEN;
+	}
+
+	PoseImageData *mouthImageData = getPoseImageData(selectedMouth);
+	if (!mouthImageData || !mouthImageData->getPixmapItem()) {
+		mouthImageData = getPoseImageData(PoseImage::MOUTHCLOSED);
+		if (!mouthImageData || !mouthImageData->getPixmapItem()) {
+			obs_log(LOG_WARNING, "Mouth image data is invalid.");
+		}
+	}
+
+	QSharedPointer<MovablePixmapItem> bodyPixmapItem = bodyImageData->getPixmapItem();
+	QPixmap bodyPixmap = bodyPixmapItem->pixmap();
+	QPointF bodyPos = bodyPixmapItem->pos();
+
+	QSharedPointer<MovablePixmapItem> eyePixmapItem = eyeImageData->getPixmapItem();
+	QPixmap eyePixmap = eyePixmapItem->pixmap();
+	QPointF eyePos = eyePixmapItem->pos();
+
+	QSharedPointer<MovablePixmapItem> mouthPixmapItem = mouthImageData->getPixmapItem();
+	QPixmap mouthPixmap = mouthPixmapItem->pixmap();
+	QPointF mouthPos = mouthPixmapItem->pos();
+
+	QRectF rectBody(bodyPos, bodyPixmap.size());
+	QRectF rectEye(eyePos, eyePixmap.size());
+	QRectF rectMouth(mouthPos, eyePixmap.size());
+
+	QRectF boundingRect = rectBody.united(rectEye).united(rectMouth);
+
+	// Add padding to image
+	const int padding = 10;
+	boundingRect.adjust(-padding, -padding, padding, padding);
+
+	QSize finalSize = boundingRect.size().toSize();
+	if (finalSize.isEmpty()) {
+		obs_log(LOG_WARNING, "Final image size is empty.");
+		return QImage();
+	}
+
+	// Fill image with transparent background
+	QImage finalImage(finalSize, QImage::Format_ARGB32);
+	finalImage.fill(Qt::transparent);
+
+	QPainter painter(&finalImage);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+	QPointF bodyDrawPos = bodyPos - boundingRect.topLeft();
+	QPointF eyeDrawPos = eyePos - boundingRect.topLeft();
+	QPointF mouthDrawPos = mouthPos - boundingRect.topLeft();
+
+	painter.drawPixmap(bodyDrawPos, bodyPixmap);
+	painter.drawPixmap(eyeDrawPos, eyePixmap);
+	painter.drawPixmap(mouthDrawPos, mouthPixmap);
+
+	painter.end();
+	return finalImage;
 }
 
 void Pose::addBlendShapeRule(QSharedPointer<BlendshapeRule> rule)

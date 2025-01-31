@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QSharedPointer>
+#include <QPainter>
 #include <obs.h>
 
 #include "pose-image.h"
@@ -27,6 +28,7 @@ public:
 
 	QSharedPointer<Pose> clone() const;
 	bool shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const;
+	QImage getPoseImageWithTracking(double in_eyeOpenPos, double in_mouthOpenPos, double in_mouthSmilePos);
 
 	QString getPoseId() const;
 	size_t getPoseImageListSize() const;
