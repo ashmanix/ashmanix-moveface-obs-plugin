@@ -129,6 +129,7 @@ void FaceTracker::setupWidgetUI()
 void FaceTracker::connectUISignalHandlers()
 {
 	QObject::connect(m_ui->isEnabledCheckBox, &QCheckBox::stateChanged, this, &FaceTracker::toggleEnabled);
+	QObject::connect(m_trackerWorker, &TrackerWorker::imageReady, this, &FaceTracker::handleDisplayNewImage);
 }
 
 void FaceTracker::setTrackerData()
@@ -291,6 +292,12 @@ void FaceTracker::handleTrackingData(VTubeStudioData data)
 {
 	UNUSED_PARAMETER(data);
 	obs_log(LOG_INFO, "data received!");
+}
+
+void FaceTracker::handleDisplayNewImage(QImage imageData)
+{
+	UNUSED_PARAMETER(imageData);
+	obs_log(LOG_INFO, "Image data received!");
 }
 
 void FaceTracker::toggleEnabled(int checkState)

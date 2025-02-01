@@ -26,7 +26,7 @@ public:
 		  QGraphicsPixmapItem(), // Initialize with an empty QPixmap
 		  m_poseImageType(pImageType)
 	{
-		// Enable the item to be movable and selectable
+		// Enable theœ item to be movable and selectable
 		setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
 	}
 

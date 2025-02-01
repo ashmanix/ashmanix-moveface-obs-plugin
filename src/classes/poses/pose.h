@@ -16,8 +16,6 @@
 #include "../blendshapes/blendshape-rule.h"
 #include "../blendshapes/blendshape.h"
 
-// Forward declarations
-
 class Pose {
 public:
 	Pose();
@@ -28,7 +26,6 @@ public:
 
 	QSharedPointer<Pose> clone() const;
 	bool shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendShapes) const;
-	QImage getPoseImageWithTracking(double in_eyeOpenPos, double in_mouthOpenPos, double in_mouthSmilePos);
 
 	QString getPoseId() const;
 	size_t getPoseImageListSize() const;

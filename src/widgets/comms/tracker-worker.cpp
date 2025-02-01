@@ -72,10 +72,14 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 	Blendshape eyeBlinkBlendshape = bsMap.value(BlendshapeKey::EYEBLINK_L);
 	Blendshape mouthSmileBlendshape = bsMap.value(BlendshapeKey::MOUTHSMILE_L);
 
-	QImage composedImage = selectedPose->getPoseImageWithTracking(
-		eyeBlinkBlendshape.m_value, mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
+	QImage composedImage = getPoseImageWithTracking(selectedPose, eyeBlinkBlendshape.m_value,
+							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
 
 	obs_log(LOG_INFO, "Data received!");
+
+	// Check if empty image and ignore if it is
+	if (composedImage.isNull())
+		return;
 
 	// Emit the composed image to the UI thread
 	emit imageReady(composedImage);
@@ -114,4 +118,124 @@ QSharedPointer<Pose> TrackerWorker::findAppropriatePose(const VTubeStudioData &d
 		}
 	}
 	return QSharedPointer<Pose>();
+}
+
+QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos = 0.0,
+					       double in_mouthOpenPos = 0.0, double in_mouthSmilePos = 0.0)
+{
+
+	double eyeOpenLimit = pose->getEyesOpenLimit();
+	double eyeHalfOpenLimit = pose->getEyesHalfOpenLimit();
+	double mouthOpenLimit = pose->getMouthOpenLimit();
+	double mouthSmileLimit = pose->getSmileLimit();
+
+	PoseImageData *bodyImageData = pose->getPoseImageData(PoseImage::BODY);
+	if (!bodyImageData || !bodyImageData->getPixmapItem()) {
+		obs_log(LOG_WARNING, "Body image data is invalid.");
+		return QImage();
+	}
+
+	PoseImage selectedEye = PoseImage::EYESCLOSED;
+	if (in_eyeOpenPos > eyeOpenLimit) {
+		selectedEye = PoseImage::EYESOPEN;
+	} else if (in_eyeOpenPos > eyeHalfOpenLimit) {
+		selectedEye = PoseImage::EYESHALFOPEN;
+	}
+
+	PoseImage selectedMouth = PoseImage::MOUTHCLOSED;
+	if (in_mouthSmilePos > mouthSmileLimit) {
+		selectedMouth = PoseImage::MOUTHSMILE;
+	} else if (in_mouthOpenPos > mouthOpenLimit) {
+		selectedMouth = PoseImage::MOUTHOPEN;
+	}
+
+	// Before building new image check if image settings matches previous settings
+	// and if there's a match then return empty image
+	PoseImageSettings currentSettings = {pose->getPoseId(), selectedEye, selectedMouth};
+	if (hasPoseChanged(currentSettings))
+		return QImage();
+
+	// We set the new previous pose settings
+	m_previousPose = currentSettings;
+
+	PoseImageData *eyeImageData = pose->getPoseImageData(selectedEye);
+	if (!eyeImageData || !eyeImageData->getPixmapItem()) {
+		eyeImageData = pose->getPoseImageData(PoseImage::EYESCLOSED);
+		if (!eyeImageData || !eyeImageData->getPixmapItem()) {
+			obs_log(LOG_WARNING, "Eye image data is invalid.");
+		}
+	}
+
+	PoseImageData *mouthImageData = pose->getPoseImageData(selectedMouth);
+	if (!mouthImageData || !mouthImageData->getPixmapItem()) {
+		mouthImageData = pose->getPoseImageData(PoseImage::MOUTHCLOSED);
+		if (!mouthImageData || !mouthImageData->getPixmapItem()) {
+			obs_log(LOG_WARNING, "Mouth image data is invalid.");
+		}
+	}
+
+	QSharedPointer<MovablePixmapItem> bodyPixmapItem = bodyImageData->getPixmapItem();
+	if (!bodyPixmapItem)
+		bodyPixmapItem = QSharedPointer<MovablePixmapItem>::create();
+	QPixmap bodyPixmap = bodyPixmapItem->pixmap();
+	QPointF bodyPos = bodyPixmapItem->pos();
+
+	QSharedPointer<MovablePixmapItem> eyePixmapItem = eyeImageData->getPixmapItem();
+	if (!eyePixmapItem)
+		eyePixmapItem = QSharedPointer<MovablePixmapItem>::create();
+	QPixmap eyePixmap = eyePixmapItem->pixmap();
+	QPointF eyePos = eyePixmapItem->pos();
+
+	QSharedPointer<MovablePixmapItem> mouthPixmapItem = mouthImageData->getPixmapItem();
+	if (!mouthPixmapItem)
+		mouthPixmapItem = QSharedPointer<MovablePixmapItem>::create();
+	QPixmap mouthPixmap = mouthPixmapItem->pixmap();
+	QPointF mouthPos = mouthPixmapItem->pos();
+
+	QRectF rectBody(bodyPos, bodyPixmap.size());
+	QRectF rectEye(eyePos, eyePixmap.size());
+	QRectF rectMouth(mouthPos, eyePixmap.size());
+
+	QRectF boundingRect = rectBody.united(rectEye).united(rectMouth);
+
+	// Add padding to image
+	const int padding = 10;
+	boundingRect.adjust(-padding, -padding, padding, padding);
+
+	QSize finalSize = boundingRect.size().toSize();
+	if (finalSize.isEmpty()) {
+		obs_log(LOG_WARNING, "Final image size is empty.");
+		return QImage();
+	}
+
+	// Fill image with transparent background
+	QImage finalImage(finalSize, QImage::Format_ARGB32);
+	finalImage.fill(Qt::transparent);
+
+	QPainter painter(&finalImage);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+	QPointF bodyDrawPos = bodyPos - boundingRect.topLeft();
+	QPointF eyeDrawPos = eyePos - boundingRect.topLeft();
+	QPointF mouthDrawPos = mouthPos - boundingRect.topLeft();
+
+	painter.drawPixmap(bodyDrawPos, bodyPixmap);
+	painter.drawPixmap(eyeDrawPos, eyePixmap);
+	painter.drawPixmap(mouthDrawPos, mouthPixmap);
+
+	painter.end();
+	return finalImage;
+}
+
+bool TrackerWorker::hasPoseChanged(PoseImageSettings imageSettings)
+{
+	bool matchesPreviousVersion = false;
+
+	if (imageSettings.poseId == m_previousPose.poseId &&
+	    imageSettings.eyeBlendshape == m_previousPose.eyeBlendshape &&
+	    imageSettings.mouthBlendshape == m_previousPose.mouthBlendshape)
+		matchesPreviousVersion = true;
+
+	return matchesPreviousVersion;
 }

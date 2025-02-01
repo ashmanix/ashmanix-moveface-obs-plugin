@@ -74,6 +74,7 @@ private slots:
 	void settingsActionSelected();
 	void deleteActionSelected();
 	void handleTrackingData(VTubeStudioData data);
+	void handleDisplayNewImage(QImage imageData);
 	void toggleEnabled(int checkState);
 	void toggleConnectionError(bool isError);
 };

@@ -2,6 +2,7 @@
 #define TRACKERWORKER_H
 
 #include <QObject>
+#include <QList>
 #include <QImage>
 #include <QSharedPointer>
 #include <QMutex>
@@ -9,6 +10,7 @@
 #include "network-tracking.h"
 #include "../../classes/tracking/vtube-studio-data.h"
 #include "../../classes/tracking/tracker-data.h"
+#include "../../classes/poses/pose-image.h"
 
 // The purpose of this tracker worker is to receive data and process pose images
 // on a separate thread to the main UI thread to prevent any lag on the UI
@@ -34,12 +36,23 @@ signals:
 	void connectionToggle(bool isConnected);
 
 private:
+	struct PoseImageSettings {
+		QString poseId = "";
+		PoseImage eyeBlendshape;
+		PoseImage mouthBlendshape;
+	};
+
+	PoseImageSettings m_previousPose;
 	QSharedPointer<NetworkTracking> networkTracking;
 	bool running = false;
 	QMutex m_mutex; // Mutex to protect settings
 
 	QSharedPointer<TrackerData> m_trackerData;
 	QSharedPointer<Pose> findAppropriatePose(const VTubeStudioData &data) const;
+	QImage getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos, double in_mouthOpenPos,
+					double in_mouthSmilePos);
+
+	bool hasPoseChanged(PoseImageSettings imageSettings);
 };
 
 #endif // TRACKERWORKER_H
