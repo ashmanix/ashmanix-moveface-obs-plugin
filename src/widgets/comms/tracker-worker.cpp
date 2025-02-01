@@ -162,7 +162,7 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	if (!eyeImageData || !eyeImageData->getPixmapItem()) {
 		eyeImageData = pose->getPoseImageData(PoseImage::EYESCLOSED);
 		if (!eyeImageData || !eyeImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Eye image data is invalid.");
+			obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s", pose->getPoseId().toStdString().c_str());
 		}
 	}
 
@@ -170,7 +170,7 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	if (!mouthImageData || !mouthImageData->getPixmapItem()) {
 		mouthImageData = pose->getPoseImageData(PoseImage::MOUTHCLOSED);
 		if (!mouthImageData || !mouthImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Mouth image data is invalid.");
+			obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s", pose->getPoseId().toStdString().c_str());
 		}
 	}
 
@@ -204,7 +204,7 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 
 	QSize finalSize = boundingRect.size().toSize();
 	if (finalSize.isEmpty()) {
-		obs_log(LOG_WARNING, "Final image size is empty.");
+		obs_log(LOG_WARNING, "Final image size is empty for pose: %s", pose->getPoseId().toStdString().c_str());
 		return QImage();
 	}
 
@@ -228,7 +228,7 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	return finalImage;
 }
 
-bool TrackerWorker::hasPoseChanged(PoseImageSettings imageSettings)
+bool TrackerWorker::hasPoseChanged(PoseImageSettings &imageSettings)
 {
 	bool matchesPreviousVersion = false;
 

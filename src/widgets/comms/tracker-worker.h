@@ -52,7 +52,7 @@ private:
 	QImage getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos, double in_mouthOpenPos,
 					double in_mouthSmilePos);
 
-	bool hasPoseChanged(PoseImageSettings imageSettings);
+	bool hasPoseChanged(PoseImageSettings &imageSettings);
 };
 
 #endif // TRACKERWORKER_H

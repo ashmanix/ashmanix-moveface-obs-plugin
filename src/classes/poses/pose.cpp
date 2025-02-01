@@ -172,7 +172,7 @@ void Pose::setPoseId(QString newId)
 bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendshapes) const
 {
 	// If there are no rules then we automatically return true
-	// to be used by the mnain (resting) pose
+	// to be used by the main (resting) pose
 	if (m_blendShapesRuleList.isEmpty())
 		return true;
 
