@@ -228,7 +228,7 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	return finalImage;
 }
 
-bool TrackerWorker::hasPoseChanged(PoseImageSettings &imageSettings)
+bool TrackerWorker::hasPoseChanged(PoseImageSettings const &imageSettings)
 {
 	bool matchesPreviousVersion = false;
 
