@@ -162,7 +162,8 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	if (!eyeImageData || !eyeImageData->getPixmapItem()) {
 		eyeImageData = pose->getPoseImageData(PoseImage::EYESCLOSED);
 		if (!eyeImageData || !eyeImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s", pose->getPoseId().toStdString().c_str());
+			obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s",
+				pose->getPoseId().toStdString().c_str());
 		}
 	}
 
@@ -170,7 +171,8 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	if (!mouthImageData || !mouthImageData->getPixmapItem()) {
 		mouthImageData = pose->getPoseImageData(PoseImage::MOUTHCLOSED);
 		if (!mouthImageData || !mouthImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s", pose->getPoseId().toStdString().c_str());
+			obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s",
+				pose->getPoseId().toStdString().c_str());
 		}
 	}
 
