@@ -30,7 +30,7 @@ FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock 
 
 FaceTracker::~FaceTracker()
 {
-	m_trackerWorker->stop();
+	m_trackerWorker = nullptr;
 	delete m_ui;
 }
 
@@ -42,6 +42,10 @@ QString FaceTracker::getTrackerID()
 void FaceTracker::setTrackerID(const QString &newId)
 {
 	if (!newId.isEmpty()) {
+		QString oldId = m_trackerData->getTrackerId();
+		// Delete saved image file using old tracker ID
+		// to ensure we don't end up wth loads of unused image files
+		deleteStoredImageFile(oldId);
 		m_trackerData->setTrackerId(newId);
 	}
 	m_ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
@@ -129,7 +133,6 @@ void FaceTracker::setupWidgetUI()
 void FaceTracker::connectUISignalHandlers()
 {
 	QObject::connect(m_ui->isEnabledCheckBox, &QCheckBox::stateChanged, this, &FaceTracker::toggleEnabled);
-	QObject::connect(m_trackerWorker, &TrackerWorker::imageReady, this, &FaceTracker::handleDisplayNewImage);
 }
 
 void FaceTracker::setTrackerData()
@@ -231,13 +234,18 @@ void FaceTracker::initiateTracking()
 
 	m_ui->errorLabel->setVisible(false);
 	if (!m_trackerWorker) {
-		m_trackerWorker = new TrackerWorker(m_trackerData->getPort(), m_trackerData->getDestinationIpAddress(),
-						    m_trackerData->getDestinationPort(), this);
+		m_trackerWorker = QSharedPointer<TrackerWorker>::create(m_trackerData->getPort(),
+									m_trackerData->getDestinationIpAddress(),
+									m_trackerData->getDestinationPort(), this);
 
-		QObject::connect(m_trackerWorker, &TrackerWorker::connectionToggle, this, &FaceTracker::setConnected);
+		QObject::connect(m_trackerWorker.data(), &TrackerWorker::connectionToggle, this,
+				 &FaceTracker::setConnected);
 
-		QObject::connect(m_trackerWorker, &TrackerWorker::errorOccurred, this,
+		QObject::connect(m_trackerWorker.data(), &TrackerWorker::errorOccurred, this,
 				 &FaceTracker::toggleConnectionError);
+
+		QObject::connect(m_trackerWorker.data(), &TrackerWorker::imageReady, this,
+				 &FaceTracker::handleDisplayNewImage);
 
 		// Set tracker data for worker
 		m_trackerWorker->start();
@@ -260,10 +268,50 @@ void FaceTracker::disableTimer()
 	m_trackerData->setIsEnabled(false);
 	m_ui->trackerNameLabel->setEnabled(false);
 	if (m_trackerWorker) {
-		m_trackerWorker->finished();
+		// m_trackerWorker->finished();
 		m_trackerWorker = nullptr;
 		setConnected(false);
 	}
+}
+
+void FaceTracker::deleteStoredImageFile(QString imageId)
+{
+	if (imageId.isNull())
+		return;
+
+	QString imageFilePath = getImageFilePath(imageId);
+	QFile imageFile(imageFilePath);
+
+	if (QFileInfo::exists(imageFilePath)) {
+		if (!imageFile.remove()) {
+			if (imageFile.error() == QFile::PermissionsError) {
+				obs_log(LOG_ERROR, "Insufficient permissions to delete file: %s",
+					imageFilePath.toStdString().c_str());
+			} else {
+				obs_log(LOG_ERROR, "Error deleting file: %s. Error: %s",
+					imageFilePath.toStdString().c_str(),
+					imageFile.errorString().toStdString().c_str());
+			}
+		}
+
+	} else {
+		obs_log(LOG_WARNING, "Attempting to delete file but file not found: %s",
+			imageFilePath.toStdString().c_str());
+	}
+}
+
+QString FaceTracker::getImageFilePath(QString fileName)
+{
+	// First we sanitise the filename
+	QRegularExpression invalidChars(R"([\\/*?":<>|])");
+	QString cleanFileName = fileName;
+	cleanFileName.replace(invalidChars, "");
+	cleanFileName = cleanFileName.trimmed();
+	cleanFileName = cleanFileName.toLower();
+
+	// Then we create the file path
+	QString filePath = getDataFolderPath() + "/images/" + cleanFileName + ".PNG";
+	return filePath;
 }
 
 // ------------------------------- Private Slots ----------------------------------
@@ -288,16 +336,41 @@ void FaceTracker::deleteActionSelected()
 	emit requestDelete(m_trackerData->getTrackerId());
 }
 
-void FaceTracker::handleTrackingData(VTubeStudioData data)
+void FaceTracker::handleDisplayNewImage(const QImage &imageData)
 {
-	UNUSED_PARAMETER(data);
-	obs_log(LOG_INFO, "data received!");
-}
-
-void FaceTracker::handleDisplayNewImage(QImage imageData)
-{
-	UNUSED_PARAMETER(imageData);
 	obs_log(LOG_INFO, "Image data received!");
+
+	// If we have a source set then we replace the source image with this image
+	QString selectedImageSource = m_trackerData->getSelectedImageSource();
+	if (selectedImageSource.isNull())
+		return;
+
+	QString imageFilePath = getImageFilePath(getTrackerID());
+	QFile imageFile(imageFilePath);
+
+	obs_log(LOG_INFO, "File path: %s", imageFilePath.toStdString().c_str());
+
+	if (!imageData.save(imageFilePath, "PNG")) {
+		obs_log(LOG_ERROR, "Failed to save image to file.");
+		return;
+	}
+
+	// Get the source first
+	std::string tempSourceName = selectedImageSource.toStdString();
+	const char *sourceName = tempSourceName.c_str();
+	obs_source_t *selectedSource = obs_get_source_by_name(sourceName);
+	if (!selectedSource) {
+		obs_log(LOG_ERROR, "Source %s not found", sourceName);
+		return;
+	}
+
+	// Set its image
+	obs_data_t *settings = obs_source_get_settings(selectedSource);
+	obs_data_set_string(settings, "file", imageFilePath.toStdString().c_str());
+
+	obs_source_update(selectedSource, settings);
+	obs_data_release(settings);
+	obs_source_release(selectedSource);
 }
 
 void FaceTracker::toggleEnabled(int checkState)

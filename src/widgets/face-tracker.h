@@ -10,6 +10,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QTimer>
+#include <QFile>
+#include <QTemporaryFile>
 
 #include <obs.h>
 #include <obs.hpp>
@@ -55,7 +57,7 @@ private:
 	MainWidgetDock *m_mainDockWidget = nullptr;
 
 	NetworkTracking *m_networkTracking = nullptr;
-	TrackerWorker *m_trackerWorker = nullptr;
+	QSharedPointer<TrackerWorker> m_trackerWorker;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();
@@ -66,6 +68,8 @@ private:
 	void initiateTracking();
 	void enableTimer();
 	void disableTimer();
+	void deleteStoredImageFile(QString imageId);
+	QString getImageFilePath(QString fileName);
 
 signals:
 	void requestDelete(QString id);
@@ -73,8 +77,7 @@ signals:
 private slots:
 	void settingsActionSelected();
 	void deleteActionSelected();
-	void handleTrackingData(VTubeStudioData data);
-	void handleDisplayNewImage(QImage imageData);
+	void handleDisplayNewImage(const QImage &imageData);
 	void toggleEnabled(int checkState);
 	void toggleConnectionError(bool isError);
 };

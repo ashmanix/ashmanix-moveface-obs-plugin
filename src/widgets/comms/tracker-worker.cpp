@@ -10,11 +10,14 @@ TrackerWorker::TrackerWorker(quint16 port, const QString &destIpAddress, quint16
 	networkTracking = QSharedPointer<NetworkTracking>::create(nullptr, port, destIpAddress, destPort);
 
 	// Connect signals from NetworkTracking to Worker slots
-	connect(networkTracking.data(), &NetworkTracking::receivedData, this, &TrackerWorker::processTrackingData);
+	QObject::connect(networkTracking.data(), &NetworkTracking::receivedData, this,
+			 &TrackerWorker::processTrackingData);
 
-	connect(networkTracking.data(), &NetworkTracking::connectionErrorToggle, this, &TrackerWorker::errorOccurred);
+	QObject::connect(networkTracking.data(), &NetworkTracking::connectionErrorToggle, this,
+			 &TrackerWorker::errorOccurred);
 
-	connect(networkTracking.data(), &NetworkTracking::connectionToggle, this, &TrackerWorker::connectionToggle);
+	QObject::connect(networkTracking.data(), &NetworkTracking::connectionToggle, this,
+			 &TrackerWorker::connectionToggle);
 }
 
 TrackerWorker::~TrackerWorker()
@@ -39,11 +42,7 @@ void TrackerWorker::stop()
 {
 	if (running) {
 		running = false;
-		if (networkTracking) {
-			networkTracking->deleteLater();
-			networkTracking = nullptr;
-		}
-		emit finished();
+		networkTracking = nullptr;
 		obs_log(LOG_INFO, "Tracker worker stopped.");
 	}
 }
@@ -65,7 +64,7 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 		return;
 	}
 
-	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
+	// obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
 
 	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
 	Blendshape mouthOpenBlendshape = bsMap.value(BlendshapeKey::JAWOPEN);
@@ -75,7 +74,7 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 	QImage composedImage = getPoseImageWithTracking(selectedPose, eyeBlinkBlendshape.m_value,
 							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
 
-	obs_log(LOG_INFO, "Data received!");
+	// obs_log(LOG_INFO, "Data received!");
 
 	// Check if empty image and ignore if it is
 	if (composedImage.isNull())
@@ -240,4 +239,29 @@ bool TrackerWorker::hasPoseChanged(PoseImageSettings const &imageSettings)
 		matchesPreviousVersion = true;
 
 	return matchesPreviousVersion;
+}
+
+gs_texture *TrackerWorker::convertToOBSTexture(QImage &image)
+{
+	QImage img = image.convertToFormat(QImage::Format_RGBA8888);
+	int width = img.width();
+	int height = img.height();
+
+	uint8_t *data = new uint8_t[width * height * 4]; // 4 bytes per pixel (RGBA)
+
+	for (int y = 0; y < height; ++y) {
+		for (int x = 0; x < width; ++x) {
+			QColor pixel = img.pixel(x, y);
+			int index = (y * width + x) * 4;
+			data[index] = pixel.red();       // Red
+			data[index + 1] = pixel.green(); // Green
+			data[index + 2] = pixel.blue();  // Blue
+			data[index + 3] = pixel.alpha(); // Alpha
+		}
+	}
+
+	const uint8_t *data_ptr = data;
+
+	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA_UNORM, 1, &data_ptr, 0);
+	return obs_texture;
 }

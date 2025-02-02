@@ -7,6 +7,8 @@
 #include <QSharedPointer>
 #include <QMutex>
 
+#include <obs.h>
+
 #include "network-tracking.h"
 #include "../../classes/tracking/vtube-studio-data.h"
 #include "../../classes/tracking/tracker-data.h"
@@ -31,7 +33,7 @@ public slots:
 
 signals:
 	void imageReady(const QImage &image); // Signal emitted when image is ready
-	void finished();
+	// void finished();
 	void errorOccurred(bool isError);
 	void connectionToggle(bool isConnected);
 
@@ -53,6 +55,7 @@ private:
 					double in_mouthSmilePos);
 
 	bool hasPoseChanged(PoseImageSettings const &imageSettings);
+	gs_texture *convertToOBSTexture(QImage &image);
 };
 
 #endif // TRACKERWORKER_H
