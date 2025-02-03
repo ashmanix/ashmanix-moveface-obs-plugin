@@ -8,6 +8,7 @@
 #include <QMutex>
 
 #include <obs.h>
+#include <graphics/graphics.h>
 
 #include "network-tracking.h"
 #include "../../classes/tracking/vtube-studio-data.h"
