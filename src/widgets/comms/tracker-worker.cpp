@@ -74,8 +74,6 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 	QImage composedImage = getPoseImageWithTracking(selectedPose, eyeBlinkBlendshape.m_value,
 							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
 
-	// obs_log(LOG_INFO, "Data received!");
-
 	// Check if empty image and ignore if it is
 	if (composedImage.isNull())
 		return;

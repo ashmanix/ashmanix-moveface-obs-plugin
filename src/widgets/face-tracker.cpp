@@ -267,7 +267,6 @@ void FaceTracker::disableTimer()
 	m_trackerData->setIsEnabled(false);
 	m_ui->trackerNameLabel->setEnabled(false);
 	if (m_trackerWorker) {
-		// m_trackerWorker->finished();
 		m_trackerWorker = nullptr;
 		setConnected(false);
 	}
@@ -322,7 +321,6 @@ void FaceTracker::handleDisplayNewImage(gs_texture *imageTexture, int width, int
 		obs_source_release(selectedSource);
 		return;
 	}
-	int textureType = gs_get_texture_type(imageTexture);
 	image_source_update_texture(privateData, imageTexture, width, height);
 
 	obs_source_release(selectedSource);

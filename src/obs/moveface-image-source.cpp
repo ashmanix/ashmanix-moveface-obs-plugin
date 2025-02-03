@@ -36,7 +36,7 @@ static const char *image_source_get_name(void *unused)
 
 static void image_source_load_texture(void *data)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 	if (os_atomic_load_bool(&context->texture_loaded))
 		return;
 
@@ -53,13 +53,12 @@ static void image_source_load_texture(void *data)
 
 static void image_source_unload(void *data)
 {
-	struct moveface_image_source *context = (moveface_image_source *)data;
+	auto context = (moveface_image_source *)data;
 	os_atomic_set_bool(&context->file_decoded, false);
 	os_atomic_set_bool(&context->texture_loaded, false);
 
 	obs_enter_graphics();
 	gs_texture_destroy(context->current_texture);
-	// gs_image_file4_free(&context->if4);
 	obs_leave_graphics();
 }
 
@@ -68,15 +67,13 @@ static void image_source_load(struct moveface_image_source *context)
 	image_source_unload(context);
 
 	if (context->current_texture) {
-		// image_source_preload_image(context);
 		image_source_load_texture(context);
 	}
 }
 
 static void image_source_update(void *data, obs_data_t *settings)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
-	// const char *file = obs_data_get_string(settings, "file");
+	auto context = (struct moveface_image_source *)data;
 	const bool unload = obs_data_get_bool(settings, "unload");
 	// const bool linear_alpha = obs_data_get_bool(settings, "linear_alpha");
 	const bool is_slide = obs_data_get_bool(settings, "is_slide");
@@ -103,7 +100,7 @@ static void image_source_defaults(obs_data_t *settings)
 
 static void image_source_show(void *data)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 
 	if (!context->persistent && !context->is_slide)
 		image_source_load(context);
@@ -111,7 +108,7 @@ static void image_source_show(void *data)
 
 static void image_source_hide(void *data)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 
 	if (!context->persistent && !context->is_slide)
 		image_source_unload(context);
@@ -120,16 +117,13 @@ static void image_source_hide(void *data)
 static void image_source_activate(void *data)
 {
 	UNUSED_PARAMETER(data);
-	// struct moveface_image_source *context = (struct moveface_image_source *)data;
-	// context->restart_gif = true;
 }
 
 static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 {
 	UNUSED_PARAMETER(settings);
 
-	struct moveface_image_source *context =
-		(struct moveface_image_source *)bzalloc(sizeof(struct moveface_image_source));
+	auto context = (struct moveface_image_source *)bzalloc(sizeof(struct moveface_image_source));
 	context->source = source;
 	context->texture_width = 0;
 	context->texture_height = 0;
@@ -137,7 +131,6 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 	context->current_texture = nullptr;
 	os_atomic_set_bool(&context->texture_loaded, false);
 
-	// image_source_update(context, settings);
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
 		g_sourceDataMap.insert(source, context);
@@ -148,7 +141,7 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 
 static void image_source_destroy(void *data)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
@@ -162,19 +155,19 @@ static void image_source_destroy(void *data)
 
 static uint32_t image_source_getwidth(void *data)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 	return context->texture_height;
 }
 
 static uint32_t image_source_getheight(void *data)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 	return context->texture_width;
 }
 
 static void image_source_render(void *data, gs_effect_t *effect)
 {
-	struct moveface_image_source *context = (struct moveface_image_source *)data;
+	auto context = (struct moveface_image_source *)data;
 	if (!os_atomic_load_bool(&context->texture_loaded))
 		return;
 
@@ -211,22 +204,45 @@ static obs_properties_t *image_source_properties(void *data)
 }
 
 struct obs_source_info moveface_image_source_info = {
-	.id = "moveface_image_source",
-	.type = OBS_SOURCE_TYPE_INPUT,
-	.output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_SRGB,
-	.get_name = image_source_get_name,
-	.create = image_source_create,
-	.destroy = image_source_destroy,
-	.update = image_source_update,
-	.get_defaults = image_source_defaults,
-	.show = image_source_show,
-	.hide = image_source_hide,
-	.get_width = image_source_getwidth,
-	.get_height = image_source_getheight,
-	.video_render = image_source_render,
-	// .video_tick = image_source_tick,
-	.get_properties = image_source_properties,
-	.icon_type = OBS_ICON_TYPE_IMAGE,
-	.activate = image_source_activate,
-	// .video_get_color_space = image_source_get_color_space,
+	/* id */ "moveface_image_source",
+	/* type */ OBS_SOURCE_TYPE_INPUT,
+	/* output_flags */ OBS_SOURCE_VIDEO | OBS_SOURCE_SRGB,
+	/* get_name */ image_source_get_name,
+	/* create */ image_source_create,
+	/* destroy */ image_source_destroy,
+	/* get_width */ image_source_getwidth,
+	/* get_height */ image_source_getheight,
+	/* get_defaults */ image_source_defaults,
+	/* get_properties */ image_source_properties,
+	/* update */ image_source_update,
+	/* activate */ image_source_activate,
+	/* deactivate */ nullptr,
+	/* show */ image_source_show,
+	/* hide */ image_source_hide,
+	/* video_tick */ nullptr,
+	/* video_render */ image_source_render,
+	/* filter_video */ nullptr,
+	/* filter_audio */ nullptr,
+	/* enim_active_sources */ nullptr,
+	/* video_get_color_space */ nullptr,
+	// For all remaining fields that you do not override, just initialize to 0 or nullptr:
+	/* type_data */ nullptr,
+	/* free_type_data */ nullptr,
+	/* audio_render */ nullptr,
+	/* enum_active_sources */ nullptr,
+	/* save */ nullptr,
+	/* load */ nullptr,
+	/* mouse_click */ nullptr,
+	/* mouse_move */ nullptr,
+	/* mouse_wheel */ nullptr,
+	/* focus */ nullptr,
+	/* key_click */ nullptr,
+	/* filter_remove */ nullptr,
+	// ... (initialize any remaining members to 0 or nullptr)
+	0,       // version
+	nullptr, // unversioned_id
+	nullptr, // missing_files
+	nullptr, // get_defaults2
+	/* icon_type */ OBS_ICON_TYPE_IMAGE,
+	nullptr, // audio_mix
 };
