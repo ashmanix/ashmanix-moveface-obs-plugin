@@ -18,6 +18,7 @@
 #include <obs-frontend-api.h>
 #include <obs-module.h>
 #include <obs-websocket-api.h>
+#include <graphics/graphics.h>
 
 #include "plugin-support.h"
 #include "../utils/utils.h"
