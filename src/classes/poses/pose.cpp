@@ -100,10 +100,12 @@ Vector3 Pose::getBodyPosition() const
 {
 	return m_bodyPosition;
 }
+
 Vector3 Pose::getEyesPosition() const
 {
 	return m_eyesPosition;
 }
+
 Vector3 Pose::getMouthPosition() const
 {
 	return m_mouthPosition;
@@ -151,10 +153,12 @@ void Pose::setBodyPosition(Vector3 newPosition)
 {
 	m_bodyPosition = newPosition;
 }
+
 void Pose::setEyesPosition(Vector3 newPosition)
 {
 	m_eyesPosition = newPosition;
 }
+
 void Pose::setMouthPosition(Vector3 newPosition)
 {
 	m_mouthPosition = newPosition;
@@ -167,6 +171,11 @@ void Pose::setPoseId(QString newId)
 
 bool Pose::shouldUsePose(const QMap<BlendshapeKey, Blendshape> &blendshapes) const
 {
+	// If there are no rules then we automatically return true
+	// to be used by the main (resting) pose
+	if (m_blendShapesRuleList.isEmpty())
+		return true;
+
 	for (auto i = m_blendShapesRuleList.begin(), end = m_blendShapesRuleList.end(); i != end; i++) {
 		auto rule = i.value();
 		if (blendshapes.contains(rule->getKey())) {

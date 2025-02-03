@@ -19,6 +19,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <QMainWindow>
 #include <QSharedPointer>
 
+#include "./obs/moveface-image-source.h"
 #include "widgets/main-widget-dock.h"
 #include <obs-module.h>
 #include <plugin-support.h>
@@ -34,6 +35,9 @@ bool obs_module_load(void)
 	const auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
 	obs_frontend_push_ui_translation(obs_module_get_string);
 	mainWidgetDock = new MainWidgetDock(main_window);
+
+	// Register our custom image source
+	obs_register_source(&moveface_image_source_info);
 
 	obs_frontend_add_dock_by_id("ashmanixMoveFaceWidget", obs_module_text("MoveFace"), mainWidgetDock);
 	obs_frontend_pop_ui_translation();

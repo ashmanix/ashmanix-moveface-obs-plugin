@@ -10,12 +10,15 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QTimer>
+#include <QFile>
+#include <QTemporaryFile>
 
 #include <obs.h>
 #include <obs.hpp>
 #include <obs-frontend-api.h>
 #include <obs-module.h>
 #include <obs-websocket-api.h>
+#include <graphics/graphics.h>
 
 #include "plugin-support.h"
 #include "../utils/utils.h"
@@ -23,6 +26,8 @@
 #include "../classes/tracking/tracker-data.h"
 #include "./comms/network-tracking.h"
 #include "../classes/poses/movable-pixmap-item.h"
+#include "./comms/tracker-worker.h"
+#include "../obs/my-gs-texture-wrapper.h"
 #include "../ui/ui_FaceTracker.h"
 
 // Forward declarations
@@ -45,7 +50,7 @@ public:
 	void updateWidgetStyles();
 
 private:
-	Ui::FaceTracker *ui = nullptr;
+	Ui::FaceTracker *m_ui = nullptr;
 	QSharedPointer<SettingsDialog> m_settingsDialogUi = nullptr;
 
 	QString m_title;
@@ -54,6 +59,7 @@ private:
 	MainWidgetDock *m_mainDockWidget = nullptr;
 
 	NetworkTracking *m_networkTracking = nullptr;
+	QSharedPointer<TrackerWorker> m_trackerWorker;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();
@@ -61,7 +67,7 @@ private:
 	void loadPoseData();
 	void setConnected(bool isConnectedInput);
 	void updateTrackerDataFromDialog(QSharedPointer<TrackerData> newData);
-	void initiateNetworkTracking();
+	void initiateTracking();
 	void enableTimer();
 	void disableTimer();
 
@@ -71,7 +77,7 @@ signals:
 private slots:
 	void settingsActionSelected();
 	void deleteActionSelected();
-	void handleTrackingData(VTubeStudioData data);
+	void handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height);
 	void toggleEnabled(int checkState);
 	void toggleConnectionError(bool isError);
 };

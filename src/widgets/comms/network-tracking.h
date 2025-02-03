@@ -11,12 +11,7 @@
 #include <QTimer>
 #include <QSharedPointer>
 
-#include <obs.h>
-
-#include "plugin-support.h"
 #include "../../classes/tracking/vtube-studio-data.h"
-
-// Forward declarations
 
 class NetworkTracking : public QWidget {
 	Q_OBJECT
@@ -30,6 +25,7 @@ public:
 			      std::optional<quint16> in_destPort = std::nullopt);
 	bool sendUDPData(QString destIpAddress, quint16 destPort, QByteArray data);
 	static QString getIpAddresses();
+	bool startConnection();
 
 signals:
 	void receivedData(VTubeStudioData data);
@@ -60,7 +56,6 @@ private:
 		{"sentBy", "vTuberApp"},
 	};
 
-	bool startConnection();
 	void resetConnectionTimer();
 	void setSendPeriodicData();
 	void requestTrackingData(quint16 destPort, QString destIpAddress);

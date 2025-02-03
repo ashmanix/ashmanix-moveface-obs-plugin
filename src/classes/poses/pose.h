@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QSharedPointer>
+#include <QPainter>
 #include <obs.h>
 
 #include "pose-image.h"
@@ -14,8 +15,6 @@
 #include "../blendshapes/blendshape-key.h"
 #include "../blendshapes/blendshape-rule.h"
 #include "../blendshapes/blendshape.h"
-
-// Forward declarations
 
 class Pose {
 public:

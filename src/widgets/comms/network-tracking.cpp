@@ -1,4 +1,6 @@
 #include "network-tracking.h"
+#include <obs.h>
+#include "plugin-support.h"
 
 NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port, QString in_destIpAddress, quint16 in_destPort)
 	: QWidget(parent),
@@ -7,7 +9,6 @@ NetworkTracking::NetworkTracking(QWidget *parent, quint16 in_port, QString in_de
 	  destPort(in_destPort)
 {
 	udpSocket = QSharedPointer<QUdpSocket>::create(this);
-	startConnection();
 }
 
 NetworkTracking::~NetworkTracking()
@@ -77,6 +78,26 @@ QString NetworkTracking::getIpAddresses()
 	return ipAddresses;
 }
 
+bool NetworkTracking::startConnection()
+{
+
+	if (udpSocket)
+		udpSocket->close();
+
+	if (!udpSocket->bind(QHostAddress::Any, port)) {
+		obs_log(LOG_WARNING, "Failed to bind to port: %d", port);
+		return false;
+	}
+
+	connect(udpSocket.data(), &QUdpSocket::readyRead, this, &NetworkTracking::processReceivedTrackingData);
+
+	resetConnectionTimer();
+	setSendPeriodicData();
+
+	obs_log(LOG_INFO, "Server listening on port: %d", port);
+	return true;
+}
+
 void NetworkTracking::processReceivedTrackingData()
 {
 	while (udpSocket->hasPendingDatagrams()) {
@@ -104,26 +125,6 @@ void NetworkTracking::processReceivedTrackingData()
 			}
 		}
 	}
-}
-
-bool NetworkTracking::startConnection()
-{
-
-	if (udpSocket)
-		udpSocket->close();
-
-	if (!udpSocket->bind(QHostAddress::Any, port)) {
-		obs_log(LOG_WARNING, "Failed to bind to port: %d", port);
-		return false;
-	}
-
-	connect(udpSocket.data(), &QUdpSocket::readyRead, this, &NetworkTracking::processReceivedTrackingData);
-
-	resetConnectionTimer();
-	setSendPeriodicData();
-
-	obs_log(LOG_INFO, "Server listening on port: %d", port);
-	return true;
 }
 
 void NetworkTracking::resetConnectionTimer()
