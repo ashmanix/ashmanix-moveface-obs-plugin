@@ -4,6 +4,7 @@
 #include "../classes/poses/pose.h"
 #include "../obs/moveface-image-source.h"
 #include "../obs/moveface-source-private.h"
+#include <graphics/image-file.h>
 
 FaceTracker::FaceTracker(QWidget *parent, obs_data_t *savedData, MainWidgetDock *mDockWidget)
 	: QWidget(parent),
