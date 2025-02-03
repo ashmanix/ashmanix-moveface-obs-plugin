@@ -14,6 +14,7 @@
 #include "../../classes/tracking/vtube-studio-data.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../classes/poses/pose-image.h"
+#include "../../obs/my-gs-texture-wrapper.h"
 
 // The purpose of this tracker worker is to receive data and process pose images
 // on a separate thread to the main UI thread to prevent any lag on the UI
@@ -33,7 +34,7 @@ public slots:
 	void updateTrackerData(const QSharedPointer<TrackerData> &newTrackerData);
 
 signals:
-	void imageReady(gs_texture *imageTexture, int width, int height); // Signal emitted when image is ready
+	void imageReady(MyGSTextureWrapper *imageTexture, int width, int height); // Signal emitted when image is ready
 	// void finished();
 	void errorOccurred(bool isError);
 	void connectionToggle(bool isConnected);

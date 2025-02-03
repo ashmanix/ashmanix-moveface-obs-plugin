@@ -79,8 +79,13 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 		return;
 
 	struct gs_texture *imageTexture = convertToOBSTexture(composedImage);
+	if (!imageTexture)
+		return;
+
+	MyGSTextureWrapper wrapper(imageTexture);
+
 	// Emit the composed image to the UI thread
-	emit imageReady(imageTexture, composedImage.width(), composedImage.height());
+	emit imageReady(&wrapper, composedImage.width(), composedImage.height());
 }
 
 void TrackerWorker::updateConnection(quint16 newPort, const QString &newDestIpAddress, quint16 newDestPort)

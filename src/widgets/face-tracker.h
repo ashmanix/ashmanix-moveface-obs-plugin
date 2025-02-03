@@ -27,6 +27,7 @@
 #include "./comms/network-tracking.h"
 #include "../classes/poses/movable-pixmap-item.h"
 #include "./comms/tracker-worker.h"
+#include "../obs/my-gs-texture-wrapper.h"
 #include "../ui/ui_FaceTracker.h"
 
 // Forward declarations
@@ -69,8 +70,6 @@ private:
 	void initiateTracking();
 	void enableTimer();
 	void disableTimer();
-	void deleteStoredImageFile(QString imageId);
-	QString getImageFilePath(QString fileName);
 
 signals:
 	void requestDelete(QString id);
@@ -78,7 +77,7 @@ signals:
 private slots:
 	void settingsActionSelected();
 	void deleteActionSelected();
-	void handleDisplayNewImage(gs_texture *imageTexture, int width, int height);
+	void handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height);
 	void toggleEnabled(int checkState);
 	void toggleConnectionError(bool isError);
 };
