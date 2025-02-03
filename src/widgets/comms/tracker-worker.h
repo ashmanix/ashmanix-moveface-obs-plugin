@@ -32,7 +32,7 @@ public slots:
 	void updateTrackerData(const QSharedPointer<TrackerData> &newTrackerData);
 
 signals:
-	void imageReady(const QImage &image); // Signal emitted when image is ready
+	void imageReady(gs_texture *imageTexture, int width, int height); // Signal emitted when image is ready
 	// void finished();
 	void errorOccurred(bool isError);
 	void connectionToggle(bool isConnected);

@@ -358,7 +358,7 @@ int SettingsDialog::checkIfImageSourceType(obs_source_t *source)
 {
 	const char *source_id = obs_source_get_unversioned_id(source);
 
-	if (strcmp(source_id, "image_source") == 0)
+	if (strcmp(source_id, "moveface_image_source") == 0)
 		return true;
 
 	return false;
@@ -489,7 +489,6 @@ void SettingsDialog::syncPoseListToModel()
 void SettingsDialog::onPoseSelected(int rowIndex)
 {
 	UNUSED_PARAMETER(rowIndex);
-	obs_log(LOG_INFO, "Pose selected: %d", rowIndex);
 	loadSelectedPoseConfig();
 }
 

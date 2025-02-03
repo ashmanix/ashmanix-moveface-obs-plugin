@@ -64,7 +64,7 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 		return;
 	}
 
-	// obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
+	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
 
 	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
 	Blendshape mouthOpenBlendshape = bsMap.value(BlendshapeKey::JAWOPEN);
@@ -80,8 +80,9 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 	if (composedImage.isNull())
 		return;
 
+	struct gs_texture *imageTexture = convertToOBSTexture(composedImage);
 	// Emit the composed image to the UI thread
-	emit imageReady(composedImage);
+	emit imageReady(imageTexture, composedImage.width(), composedImage.height());
 }
 
 void TrackerWorker::updateConnection(quint16 newPort, const QString &newDestIpAddress, quint16 newDestPort)
@@ -247,21 +248,16 @@ gs_texture *TrackerWorker::convertToOBSTexture(QImage &image)
 	int width = img.width();
 	int height = img.height();
 
-	uint8_t *data = new uint8_t[width * height * 4]; // 4 bytes per pixel (RGBA)
-
-	for (int y = 0; y < height; ++y) {
-		for (int x = 0; x < width; ++x) {
-			QColor pixel = img.pixel(x, y);
-			int index = (y * width + x) * 4;
-			data[index] = pixel.red();       // Red
-			data[index + 1] = pixel.green(); // Green
-			data[index + 2] = pixel.blue();  // Blue
-			data[index + 3] = pixel.alpha(); // Alpha
-		}
+	if (img.bytesPerLine() != width * 4) {
+		// In rare cases the image may not be tightly packed; you may have to copy.
+		img = img.copy();
 	}
 
-	const uint8_t *data_ptr = data;
+	const uint8_t *data_ptr = img.bits();
 
-	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA_UNORM, 1, &data_ptr, 0);
+	obs_enter_graphics();
+	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA, 1, &data_ptr, 0);
+	obs_leave_graphics();
+
 	return obs_texture;
 }
