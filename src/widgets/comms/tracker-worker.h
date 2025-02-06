@@ -38,6 +38,7 @@ signals:
 	// void finished();
 	void errorOccurred(bool isError);
 	void connectionToggle(bool isConnected);
+	void trackingDataReceived(VTubeStudioData data);
 
 private:
 	struct PoseImageSettings {
@@ -54,7 +55,7 @@ private:
 	QSharedPointer<TrackerData> m_trackerData;
 	QSharedPointer<Pose> findAppropriatePose(const VTubeStudioData &data) const;
 	QImage getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos, double in_mouthOpenPos,
-					double in_mouthSmilePos);
+					double in_mouthSmilePos, double in_tongueOutPos);
 
 	bool hasPoseChanged(PoseImageSettings const &imageSettings);
 	gs_texture *convertToOBSTexture(QImage &image);

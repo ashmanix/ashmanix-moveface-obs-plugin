@@ -11,9 +11,11 @@
 
 #include "plugin-support.h"
 #include "settings-widget-interface.h"
+#include "../../classes/blendshapes/blendshape-key.h"
 #include "../../classes/poses/pose-image.h"
 #include "../../classes/poses/pose.h"
 #include "../../classes/tracking/tracker-data.h"
+#include "../../classes/tracking/vtube-studio-data.h"
 #include "../../ui/settings-dialog/ui_FaceSettingsWidget.h"
 
 class FaceSettingsWidget : public QWidget, public SettingsWidgetInterface {
@@ -26,6 +28,8 @@ public:
 	void toggleVisible(bool isVisible) override;
 	void setData(QSharedPointer<Pose> poseData = nullptr) override;
 	void updateStyledUIComponents() override;
+	void toggleShowTracking(bool shouldShowTracking);
+	void handleTrackingValueChange(VTubeStudioData data);
 
 private:
 	Ui::FaceSettingsWidget *m_ui;
@@ -33,11 +37,14 @@ private:
 	QMap<PoseImage, QDoubleSpinBox *> m_faceConfigDoubleSpinBoxes;
 	QMap<PoseImage, QSlider *> m_faceConfigSliders;
 	bool m_isDataLoading = false;
+	bool m_shouldShowTracking = false;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();
 	void toggleBlockAllUISignals(bool shouldBlock);
 	void handleBlendshapelimitChange(PoseImage poseEnum, double value);
+	QString formatTrackingValueLabel(double value);
+	int formatTrackingValue(double value);
 
 signals:
 	void blendshapeLimitChanged();

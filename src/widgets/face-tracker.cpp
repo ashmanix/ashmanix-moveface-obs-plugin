@@ -193,7 +193,7 @@ void FaceTracker::setConnected(bool isConnectedInput)
 {
 	m_isConnected = isConnectedInput;
 
-	if (m_isConnected) {
+	if (m_isConnected && m_ui) {
 		m_ui->connectionLabel->setStyleSheet("QLabel { "
 						     "  background-color:  rgb(0, 128, 0); "
 						     "  border-radius: 6px; "
@@ -253,6 +253,10 @@ void FaceTracker::initiateTracking()
 						  m_trackerData->getDestinationPort());
 	}
 	m_trackerWorker->updateTrackerData(m_trackerData);
+
+	if (m_settingsDialogUi) {
+		m_settingsDialogUi->updateTrackerWorker(m_trackerWorker);
+	}
 }
 
 void FaceTracker::enableTimer()
@@ -267,6 +271,7 @@ void FaceTracker::disableTimer()
 	m_trackerData->setIsEnabled(false);
 	m_ui->trackerNameLabel->setEnabled(false);
 	if (m_trackerWorker) {
+		m_trackerWorker->stop();
 		m_trackerWorker = nullptr;
 		setConnected(false);
 	}
@@ -277,7 +282,8 @@ void FaceTracker::disableTimer()
 void FaceTracker::settingsActionSelected()
 {
 	if (!m_settingsDialogUi) {
-		m_settingsDialogUi = QSharedPointer<SettingsDialog>::create(this, m_trackerData, m_mainDockWidget);
+		m_settingsDialogUi =
+			QSharedPointer<SettingsDialog>::create(this, m_trackerData, m_mainDockWidget, m_trackerWorker);
 		QObject::connect(m_settingsDialogUi.data(), &SettingsDialog::settingsUpdated, this,
 				 &FaceTracker::updateTrackerDataFromDialog);
 	}
@@ -296,9 +302,6 @@ void FaceTracker::deleteActionSelected()
 
 void FaceTracker::handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height)
 {
-	UNUSED_PARAMETER(imageTexture);
-	UNUSED_PARAMETER(width);
-	UNUSED_PARAMETER(height);
 	obs_log(LOG_INFO, "Image data received!");
 
 	// If we have a source set then we replace the source image with this image

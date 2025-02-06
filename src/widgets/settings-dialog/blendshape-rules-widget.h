@@ -18,6 +18,7 @@
 #include "../../utils/utils.h"
 #include "../../classes/poses/pose.h"
 #include "../../classes/tracking/tracker-data.h"
+#include "../../classes/tracking/vtube-studio-data.h"
 #include "../../ui/settings-dialog/ui_BlendshapeRulesWidget.h"
 
 class BlendshapeRulesWidget : public QWidget, public SettingsWidgetInterface {
@@ -30,6 +31,8 @@ public:
 	void toggleVisible(bool isVisible) override;
 	void setData(QSharedPointer<Pose> in_pose) override;
 	void updateStyledUIComponents() override;
+	void toggleShowTracking(bool shouldBeVisible);
+	void trackingDataUpdate(VTubeStudioData data);
 
 private:
 	Ui::BlendshapeRulesWidget *m_ui;

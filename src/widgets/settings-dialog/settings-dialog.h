@@ -32,16 +32,19 @@
 #include "blendshape-rules-widget.h"
 #include "pose-display-widget.h"
 #include "../../classes/tracking/tracker-data.h"
+#include "../comms/tracker-worker.h"
 #include "../../ui/settings-dialog/ui_FaceTrackerDialog.h"
 
 class SettingsDialog : public QDialog {
 	Q_OBJECT
 public:
 	explicit SettingsDialog(QWidget *parent = nullptr, QSharedPointer<TrackerData> tData = nullptr,
-				MainWidgetDock *mWidget = nullptr);
+				MainWidgetDock *mWidget = nullptr,
+				QSharedPointer<TrackerWorker> trackerWorker = nullptr);
 	~SettingsDialog() override;
 	void setFormDetails(QSharedPointer<TrackerData> settingsDialogData);
 	void updateStyledUIComponents();
+	void updateTrackerWorker(QSharedPointer<TrackerWorker> trackerWorker);
 
 private:
 	Ui::FaceTrackerDialog *m_ui;
@@ -56,6 +59,7 @@ private:
 								 m_blendshapeRulesWidget, m_poseDisplayWidget};
 
 	QSharedPointer<TrackerData> m_trackerData;
+	QSharedPointer<TrackerWorker> m_trackerWorker;
 	bool m_isError = false;
 	QString m_formErrorStyling = "border: 1px solid rgb(192, 0, 0);";
 
@@ -89,6 +93,7 @@ protected:
 
 signals:
 	void settingsUpdated(QSharedPointer<TrackerData> newData);
+	void trackingUpdated(VTubeStudioData data);
 
 private slots:
 	void handleRaisedWindow();
@@ -105,6 +110,9 @@ private slots:
 	void onPoseRowsRemoved(QList<int> rowsList);
 	void onPoseDataChanged(QMap<int, QString> rowMap);
 	void onPoseRowMoved(int sourceRow, int targetRow);
+
+	void handleTrackingDataUpdate(VTubeStudioData data);
+	void handleTrackingConnectionToggle(bool isConnected);
 };
 
 #endif // SETTINGSDIALOG_H

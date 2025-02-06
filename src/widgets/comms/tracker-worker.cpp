@@ -53,6 +53,10 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 		return;
 
 	QMutexLocker locker(&m_mutex);
+
+	// Emit data so that other widgets can read tracking data
+	emit trackingDataReceived(data);
+
 	if (!m_trackerData) {
 		emit errorOccurred("TrackerData is not set.");
 		return;
@@ -68,11 +72,14 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 
 	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
 	Blendshape mouthOpenBlendshape = bsMap.value(BlendshapeKey::JAWOPEN);
+	Blendshape tongueOutBlendshape = bsMap.value(BlendshapeKey::TONGUEOUT);
+	// TODO: Use average of left and right for both eye and mouth smile
 	Blendshape eyeBlinkBlendshape = bsMap.value(BlendshapeKey::EYEBLINK_L);
 	Blendshape mouthSmileBlendshape = bsMap.value(BlendshapeKey::MOUTHSMILE_L);
 
 	QImage composedImage = getPoseImageWithTracking(selectedPose, eyeBlinkBlendshape.m_value,
-							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
+							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value,
+							tongueOutBlendshape.m_value);
 
 	// Check if empty image and ignore if it is
 	if (composedImage.isNull())
@@ -124,13 +131,15 @@ QSharedPointer<Pose> TrackerWorker::findAppropriatePose(const VTubeStudioData &d
 }
 
 QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos = 0.0,
-					       double in_mouthOpenPos = 0.0, double in_mouthSmilePos = 0.0)
+					       double in_mouthOpenPos = 0.0, double in_mouthSmilePos = 0.0,
+					       double in_tongueOutPos = 0.0)
 {
 
 	double eyeOpenLimit = pose->getEyesOpenLimit();
 	double eyeHalfOpenLimit = pose->getEyesHalfOpenLimit();
 	double mouthOpenLimit = pose->getMouthOpenLimit();
 	double mouthSmileLimit = pose->getSmileLimit();
+	double tongueOutLimit = pose->getTongueOutLimit();
 
 	PoseImageData *bodyImageData = pose->getPoseImageData(PoseImage::BODY);
 	if (!bodyImageData || !bodyImageData->getPixmapItem()) {
@@ -146,7 +155,9 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	}
 
 	PoseImage selectedMouth = PoseImage::MOUTHCLOSED;
-	if (in_mouthSmilePos > mouthSmileLimit) {
+	if (in_tongueOutPos > tongueOutLimit) {
+		selectedMouth = PoseImage::TONGUEOUT;
+	} else if (in_mouthSmilePos > mouthSmileLimit) {
 		selectedMouth = PoseImage::MOUTHSMILE;
 	} else if (in_mouthOpenPos > mouthOpenLimit) {
 		selectedMouth = PoseImage::MOUTHOPEN;
