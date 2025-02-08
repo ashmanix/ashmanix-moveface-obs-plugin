@@ -77,7 +77,7 @@ signals:
 private slots:
 	void settingsActionSelected();
 	void deleteActionSelected();
-	void handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height);
+	void handleDisplayNewImage(QImage *image);
 	void toggleEnabled(int checkState);
 	void toggleConnectionError(bool isError);
 };

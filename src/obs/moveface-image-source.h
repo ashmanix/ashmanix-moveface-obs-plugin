@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <mutex>
 
+#include <QImage>
 #include <QMap>
 #include <QMutex>
 #include <QMutexLocker>
@@ -16,14 +17,17 @@
 // Declare the symbol as 'extern' so it can be defined in moveface-image-source.cpp
 extern struct obs_source_info moveface_image_source_info;
 
+const int DEFAULT_TEXTURE_HEIGHT = 400;
+const int DEFAULT_TEXTURE_WIDTH = 400;
+
 struct moveface_image_source {
 	obs_source_t *source;
-	const char *test = "yo";
 
 	gs_texture_t *current_texture;
 
 	// texture dimensions
-	int texture_width, texture_height;
+	int texture_width;
+	int texture_height;
 
 	bool persistent;
 	bool is_slide;
@@ -36,6 +40,7 @@ struct moveface_image_source {
 	volatile bool texture_loaded;
 };
 
-void image_source_update_texture(void *data, gs_texture_t *new_texture, int width, int height);
+// void image_source_update_texture(void *data, gs_texture_t *new_texture, int width, int height);
+void image_source_update_texture(void *data, QImage *new_image);
 
 #endif // MOVEFACEIMAGESOURCE_H

@@ -2,7 +2,24 @@
 #include "moveface-source-private.h"
 #include "../plugin-support.h"
 
-void image_source_update_texture(void *data, gs_texture_t *new_texture, int width, int height)
+gs_texture *convertToOBSTexture(QImage *image)
+{
+	QImage img = image->convertToFormat(QImage::Format_RGBA8888);
+	int width = img.width();
+	int height = img.height();
+
+	if (img.bytesPerLine() != width * 4) {
+		// In rare cases the image may not be tightly packed; you may have to copy.
+		img = img.copy();
+	}
+
+	const uint8_t *data_ptr = img.bits();
+	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA, 1, &data_ptr, 0);
+
+	return obs_texture;
+}
+
+void image_source_update_texture(void *data, QImage *new_image)
 {
 	obs_log(LOG_INFO, "Updating texture!");
 	auto context = (struct moveface_image_source *)data;
@@ -14,11 +31,13 @@ void image_source_update_texture(void *data, gs_texture_t *new_texture, int widt
 		context->current_texture = nullptr;
 	}
 
+	gs_texture *new_texture = convertToOBSTexture(new_image);
+
 	if (new_texture) {
 		// Set the new texture and update dimensions
 		context->current_texture = new_texture;
-		context->texture_width = width;
-		context->texture_height = height;
+		context->texture_width = new_image->width();
+		context->texture_height = new_image->height();
 		os_atomic_set_bool(&context->texture_loaded, true);
 	} else {
 		os_atomic_set_bool(&context->texture_loaded, false);
@@ -36,6 +55,7 @@ static const char *image_source_get_name(void *unused)
 
 static void image_source_load_texture(void *data)
 {
+	obs_log(LOG_INFO, "Loading MoveFace Texture");
 	auto context = (struct moveface_image_source *)data;
 	if (os_atomic_load_bool(&context->texture_loaded))
 		return;
@@ -125,14 +145,15 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 
 	auto context = (struct moveface_image_source *)bzalloc(sizeof(struct moveface_image_source));
 	context->source = source;
-	context->texture_width = 0;
-	context->texture_height = 0;
+	context->texture_height = DEFAULT_TEXTURE_HEIGHT;
+	context->texture_width = DEFAULT_TEXTURE_WIDTH;
 	context->source = source;
 	context->current_texture = nullptr;
 	os_atomic_set_bool(&context->texture_loaded, false);
 
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
+		// We keep a list of sources data separately
 		g_sourceDataMap.insert(source, context);
 	}
 
@@ -145,6 +166,7 @@ static void image_source_destroy(void *data)
 
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
+		// Remove source from source data list
 		g_sourceDataMap.remove(context->source);
 	}
 

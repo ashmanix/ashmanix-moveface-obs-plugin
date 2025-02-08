@@ -34,7 +34,7 @@ public slots:
 	void updateTrackerData(const QSharedPointer<TrackerData> &newTrackerData);
 
 signals:
-	void imageReady(MyGSTextureWrapper *imageTexture, int width, int height); // Signal emitted when image is ready
+	void imageReady(QImage *image); // Signal emitted when image is ready
 	// void finished();
 	void errorOccurred(bool isError);
 	void connectionToggle(bool isConnected);
@@ -58,7 +58,6 @@ private:
 					double in_mouthSmilePos, double in_tongueOutPos);
 
 	bool hasPoseChanged(PoseImageSettings const &imageSettings);
-	gs_texture *convertToOBSTexture(QImage &image);
 };
 
 #endif // TRACKERWORKER_H

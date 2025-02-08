@@ -300,7 +300,7 @@ void FaceTracker::deleteActionSelected()
 	emit requestDelete(m_trackerData->getTrackerId());
 }
 
-void FaceTracker::handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height)
+void FaceTracker::handleDisplayNewImage(QImage *image)
 {
 	obs_log(LOG_INFO, "Image data received!");
 
@@ -324,7 +324,7 @@ void FaceTracker::handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int wi
 		obs_source_release(selectedSource);
 		return;
 	}
-	image_source_update_texture(privateData, imageTexture->get(), width, height);
+	image_source_update_texture(privateData, image);
 
 	obs_source_release(selectedSource);
 }
