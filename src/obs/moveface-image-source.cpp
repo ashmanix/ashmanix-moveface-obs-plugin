@@ -1,6 +1,9 @@
 #include "moveface-image-source.h"
 #include "moveface-source-private.h"
 #include "../plugin-support.h"
+#include "../utils/utils.h"
+#include <QString>
+#include <QFile>
 
 gs_texture *convertToOBSTexture(QImage *image)
 {
@@ -17,6 +20,19 @@ gs_texture *convertToOBSTexture(QImage *image)
 	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA, 1, &data_ptr, 0);
 
 	return obs_texture;
+}
+
+QImage getNoPoseImage()
+{
+	QString filePath =
+		QDir::fromNativeSeparators(getDataFolderPath() + QStringLiteral("/images/") + NO_POSE_FILE_NAME);
+	if (QFileInfo::exists(filePath)) {
+		QImage noPoseImage(filePath);
+		return noPoseImage;
+	} else {
+		obs_log(LOG_WARNING, "Could not find no pose image");
+	}
+	return QImage();
 }
 
 void image_source_update_texture(void *data, QImage *new_image)
@@ -78,17 +94,16 @@ static void image_source_unload(void *data)
 	os_atomic_set_bool(&context->texture_loaded, false);
 
 	obs_enter_graphics();
-	gs_texture_destroy(context->current_texture);
+	if (context->current_texture) {
+		gs_texture_destroy(context->current_texture);
+		context->current_texture = nullptr;
+	}
 	obs_leave_graphics();
 }
 
 static void image_source_load(struct moveface_image_source *context)
 {
-	image_source_unload(context);
-
-	if (context->current_texture) {
-		image_source_load_texture(context);
-	}
+	image_source_load_texture(context);
 }
 
 static void image_source_update(void *data, obs_data_t *settings)
@@ -149,7 +164,12 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 	context->texture_width = DEFAULT_TEXTURE_WIDTH;
 	context->source = source;
 	context->current_texture = nullptr;
+
 	os_atomic_set_bool(&context->texture_loaded, false);
+
+	QImage noPoseImage = getNoPoseImage();
+	if (!noPoseImage.isNull())
+		image_source_update_texture(context, &noPoseImage);
 
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
@@ -178,13 +198,13 @@ static void image_source_destroy(void *data)
 static uint32_t image_source_getwidth(void *data)
 {
 	auto context = (struct moveface_image_source *)data;
-	return context->texture_height;
+	return context->texture_width;
 }
 
 static uint32_t image_source_getheight(void *data)
 {
 	auto context = (struct moveface_image_source *)data;
-	return context->texture_width;
+	return context->texture_height;
 }
 
 static void image_source_render(void *data, gs_effect_t *effect)

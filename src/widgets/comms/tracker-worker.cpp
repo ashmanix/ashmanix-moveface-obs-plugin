@@ -85,12 +85,6 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 	if (composedImage.isNull())
 		return;
 
-	// struct gs_texture *imageTexture = convertToOBSTexture(composedImage);
-	// if (!imageTexture)
-	// 	return;
-
-	// MyGSTextureWrapper wrapper(imageTexture);
-
 	// Emit the composed image to the UI thread
 	emit imageReady(&composedImage);
 }
@@ -255,23 +249,3 @@ bool TrackerWorker::hasPoseChanged(PoseImageSettings const &imageSettings)
 
 	return matchesPreviousVersion;
 }
-
-// gs_texture *TrackerWorker::convertToOBSTexture(QImage &image)
-// {
-// 	QImage img = image.convertToFormat(QImage::Format_RGBA8888);
-// 	int width = img.width();
-// 	int height = img.height();
-
-// 	if (img.bytesPerLine() != width * 4) {
-// 		// In rare cases the image may not be tightly packed; you may have to copy.
-// 		img = img.copy();
-// 	}
-
-// 	const uint8_t *data_ptr = img.bits();
-
-// 	obs_enter_graphics();
-// 	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA, 1, &data_ptr, 0);
-// 	obs_leave_graphics();
-
-// 	return obs_texture;
-// }

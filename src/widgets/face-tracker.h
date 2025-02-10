@@ -27,7 +27,6 @@
 #include "./comms/network-tracking.h"
 #include "../classes/poses/movable-pixmap-item.h"
 #include "./comms/tracker-worker.h"
-#include "../obs/my-gs-texture-wrapper.h"
 #include "../ui/ui_FaceTracker.h"
 
 // Forward declarations
