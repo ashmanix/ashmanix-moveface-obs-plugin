@@ -66,6 +66,7 @@ private:
 	void loadPoseData();
 	void setConnected(bool isConnectedInput);
 	void updateTrackerDataFromDialog(QSharedPointer<TrackerData> newData);
+	void setImageSourcePositionToCenter(QString sourceName);
 	void initiateTracking();
 	void enableTimer();
 	void disableTimer();

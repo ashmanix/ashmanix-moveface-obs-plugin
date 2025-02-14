@@ -13,6 +13,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QPainter>
 
 // Declare the symbol as 'extern' so it can be defined in moveface-image-source.cpp
 extern struct obs_source_info moveface_image_source_info;

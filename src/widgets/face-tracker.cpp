@@ -223,7 +223,29 @@ void FaceTracker::updateTrackerDataFromDialog(QSharedPointer<TrackerData> newDat
 	}
 
 	m_trackerData->setSelectedImageSource(newData->getSelectedImageSource());
+
+	// We set the image source alignment to center so all poses are centered on each other
+	setImageSourcePositionToCenter(newData->getSelectedImageSource());
+
 	m_mainDockWidget->updateTrackerList(m_trackerData->getTrackerId(), newData->getTrackerId());
+}
+
+// Set image source position to center
+void FaceTracker::setImageSourcePositionToCenter(QString sourceName)
+{
+	obs_source_t *current_scene = obs_frontend_get_current_scene();
+	if (!current_scene)
+		return;
+
+	obs_sceneitem_t *item =
+		obs_scene_find_source(obs_scene_from_source(current_scene), sourceName.toStdString().c_str());
+
+	if (item) {
+		obs_sceneitem_set_alignment(item, OBS_ALIGN_CENTER);
+		obs_sceneitem_release(item);
+	}
+
+	obs_source_release(current_scene);
 }
 
 void FaceTracker::initiateTracking()
@@ -302,8 +324,6 @@ void FaceTracker::deleteActionSelected()
 
 void FaceTracker::handleDisplayNewImage(QImage *image)
 {
-	obs_log(LOG_INFO, "Image data received!");
-
 	// If we have a source set then we replace the source image with this image
 	QString selectedImageSource = m_trackerData->getSelectedImageSource();
 	if (selectedImageSource.isNull())

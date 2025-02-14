@@ -54,6 +54,7 @@ private:
 
 	QSharedPointer<TrackerData> m_trackerData;
 	QMap<BlendshapeKey, KalmanFilter> m_blendshapeFilters;
+	QImage cachedImage;
 	QSharedPointer<Pose> findAppropriatePose(const VTubeStudioData &data) const;
 	QImage getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos, double in_mouthOpenPos,
 					double in_mouthSmilePos, double in_tongueOutPos);

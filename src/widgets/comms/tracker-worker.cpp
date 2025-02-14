@@ -71,8 +71,6 @@ void TrackerWorker::processTrackingData(VTubeStudioData &data)
 		return;
 	}
 
-	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
-
 	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
 	Blendshape mouthOpenBlendshape = bsMap.value(BlendshapeKey::JAWOPEN);
 	Blendshape tongueOutBlendshape = bsMap.value(BlendshapeKey::TONGUEOUT);
@@ -87,6 +85,13 @@ void TrackerWorker::processTrackingData(VTubeStudioData &data)
 	// Check if empty image and ignore if it is
 	if (composedImage.isNull())
 		return;
+
+	if (cachedImage == composedImage)
+		return;
+
+	cachedImage = composedImage;
+
+	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
 
 	// Emit the composed image to the UI thread
 	emit imageReady(&composedImage);
@@ -172,19 +177,19 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	PoseImageData *eyeImageData = pose->getPoseImageData(selectedEye);
 	if (!eyeImageData || !eyeImageData->getPixmapItem()) {
 		eyeImageData = pose->getPoseImageData(PoseImage::EYESCLOSED);
-		if (!eyeImageData || !eyeImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s",
-				pose->getPoseId().toStdString().c_str());
-		}
+		// if (!eyeImageData || !eyeImageData->getPixmapItem()) {
+		// 	obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s",
+		// 		pose->getPoseId().toStdString().c_str());
+		// }
 	}
 
 	PoseImageData *mouthImageData = pose->getPoseImageData(selectedMouth);
 	if (!mouthImageData || !mouthImageData->getPixmapItem()) {
 		mouthImageData = pose->getPoseImageData(PoseImage::MOUTHCLOSED);
-		if (!mouthImageData || !mouthImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s",
-				pose->getPoseId().toStdString().c_str());
-		}
+		// if (!mouthImageData || !mouthImageData->getPixmapItem()) {
+		// 	obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s",
+		// 		pose->getPoseId().toStdString().c_str());
+		// }
 	}
 
 	QSharedPointer<MovablePixmapItem> bodyPixmapItem = bodyImageData->getPixmapItem();

@@ -35,9 +35,38 @@ QImage getNoPoseImage()
 	return QImage();
 }
 
+// Crop out transparent pixels around the image.
+QImage cropTransparentArea(QImage *image)
+{
+	int left = image->width();
+	int right = 0;
+	int top = image->height();
+	int bottom = 0;
+
+	// Scan every pixel.
+	for (int y = 0; y < image->height(); ++y) {
+		for (int x = 0; x < image->width(); ++x) {
+			QColor color = image->pixelColor(x, y);
+			// Check if pixel is not fully transparent.
+			if (color.alpha() > 0) {
+				left = qMin(left, x);
+				right = qMax(right, x);
+				top = qMin(top, y);
+				bottom = qMax(bottom, y);
+			}
+		}
+	}
+
+	// If no non-transparent pixel is found, return an empty image or the original.
+	if (right < left || bottom < top)
+		return QImage();
+
+	// Copy the region that contains all non-transparent pixels.
+	return image->copy(left, top, right - left + 1, bottom - top + 1);
+}
+
 void image_source_update_texture(void *data, QImage *new_image)
 {
-	obs_log(LOG_INFO, "Updating texture!");
 	auto context = (struct moveface_image_source *)data;
 
 	obs_enter_graphics();
@@ -47,13 +76,15 @@ void image_source_update_texture(void *data, QImage *new_image)
 		context->current_texture = nullptr;
 	}
 
-	gs_texture *new_texture = convertToOBSTexture(new_image);
+	QImage cropped_image = cropTransparentArea(new_image);
+
+	gs_texture *new_texture = convertToOBSTexture(&cropped_image);
 
 	if (new_texture) {
 		// Set the new texture and update dimensions
 		context->current_texture = new_texture;
-		context->texture_width = new_image->width();
-		context->texture_height = new_image->height();
+		context->texture_width = cropped_image.width();
+		context->texture_height = cropped_image.height();
 		os_atomic_set_bool(&context->texture_loaded, true);
 	} else {
 		os_atomic_set_bool(&context->texture_loaded, false);
@@ -71,7 +102,6 @@ static const char *image_source_get_name(void *unused)
 
 static void image_source_load_texture(void *data)
 {
-	obs_log(LOG_INFO, "Loading MoveFace Texture");
 	auto context = (struct moveface_image_source *)data;
 	if (os_atomic_load_bool(&context->texture_loaded))
 		return;
