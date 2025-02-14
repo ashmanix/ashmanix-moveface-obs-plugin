@@ -53,8 +53,7 @@ QString blendshapeKeyToString(BlendshapeKey key)
 		{BlendshapeKey::HEADROLLLEFT, "headRollLeft"},
 		{BlendshapeKey::HEADROLLRIGHT, "headRollRight"},
 		{BlendshapeKey::EYEBLINKLEFT, "EyeBlinkLeft"},
-		{BlendshapeKey::EYEBLINKRIGHT, "EyeBlinkRight"} // Add all other mappings here
-	};
+		{BlendshapeKey::EYEBLINKRIGHT, "EyeBlinkRight"}};
 
 	// Attempt to find the key in the map
 	if (auto it = blendshapeMap.find(key); it != blendshapeMap.end()) {
@@ -68,6 +67,7 @@ QString blendshapeKeyToString(BlendshapeKey key)
 BlendshapeKey blendshapeKeyFromString(const QString &str)
 {
 	static const std::unordered_map<QString, BlendshapeKey> mapping = {
+		// vTubeStudio blendshape names
 		{"browOuterUp_L", BlendshapeKey::BROWOUTERUP_L},
 		{"browInnerUp_L", BlendshapeKey::BROWINNERUP_L},
 		{"browDown_L", BlendshapeKey::BROWDOWN_L},
@@ -118,6 +118,40 @@ BlendshapeKey blendshapeKeyFromString(const QString &str)
 		{"headRollRight", BlendshapeKey::HEADROLLRIGHT},
 		{"EyeBlinkLeft", BlendshapeKey::EYEBLINKLEFT},
 		{"EyeBlinkRight", BlendshapeKey::EYEBLINKRIGHT},
+
+		//MeowFace blendshape names
+		{"browOuterUpLeft", BlendshapeKey::BROWOUTERUP_L},
+		{"browInnerUpLeft", BlendshapeKey::BROWINNERUP_L},
+		{"browDownLeft", BlendshapeKey::BROWDOWN_L},
+		{"eyeBlinkLeft", BlendshapeKey::EYEBLINK_L},
+		{"eyeSquintLeft", BlendshapeKey::EYESQUINT_L},
+		{"eyeWideLeft", BlendshapeKey::EYEWIDE_L},
+		{"eyeLookUpLeft", BlendshapeKey::EYELOOKUP_L},
+		{"eyeLookOutLeft", BlendshapeKey::EYELOOKOUT_L},
+		{"eyeLookInLeft", BlendshapeKey::EYELOOKIN_L},
+		{"eyeLookDownLeft", BlendshapeKey::EYELOOKDOWN_L},
+		{"noseSneerLeft", BlendshapeKey::NOSESNEER_L},
+		{"mouthUpperUpLeft", BlendshapeKey::MOUTHUPPERUP_L},
+		{"mouthSmileLeft", BlendshapeKey::MOUTHSMILE_L},
+		{"mouthFrownLeft", BlendshapeKey::MOUTHFROWN_L},
+		{"mouthLowerDownLeft", BlendshapeKey::MOUTHLOWERDOWN_L},
+		{"mouthLowerDownRight", BlendshapeKey::MOUTHLOWERDOWN_R},
+		{"mouthFrownRight", BlendshapeKey::MOUTHFROWN_R},
+		{"mouthSmileRight", BlendshapeKey::MOUTHSMILE_R},
+		{"mouthUpperUpRight", BlendshapeKey::MOUTHUPPERUP_R},
+		{"noseSneerRight", BlendshapeKey::NOSESNEER_R},
+		{"eyeLookDownRight", BlendshapeKey::EYELOOKDOWN_R},
+		{"eyeLookInRight", BlendshapeKey::EYELOOKIN_R},
+		{"eyeLookOutRight", BlendshapeKey::EYELOOKOUT_R},
+		{"eyeLookUpRight", BlendshapeKey::EYELOOKUP_R},
+		{"eyeWideRight", BlendshapeKey::EYEWIDE_R},
+		{"eyeSquintRight", BlendshapeKey::EYESQUINT_R},
+		{"eyeBlinkRight", BlendshapeKey::EYEBLINK_R},
+		{"browDownRight", BlendshapeKey::BROWDOWN_R},
+		{"browInnerUpRight", BlendshapeKey::BROWINNERUP_R},
+		{"browOuterUpRight", BlendshapeKey::BROWOUTERUP_R},
+		{"eyeBlinkLeft", BlendshapeKey::EYEBLINKLEFT},
+		{"eyeBlinkRight", BlendshapeKey::EYEBLINKRIGHT},
 	};
 
 	if (auto it = mapping.find(str); it != mapping.end()) {

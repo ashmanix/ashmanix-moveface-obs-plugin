@@ -47,12 +47,15 @@ void TrackerWorker::stop()
 	}
 }
 
-void TrackerWorker::processTrackingData(const VTubeStudioData &data)
+void TrackerWorker::processTrackingData(VTubeStudioData &data)
 {
 	if (!running)
 		return;
 
 	QMutexLocker locker(&m_mutex);
+
+	// Use Kalman filters to smoothen blendshape changes
+	smoothenBlendshapeData(data);
 
 	// Emit data so that other widgets can read tracking data
 	emit trackingDataReceived(data);
@@ -248,4 +251,26 @@ bool TrackerWorker::hasPoseChanged(PoseImageSettings const &imageSettings)
 		matchesPreviousVersion = true;
 
 	return matchesPreviousVersion;
+}
+
+void TrackerWorker::smoothenBlendshapeData(VTubeStudioData &data)
+{
+	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
+	for (auto it = bsMap.begin(); it != bsMap.end(); ++it) {
+		BlendshapeKey key = it.key();
+		Blendshape blendshape = it.value();
+		float rawValue = blendshape.m_value;
+
+		// If the blendshape filter doesn't exist yet, create one
+		if (m_blendshapeFilters.find(key) == m_blendshapeFilters.end()) {
+			m_blendshapeFilters[key] = KalmanFilter(0.01f, 0.1f); // Default params
+		}
+
+		// Smooth the value
+		float smoothedValue = m_blendshapeFilters[key].update(rawValue);
+		blendshape.m_value = smoothedValue;
+
+		// Update the blendshape's value in the QMap
+		data.addBlendshape(key, blendshape);
+	}
 }

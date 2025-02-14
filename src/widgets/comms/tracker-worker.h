@@ -14,6 +14,7 @@
 #include "../../classes/tracking/vtube-studio-data.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../classes/poses/pose-image.h"
+#include "../../classes/tracking/kalman-filter.h"
 
 // The purpose of this tracker worker is to receive data and process pose images
 // on a separate thread to the main UI thread to prevent any lag on the UI
@@ -26,7 +27,7 @@ public:
 public slots:
 	void start();
 	void stop();
-	void processTrackingData(const VTubeStudioData &data);
+	void processTrackingData(VTubeStudioData &data);
 
 	// New slots to update settings
 	void updateConnection(quint16 newPort, const QString &newDestIpAddress, quint16 newDestPort);
@@ -52,11 +53,13 @@ private:
 	QMutex m_mutex; // Mutex to protect settings
 
 	QSharedPointer<TrackerData> m_trackerData;
+	QMap<BlendshapeKey, KalmanFilter> m_blendshapeFilters;
 	QSharedPointer<Pose> findAppropriatePose(const VTubeStudioData &data) const;
 	QImage getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos, double in_mouthOpenPos,
 					double in_mouthSmilePos, double in_tongueOutPos);
 
 	bool hasPoseChanged(PoseImageSettings const &imageSettings);
+	void smoothenBlendshapeData(VTubeStudioData &data);
 };
 
 #endif // TRACKERWORKER_H
