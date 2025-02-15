@@ -127,7 +127,7 @@ void PoseDisplayWidget::setData(QSharedPointer<Pose> in_pose)
 		if (fileName.isEmpty())
 			continue;
 
-		if (!FileExists(fileName)) {
+		if (!fileExists(fileName)) {
 			obs_log(LOG_WARNING, QString("Image file: %1 not found when loading pose!")
 						     .arg(fileName)
 						     .toStdString()
@@ -259,7 +259,7 @@ void PoseDisplayWidget::handleClearImageUrl(int imageIndex)
 void PoseDisplayWidget::setImagesFromPose(PoseImage poseEnum, QString fileName)
 {
 
-	if (!FileExists(fileName)) {
+	if (!fileExists(fileName)) {
 		obs_log(LOG_WARNING, QString("Image file: %1 not found!").arg(fileName).toStdString().c_str());
 		return;
 	}

@@ -47,6 +47,7 @@ public:
 	void saveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
 	void loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
 	void updateWidgetStyles();
+	void removeFromList();
 
 private:
 	Ui::FaceTracker *m_ui = nullptr;
@@ -59,6 +60,7 @@ private:
 
 	NetworkTracking *m_networkTracking = nullptr;
 	QSharedPointer<TrackerWorker> m_trackerWorker;
+	QSharedPointer<QImage> m_cachedPoseImage;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();
@@ -70,6 +72,10 @@ private:
 	void initiateTracking();
 	void enableTimer();
 	void disableTimer();
+	void loadPoseImageFromSavedFile();
+	void savePoseImageToFile();
+	void deleteStoredImageFile(QString imageId);
+	QString getImageFilePath(QString fileName);
 
 signals:
 	void requestDelete(QString id);

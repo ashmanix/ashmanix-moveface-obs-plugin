@@ -45,6 +45,11 @@ void FaceTracker::setTrackerID(const QString &newId)
 {
 	if (!newId.isEmpty()) {
 		QString oldId = m_trackerData->getTrackerId();
+
+		// Delete saved image file using old tracker ID
+		// to ensure we don't end up wth loads of unused image files
+		deleteStoredImageFile(oldId);
+
 		m_trackerData->setTrackerId(newId);
 	}
 	m_ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
@@ -73,6 +78,8 @@ void FaceTracker::saveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject)
 
 	QString poseListJson = m_trackerData->poseListToJsonString();
 	obs_data_set_string(dataObject, "poseList", poseListJson.toStdString().c_str());
+
+	savePoseImageToFile();
 }
 
 void FaceTracker::loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
@@ -91,6 +98,8 @@ void FaceTracker::loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
 
 	setTrackerData();
 
+	loadPoseImageFromSavedFile();
+
 	toggleEnabled(m_trackerData->getIsEnabled() ? Qt::Checked : Qt::Unchecked);
 }
 
@@ -99,6 +108,12 @@ void FaceTracker::updateWidgetStyles()
 	if (m_settingsDialogUi) {
 		m_settingsDialogUi->updateStyledUIComponents();
 	}
+}
+
+void FaceTracker::removeFromList()
+{
+	deleteStoredImageFile(m_trackerData->getTrackerId());
+	this->deleteLater();
 }
 
 // ---------------------------------- Private -------------------------------------
@@ -299,6 +314,76 @@ void FaceTracker::disableTimer()
 	}
 }
 
+void FaceTracker::loadPoseImageFromSavedFile()
+{
+	QString imageFilePath = getImageFilePath(getTrackerID());
+	QImage imageFile(imageFilePath);
+	if (imageFile.isNull()) {
+		obs_log(LOG_WARNING, "Could not load move face image from file URL: %s",
+			imageFilePath.toStdString().c_str());
+	} else {
+		handleDisplayNewImage(&imageFile);
+	}
+}
+
+void FaceTracker::savePoseImageToFile()
+{
+	QString imageFilePath = getImageFilePath(getTrackerID());
+	if (m_cachedPoseImage) {
+		obs_log(LOG_INFO, "Saving move face image to location: %s", imageFilePath.toStdString().c_str());
+		m_cachedPoseImage->save(imageFilePath);
+	}
+}
+
+void FaceTracker::deleteStoredImageFile(QString imageId)
+{
+	if (imageId.isNull())
+		return;
+
+	QString imageFilePath = getImageFilePath(imageId);
+	QFile imageFile(imageFilePath);
+
+	if (QFileInfo::exists(imageFilePath)) {
+		if (!imageFile.remove()) {
+			if (imageFile.error() == QFile::PermissionsError) {
+				obs_log(LOG_ERROR, "Insufficient permissions to delete file: %s",
+					imageFilePath.toStdString().c_str());
+			} else {
+				obs_log(LOG_ERROR, "Error deleting file: %s. Error: %s",
+					imageFilePath.toStdString().c_str(),
+					imageFile.errorString().toStdString().c_str());
+			}
+		}
+
+	} else {
+		obs_log(LOG_WARNING, "Attempting to delete file but file not found: %s",
+			imageFilePath.toStdString().c_str());
+	}
+}
+
+QString FaceTracker::getImageFilePath(QString fileName)
+{
+	// First we sanitise the filename
+	QRegularExpression invalidChars(R"([\\/*?":<>|])");
+	QString cleanFileName = fileName;
+	cleanFileName.replace(invalidChars, "");
+	cleanFileName = cleanFileName.trimmed();
+	cleanFileName = cleanFileName.toLower();
+
+	QString baseDir = getConfigFolderPath() + "/images";
+	QDir dir(baseDir);
+
+	// Check if image folder exists in config folder path if not then create
+	if (!fileExists(dir.filePath(""))) {
+		QDir().mkpath(dir.filePath(""));
+	}
+
+	// Then we create the file path
+	// QString filePath = getConfigFolderPath() + "/images/" + cleanFileName + ".PNG";
+	QString filePath = dir.filePath(cleanFileName + ".PNG");
+	return filePath;
+}
+
 // ------------------------------- Private Slots ----------------------------------
 
 void FaceTracker::settingsActionSelected()
@@ -328,6 +413,9 @@ void FaceTracker::handleDisplayNewImage(QImage *image)
 	QString selectedImageSource = m_trackerData->getSelectedImageSource();
 	if (selectedImageSource.isNull())
 		return;
+
+	// Cache the image pointer
+	m_cachedPoseImage = QSharedPointer<QImage>::create(*image);
 
 	// Get the source first
 	std::string tempSourceName = selectedImageSource.toStdString();

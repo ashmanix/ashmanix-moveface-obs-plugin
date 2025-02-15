@@ -7,7 +7,7 @@ QString generateUniqueID()
 	return QString(hash.toHex().left(8)); // We take the first 8 characters of the hash
 }
 
-bool FileExists(QString path)
+bool fileExists(QString path)
 {
 	QFileInfo check_file(path);
 	// Check if file exists and if yes: Is it really a file and not a directory?
@@ -60,6 +60,14 @@ QString getDataFolderPath()
 	QString filePath = QString::fromUtf8(file);
 	bfree(file);
 	return filePath;
+}
+
+QString getConfigFolderPath()
+{
+	char *configFile = obs_module_config_path(NULL);
+	QString configFilePath = QString::fromUtf8(configFile);
+	bfree(configFile);
+	return configFilePath;
 }
 
 QString getStyleSheetDataFromFilePath(QString fileName)

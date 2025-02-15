@@ -272,7 +272,7 @@ void ImageFilesWidget::handleImageUrlButtonClicked(PoseImage poseEnum)
 		return;
 	}
 
-	if (!FileExists(fileName)) {
+	if (!fileExists(fileName)) {
 		obs_log(LOG_WARNING, QString("Image file: %1 not found!").arg(fileName).toStdString().c_str());
 		return;
 	}

@@ -86,6 +86,8 @@ void TrackerWorker::processTrackingData(VTubeStudioData &data)
 	if (composedImage.isNull())
 		return;
 
+	// We store a cached image to compare the next image with
+	// so that we only update the pose if there is a change
 	if (cachedImage == composedImage)
 		return;
 
