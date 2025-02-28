@@ -97,8 +97,17 @@ void SingleBlendshapeRuleWidget::setupWidgetUI()
 	m_ui->deleteToolButton->setToolTip(obs_module_text("DialogDeleteBlendshapeRuleTooltip"));
 
 	for (auto i = 0; i < static_cast<int>(BlendshapeKey::COUNT) - 1; ++i) {
-		m_ui->blendshapeNameComboBox->addItem(blendshapeKeyToString(static_cast<BlendshapeKey>(i)));
+		QString blendshapeKey = blendshapeKeyToString(static_cast<BlendshapeKey>(i));
+		m_blendshapeList.append(blendshapeKey);
+		m_ui->blendshapeNameComboBox->addItem(blendshapeKey);
 	}
+
+	// Set up auto filter for blendshape dropdown list
+	m_ui->blendshapeNameComboBox->setEditable(true);
+	m_blendshapeListCompleter = new QCompleter(m_ui->blendshapeNameComboBox->model(), this);
+	m_blendshapeListCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_blendshapeListCompleter->setFilterMode(Qt::MatchContains);
+	m_ui->blendshapeNameComboBox->setCompleter(m_blendshapeListCompleter);
 
 	for (auto i = 0; i < static_cast<int>(ComparisonType::COUNT); ++i) {
 		m_ui->comparisonTypeComboBox->addItem(

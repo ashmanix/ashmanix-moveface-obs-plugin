@@ -9,6 +9,7 @@
 #include <QDoubleSpinBox>
 #include <QSharedPointer>
 #include <QString>
+#include <QCompleter>
 
 #include <obs-frontend-api.h>
 
@@ -38,6 +39,8 @@ private:
 	Ui::SingleBlendshapeRuleUI *m_ui = nullptr;
 	QSharedPointer<BlendshapeRule> m_blendshapeRule = nullptr;
 	bool m_shouldShowTracking = false;
+	QStringList m_blendshapeList;
+	QCompleter *m_blendshapeListCompleter;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();
