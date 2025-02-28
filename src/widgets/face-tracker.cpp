@@ -45,6 +45,11 @@ void FaceTracker::setTrackerID(const QString &newId)
 {
 	if (!newId.isEmpty()) {
 		QString oldId = m_trackerData->getTrackerId();
+
+		// Delete saved image file using old tracker ID
+		// to ensure we don't end up wth loads of unused image files
+		deleteStoredImageFile(oldId);
+
 		m_trackerData->setTrackerId(newId);
 	}
 	m_ui->trackerNameLabel->setText(m_trackerData->getTrackerId());
@@ -73,6 +78,8 @@ void FaceTracker::saveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject)
 
 	QString poseListJson = m_trackerData->poseListToJsonString();
 	obs_data_set_string(dataObject, "poseList", poseListJson.toStdString().c_str());
+
+	savePoseImageToFile();
 }
 
 void FaceTracker::loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
@@ -91,6 +98,8 @@ void FaceTracker::loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject)
 
 	setTrackerData();
 
+	loadPoseImageFromSavedFile();
+
 	toggleEnabled(m_trackerData->getIsEnabled() ? Qt::Checked : Qt::Unchecked);
 }
 
@@ -99,6 +108,12 @@ void FaceTracker::updateWidgetStyles()
 	if (m_settingsDialogUi) {
 		m_settingsDialogUi->updateStyledUIComponents();
 	}
+}
+
+void FaceTracker::removeFromList()
+{
+	deleteStoredImageFile(m_trackerData->getTrackerId());
+	this->deleteLater();
 }
 
 // ---------------------------------- Private -------------------------------------
@@ -193,7 +208,7 @@ void FaceTracker::setConnected(bool isConnectedInput)
 {
 	m_isConnected = isConnectedInput;
 
-	if (m_isConnected) {
+	if (m_isConnected && m_ui) {
 		m_ui->connectionLabel->setStyleSheet("QLabel { "
 						     "  background-color:  rgb(0, 128, 0); "
 						     "  border-radius: 6px; "
@@ -223,7 +238,29 @@ void FaceTracker::updateTrackerDataFromDialog(QSharedPointer<TrackerData> newDat
 	}
 
 	m_trackerData->setSelectedImageSource(newData->getSelectedImageSource());
+
+	// We set the image source alignment to center so all poses are centered on each other
+	setImageSourcePositionToCenter(newData->getSelectedImageSource());
+
 	m_mainDockWidget->updateTrackerList(m_trackerData->getTrackerId(), newData->getTrackerId());
+}
+
+// Set image source position to center
+void FaceTracker::setImageSourcePositionToCenter(QString sourceName)
+{
+	obs_source_t *current_scene = obs_frontend_get_current_scene();
+	if (!current_scene)
+		return;
+
+	obs_sceneitem_t *item =
+		obs_scene_find_source(obs_scene_from_source(current_scene), sourceName.toStdString().c_str());
+
+	if (item) {
+		obs_sceneitem_set_alignment(item, OBS_ALIGN_CENTER);
+		obs_sceneitem_release(item);
+	}
+
+	obs_source_release(current_scene);
 }
 
 void FaceTracker::initiateTracking()
@@ -253,6 +290,10 @@ void FaceTracker::initiateTracking()
 						  m_trackerData->getDestinationPort());
 	}
 	m_trackerWorker->updateTrackerData(m_trackerData);
+
+	if (m_settingsDialogUi) {
+		m_settingsDialogUi->updateTrackerWorker(m_trackerWorker);
+	}
 }
 
 void FaceTracker::enableTimer()
@@ -267,9 +308,80 @@ void FaceTracker::disableTimer()
 	m_trackerData->setIsEnabled(false);
 	m_ui->trackerNameLabel->setEnabled(false);
 	if (m_trackerWorker) {
+		m_trackerWorker->stop();
 		m_trackerWorker = nullptr;
 		setConnected(false);
 	}
+}
+
+void FaceTracker::loadPoseImageFromSavedFile()
+{
+	QString imageFilePath = getImageFilePath(getTrackerID());
+	QImage imageFile(imageFilePath);
+	if (imageFile.isNull()) {
+		obs_log(LOG_WARNING, "Could not load move face image from file URL: %s",
+			imageFilePath.toStdString().c_str());
+	} else {
+		handleDisplayNewImage(&imageFile);
+	}
+}
+
+void FaceTracker::savePoseImageToFile()
+{
+	QString imageFilePath = getImageFilePath(getTrackerID());
+	if (m_cachedPoseImage) {
+		obs_log(LOG_INFO, "Saving move face image to location: %s", imageFilePath.toStdString().c_str());
+		m_cachedPoseImage->save(imageFilePath);
+	}
+}
+
+void FaceTracker::deleteStoredImageFile(QString imageId)
+{
+	if (imageId.isNull())
+		return;
+
+	QString imageFilePath = getImageFilePath(imageId);
+	QFile imageFile(imageFilePath);
+
+	if (QFileInfo::exists(imageFilePath)) {
+		if (!imageFile.remove()) {
+			if (imageFile.error() == QFile::PermissionsError) {
+				obs_log(LOG_ERROR, "Insufficient permissions to delete file: %s",
+					imageFilePath.toStdString().c_str());
+			} else {
+				obs_log(LOG_ERROR, "Error deleting file: %s. Error: %s",
+					imageFilePath.toStdString().c_str(),
+					imageFile.errorString().toStdString().c_str());
+			}
+		}
+
+	} else {
+		obs_log(LOG_WARNING, "Attempting to delete file but file not found: %s",
+			imageFilePath.toStdString().c_str());
+	}
+}
+
+QString FaceTracker::getImageFilePath(QString fileName)
+{
+	// First we sanitise the filename
+	QRegularExpression invalidChars(R"([\\/*?":<>|])");
+	QString cleanFileName = fileName;
+	cleanFileName.replace(invalidChars, "");
+	cleanFileName = cleanFileName.trimmed();
+	cleanFileName = cleanFileName.toLower();
+
+	QString baseDir = getConfigFolderPath() + "/images";
+	QDir dir(baseDir);
+
+	// Check if image folder exists in config folder path if not then create
+	if (!fileExists(dir.filePath(""))) {
+		QDir().mkpath(dir.filePath(""));
+	}
+
+	// Then we create the file path
+	// QString filePath = getConfigFolderPath() + "/images/" + cleanFileName + ".PNG";
+	QString filePath = dir.filePath(cleanFileName + ".PNG");
+	return filePath;
 }
 
 // ------------------------------- Private Slots ----------------------------------
@@ -277,7 +389,8 @@ void FaceTracker::disableTimer()
 void FaceTracker::settingsActionSelected()
 {
 	if (!m_settingsDialogUi) {
-		m_settingsDialogUi = QSharedPointer<SettingsDialog>::create(this, m_trackerData, m_mainDockWidget);
+		m_settingsDialogUi =
+			QSharedPointer<SettingsDialog>::create(this, m_trackerData, m_mainDockWidget, m_trackerWorker);
 		QObject::connect(m_settingsDialogUi.data(), &SettingsDialog::settingsUpdated, this,
 				 &FaceTracker::updateTrackerDataFromDialog);
 	}
@@ -294,17 +407,15 @@ void FaceTracker::deleteActionSelected()
 	emit requestDelete(m_trackerData->getTrackerId());
 }
 
-void FaceTracker::handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height)
+void FaceTracker::handleDisplayNewImage(QImage *image)
 {
-	UNUSED_PARAMETER(imageTexture);
-	UNUSED_PARAMETER(width);
-	UNUSED_PARAMETER(height);
-	obs_log(LOG_INFO, "Image data received!");
-
 	// If we have a source set then we replace the source image with this image
 	QString selectedImageSource = m_trackerData->getSelectedImageSource();
 	if (selectedImageSource.isNull())
 		return;
+
+	// Cache the image pointer
+	m_cachedPoseImage = QSharedPointer<QImage>::create(*image);
 
 	// Get the source first
 	std::string tempSourceName = selectedImageSource.toStdString();
@@ -321,7 +432,7 @@ void FaceTracker::handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int wi
 		obs_source_release(selectedSource);
 		return;
 	}
-	image_source_update_texture(privateData, imageTexture->get(), width, height);
+	image_source_update_texture(privateData, image);
 
 	obs_source_release(selectedSource);
 }

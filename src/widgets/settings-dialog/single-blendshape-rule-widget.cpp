@@ -26,6 +26,11 @@ QString SingleBlendshapeRuleWidget::getID() const
 	return m_blendshapeRule->getID();
 }
 
+QSharedPointer<BlendshapeRule> SingleBlendshapeRuleWidget::getBlendshapeRule() const
+{
+	return m_blendshapeRule;
+}
+
 void SingleBlendshapeRuleWidget::clearSelection()
 {
 	m_ui->blendshapeNameComboBox->setCurrentIndex(0);
@@ -58,6 +63,21 @@ void SingleBlendshapeRuleWidget::updateStyledUIComponents()
 	}
 }
 
+void SingleBlendshapeRuleWidget::toggleTrackerVisible(bool shouldShowTracking)
+{
+	m_ui->trackingValueLabel->setVisible(shouldShowTracking);
+	m_shouldShowTracking = shouldShowTracking;
+}
+
+void SingleBlendshapeRuleWidget::updateTrackingValue(double value)
+{
+	if (!m_shouldShowTracking)
+		toggleTrackerVisible(true);
+
+	double clampedValue = qBound(0.0, value, 1.0);
+	m_ui->trackingValueLabel->setText(QString("[%1]").arg(clampedValue, 0, 'f', 3));
+}
+
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void SingleBlendshapeRuleWidget::connectUISignalHandlers()
@@ -84,6 +104,8 @@ void SingleBlendshapeRuleWidget::setupWidgetUI()
 		m_ui->comparisonTypeComboBox->addItem(
 			BlendshapeRule::comparisonTypeToString(static_cast<ComparisonType>(i)));
 	}
+
+	toggleTrackerVisible(false);
 
 	updateStyledUIComponents();
 }

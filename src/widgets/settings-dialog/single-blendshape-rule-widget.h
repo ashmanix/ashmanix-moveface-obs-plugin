@@ -29,10 +29,15 @@ public:
 	void updateStyledUIComponents();
 
 	QString getID() const;
+	QSharedPointer<BlendshapeRule> getBlendshapeRule() const;
+
+	void toggleTrackerVisible(bool shouldShowTracking);
+	void updateTrackingValue(double value);
 
 private:
 	Ui::SingleBlendshapeRuleUI *m_ui = nullptr;
 	QSharedPointer<BlendshapeRule> m_blendshapeRule = nullptr;
+	bool m_shouldShowTracking = false;
 
 	void connectUISignalHandlers();
 	void setupWidgetUI();

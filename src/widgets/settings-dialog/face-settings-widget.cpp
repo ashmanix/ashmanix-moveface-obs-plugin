@@ -132,6 +132,47 @@ void FaceSettingsWidget::updateStyledUIComponents()
 	}
 }
 
+void FaceSettingsWidget::toggleShowTracking(bool shouldShowTracking)
+{
+	m_ui->eyesHalfOpenSlider->setShowTracking(shouldShowTracking);
+	m_ui->eyesOpenSlider->setShowTracking(shouldShowTracking);
+	m_ui->mouthOpenSlider->setShowTracking(shouldShowTracking);
+	m_ui->smileSlider->setShowTracking(shouldShowTracking);
+	m_ui->tongueOutSlider->setShowTracking(shouldShowTracking);
+
+	m_ui->eyesHalfOpenTrackingLabel->setVisible(shouldShowTracking);
+	m_ui->eyesOpenTrackingLabel->setVisible(shouldShowTracking);
+	m_ui->mouthOpenTrackingLabel->setVisible(shouldShowTracking);
+	m_ui->smileTrackingLabel->setVisible(shouldShowTracking);
+	m_ui->tongueOutTrackingLabel->setVisible(shouldShowTracking);
+
+	m_shouldShowTracking = shouldShowTracking;
+}
+
+void FaceSettingsWidget::handleTrackingValueChange(VTubeStudioData data)
+{
+	if (!m_shouldShowTracking)
+		toggleShowTracking(true);
+
+	QMap<BlendshapeKey, Blendshape> blendshapeMap = data.getBlendshapes();
+	double eyeBlink = blendshapeMap.value(BlendshapeKey::EYEBLINK_L).m_value;
+	double mouthOpen = blendshapeMap.value(BlendshapeKey::JAWOPEN).m_value;
+	double mouthSmile = blendshapeMap.value(BlendshapeKey::MOUTHSMILE_L).m_value;
+	double tongueOut = blendshapeMap.value(BlendshapeKey::TONGUEOUT).m_value;
+
+	m_ui->eyesHalfOpenTrackingLabel->setText(formatTrackingValueLabel(eyeBlink));
+	m_ui->eyesOpenTrackingLabel->setText(formatTrackingValueLabel(eyeBlink));
+	m_ui->mouthOpenTrackingLabel->setText(formatTrackingValueLabel(mouthOpen));
+	m_ui->smileTrackingLabel->setText(formatTrackingValueLabel(mouthSmile));
+	m_ui->tongueOutTrackingLabel->setText(formatTrackingValueLabel(tongueOut));
+
+	m_ui->eyesHalfOpenSlider->setTrackingValue(formatTrackingValue(eyeBlink));
+	m_ui->eyesOpenSlider->setTrackingValue(formatTrackingValue(eyeBlink));
+	m_ui->mouthOpenSlider->setTrackingValue(formatTrackingValue(mouthOpen));
+	m_ui->smileSlider->setTrackingValue(formatTrackingValue(mouthSmile));
+	m_ui->tongueOutSlider->setTrackingValue(formatTrackingValue(tongueOut));
+}
+
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void FaceSettingsWidget::connectUISignalHandlers()
@@ -203,6 +244,8 @@ void FaceSettingsWidget::setupWidgetUI()
 
 	toggleVisible(false);
 
+	toggleShowTracking(m_shouldShowTracking);
+
 	updateStyledUIComponents();
 }
 
@@ -247,6 +290,17 @@ void FaceSettingsWidget::handleBlendshapelimitChange(PoseImage poseEnum, double 
 	default:
 		break;
 	}
+}
+
+QString FaceSettingsWidget::formatTrackingValueLabel(double value = 0.0)
+{
+	double clampedValue = qBound(0.0, value, 1.0);
+	return QString("[%1]").arg(clampedValue, 0, 'f', 3);
+}
+
+int FaceSettingsWidget::formatTrackingValue(double value = 0.0)
+{
+	return qBound(0, qRound(value * 1000), 1000);
 }
 
 //  ---------------------------------------------- Private Slots -----------------------------------------------
@@ -302,7 +356,7 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 			handleBlendshapelimitChange(poseEnum, spinBoxValue);
 		}
 		// Eyes open value cannot be less than eyes half open value
-		if (poseEnum == PoseImage::EYESHALFOPEN && (m_ui->eyesOpenSlider->value() < spinBoxValue)) {
+		if (poseEnum == PoseImage::EYESHALFOPEN && (m_ui->eyesOpenSpinBox->value() < spinBoxValue)) {
 			m_ui->eyesOpenSlider->blockSignals(true);
 			m_ui->eyesOpenSpinBox->blockSignals(true);
 
@@ -312,7 +366,7 @@ void FaceSettingsWidget::handleSpinBoxChange(PoseImage poseEnum, double spinBoxV
 			m_ui->eyesOpenSlider->blockSignals(false);
 			m_ui->eyesOpenSpinBox->blockSignals(false);
 			handleBlendshapelimitChange(PoseImage::EYESOPEN, spinBoxValue);
-		} else if (poseEnum == PoseImage::EYESOPEN && (m_ui->eyesHalfOpenSlider->value() > spinBoxValue)) {
+		} else if (poseEnum == PoseImage::EYESOPEN && (m_ui->eyesHalfOpenSpinBox->value() > spinBoxValue)) {
 			m_ui->eyesHalfOpenSlider->blockSignals(true);
 			m_ui->eyesHalfOpenSpinBox->blockSignals(true);
 

@@ -47,12 +47,19 @@ void TrackerWorker::stop()
 	}
 }
 
-void TrackerWorker::processTrackingData(const VTubeStudioData &data)
+void TrackerWorker::processTrackingData(VTubeStudioData &data)
 {
 	if (!running)
 		return;
 
 	QMutexLocker locker(&m_mutex);
+
+	// Use Kalman filters to smoothen blendshape changes
+	smoothenBlendshapeData(data);
+
+	// Emit data so that other widgets can read tracking data
+	emit trackingDataReceived(data);
+
 	if (!m_trackerData) {
 		emit errorOccurred("TrackerData is not set.");
 		return;
@@ -64,28 +71,32 @@ void TrackerWorker::processTrackingData(const VTubeStudioData &data)
 		return;
 	}
 
-	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
-
 	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
 	Blendshape mouthOpenBlendshape = bsMap.value(BlendshapeKey::JAWOPEN);
+	Blendshape tongueOutBlendshape = bsMap.value(BlendshapeKey::TONGUEOUT);
+	// TODO: Use average of left and right for both eye and mouth smile
 	Blendshape eyeBlinkBlendshape = bsMap.value(BlendshapeKey::EYEBLINK_L);
 	Blendshape mouthSmileBlendshape = bsMap.value(BlendshapeKey::MOUTHSMILE_L);
 
 	QImage composedImage = getPoseImageWithTracking(selectedPose, eyeBlinkBlendshape.m_value,
-							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value);
+							mouthOpenBlendshape.m_value, mouthSmileBlendshape.m_value,
+							tongueOutBlendshape.m_value);
 
 	// Check if empty image and ignore if it is
 	if (composedImage.isNull())
 		return;
 
-	struct gs_texture *imageTexture = convertToOBSTexture(composedImage);
-	if (!imageTexture)
+	// We store a cached image to compare the next image with
+	// so that we only update the pose if there is a change
+	if (cachedImage == composedImage)
 		return;
 
-	MyGSTextureWrapper wrapper(imageTexture);
+	cachedImage = composedImage;
+
+	obs_log(LOG_INFO, "Pose: %s selected!", selectedPose->getPoseId().toStdString().c_str());
 
 	// Emit the composed image to the UI thread
-	emit imageReady(&wrapper, composedImage.width(), composedImage.height());
+	emit imageReady(&composedImage);
 }
 
 void TrackerWorker::updateConnection(quint16 newPort, const QString &newDestIpAddress, quint16 newDestPort)
@@ -124,13 +135,15 @@ QSharedPointer<Pose> TrackerWorker::findAppropriatePose(const VTubeStudioData &d
 }
 
 QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos = 0.0,
-					       double in_mouthOpenPos = 0.0, double in_mouthSmilePos = 0.0)
+					       double in_mouthOpenPos = 0.0, double in_mouthSmilePos = 0.0,
+					       double in_tongueOutPos = 0.0)
 {
 
 	double eyeOpenLimit = pose->getEyesOpenLimit();
 	double eyeHalfOpenLimit = pose->getEyesHalfOpenLimit();
 	double mouthOpenLimit = pose->getMouthOpenLimit();
 	double mouthSmileLimit = pose->getSmileLimit();
+	double tongueOutLimit = pose->getTongueOutLimit();
 
 	PoseImageData *bodyImageData = pose->getPoseImageData(PoseImage::BODY);
 	if (!bodyImageData || !bodyImageData->getPixmapItem()) {
@@ -146,7 +159,9 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	}
 
 	PoseImage selectedMouth = PoseImage::MOUTHCLOSED;
-	if (in_mouthSmilePos > mouthSmileLimit) {
+	if (in_tongueOutPos > tongueOutLimit) {
+		selectedMouth = PoseImage::TONGUEOUT;
+	} else if (in_mouthSmilePos > mouthSmileLimit) {
 		selectedMouth = PoseImage::MOUTHSMILE;
 	} else if (in_mouthOpenPos > mouthOpenLimit) {
 		selectedMouth = PoseImage::MOUTHOPEN;
@@ -164,19 +179,19 @@ QImage TrackerWorker::getPoseImageWithTracking(QSharedPointer<Pose> pose, double
 	PoseImageData *eyeImageData = pose->getPoseImageData(selectedEye);
 	if (!eyeImageData || !eyeImageData->getPixmapItem()) {
 		eyeImageData = pose->getPoseImageData(PoseImage::EYESCLOSED);
-		if (!eyeImageData || !eyeImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s",
-				pose->getPoseId().toStdString().c_str());
-		}
+		// if (!eyeImageData || !eyeImageData->getPixmapItem()) {
+		// 	obs_log(LOG_WARNING, "Eye image data is invalid for pose: %s",
+		// 		pose->getPoseId().toStdString().c_str());
+		// }
 	}
 
 	PoseImageData *mouthImageData = pose->getPoseImageData(selectedMouth);
 	if (!mouthImageData || !mouthImageData->getPixmapItem()) {
 		mouthImageData = pose->getPoseImageData(PoseImage::MOUTHCLOSED);
-		if (!mouthImageData || !mouthImageData->getPixmapItem()) {
-			obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s",
-				pose->getPoseId().toStdString().c_str());
-		}
+		// if (!mouthImageData || !mouthImageData->getPixmapItem()) {
+		// 	obs_log(LOG_WARNING, "Mouth image data is invalid for pose: %s",
+		// 		pose->getPoseId().toStdString().c_str());
+		// }
 	}
 
 	QSharedPointer<MovablePixmapItem> bodyPixmapItem = bodyImageData->getPixmapItem();
@@ -245,22 +260,24 @@ bool TrackerWorker::hasPoseChanged(PoseImageSettings const &imageSettings)
 	return matchesPreviousVersion;
 }
 
-gs_texture *TrackerWorker::convertToOBSTexture(QImage &image)
+void TrackerWorker::smoothenBlendshapeData(VTubeStudioData &data)
 {
-	QImage img = image.convertToFormat(QImage::Format_RGBA8888);
-	int width = img.width();
-	int height = img.height();
+	QMap<BlendshapeKey, Blendshape> bsMap = data.getBlendshapes();
+	for (auto it = bsMap.begin(); it != bsMap.end(); ++it) {
+		BlendshapeKey key = it.key();
+		Blendshape blendshape = it.value();
+		float rawValue = blendshape.m_value;
 
-	if (img.bytesPerLine() != width * 4) {
-		// In rare cases the image may not be tightly packed; you may have to copy.
-		img = img.copy();
+		// If the blendshape filter doesn't exist yet, create one
+		if (m_blendshapeFilters.find(key) == m_blendshapeFilters.end()) {
+			m_blendshapeFilters[key] = KalmanFilter(0.01f, 0.1f); // Default params
+		}
+
+		// Smooth the value
+		float smoothedValue = m_blendshapeFilters[key].update(rawValue);
+		blendshape.m_value = smoothedValue;
+
+		// Update the blendshape's value in the QMap
+		data.addBlendshape(key, blendshape);
 	}
-
-	const uint8_t *data_ptr = img.bits();
-
-	obs_enter_graphics();
-	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA, 1, &data_ptr, 0);
-	obs_leave_graphics();
-
-	return obs_texture;
 }

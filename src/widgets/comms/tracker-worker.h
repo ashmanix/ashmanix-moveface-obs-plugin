@@ -14,7 +14,7 @@
 #include "../../classes/tracking/vtube-studio-data.h"
 #include "../../classes/tracking/tracker-data.h"
 #include "../../classes/poses/pose-image.h"
-#include "../../obs/my-gs-texture-wrapper.h"
+#include "../../classes/tracking/kalman-filter.h"
 
 // The purpose of this tracker worker is to receive data and process pose images
 // on a separate thread to the main UI thread to prevent any lag on the UI
@@ -27,17 +27,18 @@ public:
 public slots:
 	void start();
 	void stop();
-	void processTrackingData(const VTubeStudioData &data);
+	void processTrackingData(VTubeStudioData &data);
 
 	// New slots to update settings
 	void updateConnection(quint16 newPort, const QString &newDestIpAddress, quint16 newDestPort);
 	void updateTrackerData(const QSharedPointer<TrackerData> &newTrackerData);
 
 signals:
-	void imageReady(MyGSTextureWrapper *imageTexture, int width, int height); // Signal emitted when image is ready
+	void imageReady(QImage *image); // Signal emitted when image is ready
 	// void finished();
 	void errorOccurred(bool isError);
 	void connectionToggle(bool isConnected);
+	void trackingDataReceived(VTubeStudioData data);
 
 private:
 	struct PoseImageSettings {
@@ -52,12 +53,14 @@ private:
 	QMutex m_mutex; // Mutex to protect settings
 
 	QSharedPointer<TrackerData> m_trackerData;
+	QMap<BlendshapeKey, KalmanFilter> m_blendshapeFilters;
+	QImage cachedImage;
 	QSharedPointer<Pose> findAppropriatePose(const VTubeStudioData &data) const;
 	QImage getPoseImageWithTracking(QSharedPointer<Pose> pose, double in_eyeOpenPos, double in_mouthOpenPos,
-					double in_mouthSmilePos);
+					double in_mouthSmilePos, double in_tongueOutPos);
 
 	bool hasPoseChanged(PoseImageSettings const &imageSettings);
-	gs_texture *convertToOBSTexture(QImage &image);
+	void smoothenBlendshapeData(VTubeStudioData &data);
 };
 
 #endif // TRACKERWORKER_H

@@ -1,6 +1,7 @@
 #include "settings-dialog.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tData, MainWidgetDock *mWidget)
+SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tData, MainWidgetDock *mWidget,
+			       QSharedPointer<TrackerWorker> trackerWorker)
 	: QDialog(parent),
 	  m_ui(new Ui::FaceTrackerDialog)
 {
@@ -8,6 +9,7 @@ SettingsDialog::SettingsDialog(QWidget *parent, QSharedPointer<TrackerData> tDat
 	m_trackerData = tData;
 	m_mainWidget = mWidget;
 	m_poseListWidget = new PoseListWidget(this, m_trackerData);
+	m_trackerWorker = trackerWorker;
 
 	setTitle();
 
@@ -101,6 +103,12 @@ void SettingsDialog::connectUISignalHandlers()
 
 	QObject::connect(m_blendshapeRulesWidget, &BlendshapeRulesWidget::blendshapeRuleChanged, this,
 			 &SettingsDialog::formChangeDetected);
+
+	QObject::connect(m_trackerWorker.data(), &TrackerWorker::trackingDataReceived, this,
+			 &SettingsDialog::handleTrackingDataUpdate);
+
+	QObject::connect(m_trackerWorker.data(), &TrackerWorker::connectionToggle, this,
+			 &SettingsDialog::handleTrackingConnectionToggle);
 
 	QPushButton *applyButton = m_ui->dialogButtonBox->button(QDialogButtonBox::Apply);
 	if (applyButton) {
@@ -406,6 +414,16 @@ void SettingsDialog::resetPoseUITab()
 	}
 }
 
+void SettingsDialog::updateTrackerWorker(QSharedPointer<TrackerWorker> trackerWorker)
+{
+	m_trackerWorker = trackerWorker;
+	QObject::connect(m_trackerWorker.data(), &TrackerWorker::trackingDataReceived, this,
+			 &SettingsDialog::handleTrackingDataUpdate);
+
+	QObject::connect(m_trackerWorker.data(), &TrackerWorker::connectionToggle, this,
+			 &SettingsDialog::handleTrackingConnectionToggle);
+}
+
 //  ------------------------------------------------ Protected ------------------------------------------------
 
 void SettingsDialog::showEvent(QShowEvent *event)
@@ -581,4 +599,16 @@ void SettingsDialog::onPoseRowMoved(int sourceRow, int targetRow)
 
 	loadSelectedPoseConfig();
 	formChangeDetected();
+}
+
+void SettingsDialog::handleTrackingDataUpdate(VTubeStudioData data)
+{
+	m_faceSettingsWidget->handleTrackingValueChange(data);
+	m_blendshapeRulesWidget->trackingDataUpdate(data);
+}
+
+void SettingsDialog::handleTrackingConnectionToggle(bool isConnected)
+{
+	m_faceSettingsWidget->toggleShowTracking(isConnected);
+	m_blendshapeRulesWidget->toggleShowTracking(isConnected);
 }

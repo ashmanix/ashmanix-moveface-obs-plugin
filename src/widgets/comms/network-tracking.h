@@ -28,7 +28,7 @@ public:
 	bool startConnection();
 
 signals:
-	void receivedData(VTubeStudioData data);
+	void receivedData(VTubeStudioData &data);
 	void connectionToggle(bool isConnected);
 	void connectionErrorToggle(bool isError);
 

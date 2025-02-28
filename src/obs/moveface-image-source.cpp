@@ -1,10 +1,72 @@
 #include "moveface-image-source.h"
 #include "moveface-source-private.h"
 #include "../plugin-support.h"
+#include "../utils/utils.h"
+#include <QString>
+#include <QFile>
 
-void image_source_update_texture(void *data, gs_texture_t *new_texture, int width, int height)
+gs_texture *convertToOBSTexture(QImage *image)
 {
-	obs_log(LOG_INFO, "Updating texture!");
+	QImage img = image->convertToFormat(QImage::Format_RGBA8888);
+	int width = img.width();
+	int height = img.height();
+
+	if (img.bytesPerLine() != width * 4) {
+		// In rare cases the image may not be tightly packed; you may have to copy.
+		img = img.copy();
+	}
+
+	const uint8_t *data_ptr = img.bits();
+	struct gs_texture *obs_texture = gs_texture_create(width, height, GS_RGBA, 1, &data_ptr, 0);
+
+	return obs_texture;
+}
+
+QImage getNoPoseImage()
+{
+	QString filePath =
+		QDir::fromNativeSeparators(getDataFolderPath() + QStringLiteral("/images/") + NO_POSE_FILE_NAME);
+	if (QFileInfo::exists(filePath)) {
+		QImage noPoseImage(filePath);
+		return noPoseImage;
+	} else {
+		obs_log(LOG_WARNING, "Could not find no pose image");
+	}
+	return QImage();
+}
+
+// Crop out transparent pixels around the image.
+QImage cropTransparentArea(const QImage *image)
+{
+	int left = image->width();
+	int right = 0;
+	int top = image->height();
+	int bottom = 0;
+
+	// Scan every pixel.
+	for (int y = 0; y < image->height(); ++y) {
+		for (int x = 0; x < image->width(); ++x) {
+			QColor color = image->pixelColor(x, y);
+			// Check if pixel is not fully transparent.
+			if (color.alpha() > 0) {
+				left = qMin(left, x);
+				right = qMax(right, x);
+				top = qMin(top, y);
+				bottom = qMax(bottom, y);
+			}
+		}
+	}
+
+	// If no non-transparent pixel is found, return an empty image or the original.
+	if (right < left || bottom < top)
+		return QImage();
+
+	// Copy the region that contains all non-transparent pixels.
+	return image->copy(left, top, right - left + 1, bottom - top + 1);
+}
+
+void image_source_update_texture(void *data, QImage *new_image)
+{
 	auto context = (struct moveface_image_source *)data;
 
 	obs_enter_graphics();
@@ -14,11 +76,15 @@ void image_source_update_texture(void *data, gs_texture_t *new_texture, int widt
 		context->current_texture = nullptr;
 	}
 
+	QImage cropped_image = cropTransparentArea(new_image);
+
+	gs_texture *new_texture = convertToOBSTexture(&cropped_image);
+
 	if (new_texture) {
 		// Set the new texture and update dimensions
 		context->current_texture = new_texture;
-		context->texture_width = width;
-		context->texture_height = height;
+		context->texture_width = cropped_image.width();
+		context->texture_height = cropped_image.height();
 		os_atomic_set_bool(&context->texture_loaded, true);
 	} else {
 		os_atomic_set_bool(&context->texture_loaded, false);
@@ -58,17 +124,16 @@ static void image_source_unload(void *data)
 	os_atomic_set_bool(&context->texture_loaded, false);
 
 	obs_enter_graphics();
-	gs_texture_destroy(context->current_texture);
+	if (context->current_texture) {
+		gs_texture_destroy(context->current_texture);
+		context->current_texture = nullptr;
+	}
 	obs_leave_graphics();
 }
 
 static void image_source_load(struct moveface_image_source *context)
 {
-	image_source_unload(context);
-
-	if (context->current_texture) {
-		image_source_load_texture(context);
-	}
+	image_source_load_texture(context);
 }
 
 static void image_source_update(void *data, obs_data_t *settings)
@@ -125,14 +190,20 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 
 	auto context = (struct moveface_image_source *)bzalloc(sizeof(struct moveface_image_source));
 	context->source = source;
-	context->texture_width = 0;
-	context->texture_height = 0;
+	context->texture_height = DEFAULT_TEXTURE_HEIGHT;
+	context->texture_width = DEFAULT_TEXTURE_WIDTH;
 	context->source = source;
 	context->current_texture = nullptr;
+
 	os_atomic_set_bool(&context->texture_loaded, false);
+
+	QImage noPoseImage = getNoPoseImage();
+	if (!noPoseImage.isNull())
+		image_source_update_texture(context, &noPoseImage);
 
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
+		// We keep a list of sources data separately
 		g_sourceDataMap.insert(source, context);
 	}
 
@@ -145,6 +216,7 @@ static void image_source_destroy(void *data)
 
 	{
 		QMutexLocker locker(&g_sourceDataMutex);
+		// Remove source from source data list
 		g_sourceDataMap.remove(context->source);
 	}
 
@@ -156,13 +228,13 @@ static void image_source_destroy(void *data)
 static uint32_t image_source_getwidth(void *data)
 {
 	auto context = (struct moveface_image_source *)data;
-	return context->texture_height;
+	return context->texture_width;
 }
 
 static uint32_t image_source_getheight(void *data)
 {
 	auto context = (struct moveface_image_source *)data;
-	return context->texture_width;
+	return context->texture_height;
 }
 
 static void image_source_render(void *data, gs_effect_t *effect)

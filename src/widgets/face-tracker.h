@@ -27,7 +27,6 @@
 #include "./comms/network-tracking.h"
 #include "../classes/poses/movable-pixmap-item.h"
 #include "./comms/tracker-worker.h"
-#include "../obs/my-gs-texture-wrapper.h"
 #include "../ui/ui_FaceTracker.h"
 
 // Forward declarations
@@ -48,6 +47,7 @@ public:
 	void saveTrackerWidgetDataToOBSSaveData(obs_data_t *dataObject);
 	void loadTrackerWidgetDataFromOBSSaveData(obs_data_t *dataObject);
 	void updateWidgetStyles();
+	void removeFromList();
 
 private:
 	Ui::FaceTracker *m_ui = nullptr;
@@ -60,6 +60,7 @@ private:
 
 	NetworkTracking *m_networkTracking = nullptr;
 	QSharedPointer<TrackerWorker> m_trackerWorker;
+	QSharedPointer<QImage> m_cachedPoseImage;
 
 	void setupWidgetUI();
 	void connectUISignalHandlers();
@@ -67,9 +68,14 @@ private:
 	void loadPoseData();
 	void setConnected(bool isConnectedInput);
 	void updateTrackerDataFromDialog(QSharedPointer<TrackerData> newData);
+	void setImageSourcePositionToCenter(QString sourceName);
 	void initiateTracking();
 	void enableTimer();
 	void disableTimer();
+	void loadPoseImageFromSavedFile();
+	void savePoseImageToFile();
+	void deleteStoredImageFile(QString imageId);
+	QString getImageFilePath(QString fileName);
 
 signals:
 	void requestDelete(QString id);
@@ -77,7 +83,7 @@ signals:
 private slots:
 	void settingsActionSelected();
 	void deleteActionSelected();
-	void handleDisplayNewImage(MyGSTextureWrapper *imageTexture, int width, int height);
+	void handleDisplayNewImage(QImage *image);
 	void toggleEnabled(int checkState);
 	void toggleConnectionError(bool isError);
 };

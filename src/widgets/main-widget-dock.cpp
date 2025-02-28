@@ -223,7 +223,7 @@ void MainWidgetDock::removeTrackerButtonClicked(QString id)
 	FaceTracker *itemToBeRemoved = m_trackerWidgetMap.value(id, nullptr);
 
 	if (itemToBeRemoved) {
-		itemToBeRemoved->deleteLater();
+		itemToBeRemoved->removeFromList();
 		m_trackerWidgetMap.remove(id);
 		obs_log(LOG_INFO, (QString("Tracker %1 deleted").arg(id)).toStdString().c_str());
 	}

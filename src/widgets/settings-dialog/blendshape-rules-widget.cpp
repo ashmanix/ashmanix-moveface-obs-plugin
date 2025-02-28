@@ -75,6 +75,26 @@ void BlendshapeRulesWidget::updateStyledUIComponents()
 	}
 }
 
+void BlendshapeRulesWidget::toggleShowTracking(bool shouldBeVisible)
+{
+	for (auto i = m_blendshapeRulesWidgetMap.begin(), end = m_blendshapeRulesWidgetMap.end(); i != end; i++) {
+		auto rule = i.value();
+		rule->toggleTrackerVisible(shouldBeVisible);
+	}
+}
+
+void BlendshapeRulesWidget::trackingDataUpdate(VTubeStudioData data)
+{
+	QMap<BlendshapeKey, Blendshape> blendshapes = data.getBlendshapes();
+	for (auto i = m_blendshapeRulesWidgetMap.begin(), end = m_blendshapeRulesWidgetMap.end(); i != end; i++) {
+		auto ruleWidget = i.value();
+		QSharedPointer<BlendshapeRule> rule = ruleWidget->getBlendshapeRule();
+		BlendshapeKey key = rule->getKey();
+		double trackingValue = blendshapes.value(key).m_value;
+		ruleWidget->updateTrackingValue(trackingValue);
+	}
+}
+
 //  ------------------------------------------------- Private --------------------------------------------------
 
 void BlendshapeRulesWidget::connectUISignalHandlers()
