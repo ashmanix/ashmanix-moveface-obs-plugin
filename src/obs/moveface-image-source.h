@@ -21,7 +21,7 @@ extern struct obs_source_info moveface_image_source_info;
 const int DEFAULT_TEXTURE_HEIGHT = 400;
 const int DEFAULT_TEXTURE_WIDTH = 400;
 
-static QString NO_POSE_FILE_NAME = "NoPoseImage.png";
+static const QString NO_POSE_FILE_NAME = "NoPoseImage.png";
 
 struct moveface_image_source {
 	obs_source_t *source;
@@ -43,7 +43,6 @@ struct moveface_image_source {
 	volatile bool texture_loaded;
 };
 
-// void image_source_update_texture(void *data, gs_texture_t *new_texture, int width, int height);
 void image_source_update_texture(void *data, QImage *new_image);
 
 #endif // MOVEFACEIMAGESOURCE_H

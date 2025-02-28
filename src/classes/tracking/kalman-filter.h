@@ -3,11 +3,11 @@ class KalmanFilter {
 public:
 	KalmanFilter(float processNoise = 0.01f, float measurementNoise = 0.1f, float estimatedError = 1.0f,
 		     float initialValue = 0.0f)
+		: q(processNoise),
+		  r(measurementNoise),
+		  p(estimatedError),
+		  x(initialValue)
 	{
-		q = processNoise;     // Process noise covariance
-		r = measurementNoise; // Measurement noise covariance
-		p = estimatedError;   // Estimated error covariance
-		x = initialValue;     // Initial state estimate
 	}
 
 	float update(float measurement)

@@ -10,10 +10,10 @@ public:
 	explicit BlendshapeSlider(QWidget *parent = nullptr);
 
 	void setTrackingValue(int trackingValue);
-	int trackingValue();
+	int trackingValue() const;
 
 	void setShowTracking(bool shouldShowTracking);
-	bool showTracking();
+	bool showTracking() const;
 
 protected:
 	void paintEvent(QPaintEvent *event) override;

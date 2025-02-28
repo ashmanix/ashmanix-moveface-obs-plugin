@@ -17,7 +17,7 @@ void BlendshapeSlider::setTrackingValue(int trackingValue)
 	}
 }
 
-int BlendshapeSlider::trackingValue()
+int BlendshapeSlider::trackingValue() const
 {
 	return m_trackingValue;
 }
@@ -30,7 +30,7 @@ void BlendshapeSlider::setShowTracking(bool shouldShowTracking)
 	}
 }
 
-bool BlendshapeSlider::showTracking()
+bool BlendshapeSlider::showTracking() const
 {
 	return m_showTracking;
 }
@@ -58,7 +58,7 @@ void BlendshapeSlider::paintEvent(QPaintEvent *event)
 	int sliderMax = (orientation() == Qt::Horizontal) ? grooveRect.width() - sliderLength
 							  : grooveRect.height() - sliderLength;
 
-	int pos = style()->sliderPositionFromValue(minimum(), maximum(), m_trackingValue, sliderMax, sliderMin);
+	int pos = QStyle::sliderPositionFromValue(minimum(), maximum(), m_trackingValue, sliderMax, sliderMin);
 
 	pos += sliderMin;
 

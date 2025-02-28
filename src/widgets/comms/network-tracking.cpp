@@ -120,11 +120,6 @@ void NetworkTracking::processReceivedTrackingData()
 
 			VTubeStudioData receivedTrackingData = VTubeStudioData::fromJson(jsonObj);
 
-			// obs_log(LOG_INFO, (QString("Received datagram from %1 : %1").arg(sender.toString(), senderPort))
-			// 			  .toStdString()
-			// 			  .c_str());
-			// obs_log(LOG_INFO, (QString("Data: %1").arg(datagram)).toStdString().c_str());
-
 			if (receivedTrackingData.getFaceFound() == true) {
 				emit receivedData(receivedTrackingData);
 			}

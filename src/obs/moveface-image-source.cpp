@@ -36,7 +36,7 @@ QImage getNoPoseImage()
 }
 
 // Crop out transparent pixels around the image.
-QImage cropTransparentArea(QImage *image)
+QImage cropTransparentArea(const QImage *image)
 {
 	int left = image->width();
 	int right = 0;
